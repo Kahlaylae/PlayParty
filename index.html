@@ -26,35 +26,31 @@
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
         }
 
-        #message, #controls {
-            position: absolute;
-            text-align: center;
-            font-size: 1.2rem;
-            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
-            opacity: 0.8;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        #message {
-            top: 20px;
-        }
-
-        #controls {
-            bottom: 20px;
-            font-size: 0.9rem;
-            text-shadow: 0 0 3px rgba(0, 255, 255, 0.5);
-        }
-        
         #score {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 32px;
+            left: 32px;
             font-size: 1.5rem;
             font-weight: bold;
             color: #4CAF50;
             text-shadow: 0 0 10px #4CAF50;
-            z-index: 10;
+            z-index: 20;
+            background: rgba(13, 17, 23, 0.85);
+            border-radius: 10px;
+            padding: 10px 18px;
+        }
+
+        #shoot-instructions {
+            position: absolute;
+            top: 80px;
+            left: 32px;
+            font-size: 1.1rem;
+            color: #fff;
+            background: rgba(13, 17, 23, 0.7);
+            border-radius: 8px;
+            padding: 8px 16px;
+            z-index: 19;
+            text-shadow: 0 0 6px #4CAF50, 0 0 2px #000;
         }
         
         #splashScreen {
@@ -108,8 +104,7 @@
 <body tabindex="0">
 
     <div id="score"></div>
-    <div id="message">Click or tap to make the dragon shoot!</div>
-    <div id="controls">Use WASD or Arrow Keys to move.</div>
+    <div id="shoot-instructions">Tap to shoot faster</div>
     <canvas id="dragonCanvas"></canvas>
     
     <div id="splashScreen">
@@ -137,8 +132,43 @@
         
         // The expandable dictionary of levels and their properties.
         const levels = {
-            1: { target: 60, emoji: '👹', regularHp: 1, bossHp: 5, enemySpeed: 2.5 },
-            2: { target: 80, emoji: '🫦', regularHp: 2, bossHp: 4, enemySpeed: 3.5 }
+            1: { 
+                target: 60, 
+                emoji: '👹', 
+                regularHp: 1, 
+                bossHp: 5, 
+                enemySpeed: 2.5,
+                aimSpeed: 2, // 2 pellets per second
+                collidables: [
+                    {x: 150, y: 150, width: 80, height: 80, color: 'rgba(255, 0, 255, 0.6)'},
+                    {x: 500, y: 400, width: 120, height: 120, color: 'rgba(255, 255, 0, 0.6)'}
+                ]
+            },
+            2: { 
+                target: 80, 
+                emoji: '🫦', 
+                regularHp: 2, 
+                bossHp: 4, 
+                enemySpeed: 3.5,
+                aimSpeed: 3, // 3 pellets per second
+                collidables: [
+                    {x: 250, y: 350, width: 60, height: 200, color: 'rgba(0, 255, 255, 0.6)'},
+                    {x: 600, y: 100, width: 200, height: 60, color: 'rgba(255, 0, 255, 0.6)'}
+                ]
+            },
+            3: { 
+                target: 100, 
+                emojis: ['👹', '🫦'], 
+                regularHp: 2, 
+                bossHp: 4, 
+                enemySpeed: 4.0,
+                aimSpeed: 4, // 4 pellets per second
+                collidables: [
+                    {x: 100, y: 100, width: 150, height: 40, color: 'rgba(255, 100, 100, 0.6)'},
+                    {x: 300, y: 500, width: 40, height: 150, color: 'rgba(100, 255, 100, 0.6)'},
+                    {x: 700, y: 200, width: 100, height: 100, color: 'rgba(100, 100, 255, 0.6)'}
+                ]
+            }
         };
         
         // LevelWatcher class to manage the game's level progression.
@@ -172,13 +202,13 @@
         const levelWatcher = new LevelWatcher(levels);
 
         let gameLoopInterval;
+        let pelletInterval;
         let dragonSegments = [];
         let projectiles = [];
         let enemies = [];
         let target = { x: 0, y: 0 };
-        let keyboardVelocity = { x: 0, y: 0 };
+        let keyboardDirection = { x: 0, y: 0 };
         let isMouthOpen = false;
-        let lastPelletTime = 0;
         let dragonHit = false;
         let enemiesDestroyed = 0;
         let isPaused = false;
@@ -206,8 +236,12 @@
         }
 
         function updateDragon() {
-            target.x += keyboardVelocity.x;
-            target.y += keyboardVelocity.y;
+            // Update target based on keyboard direction
+            if (keyboardDirection.x !== 0 || keyboardDirection.y !== 0) {
+                target.x += keyboardDirection.x * DRAGON_SPEED;
+                target.y += keyboardDirection.y * DRAGON_SPEED;
+            }
+
             target.x = Math.max(0, Math.min(canvas.width, target.x));
             target.y = Math.max(0, Math.min(canvas.height, target.y));
 
@@ -285,6 +319,18 @@
             }
         }
 
+        function drawCollidables() {
+            const levelConfig = levelWatcher.getLevelConfig();
+            levelConfig.collidables.forEach(c => {
+                ctx.beginPath();
+                ctx.rect(c.x, c.y, c.width, c.height);
+                ctx.fillStyle = c.color;
+                ctx.shadowColor = c.color;
+                ctx.shadowBlur = 15;
+                ctx.fill();
+            });
+        }
+
         function updatePellets() {
             projectiles.forEach(p => {
                 p.x += p.vx;
@@ -317,17 +363,33 @@
         
         function spawnEnemy() {
             if (isPaused) return;
-            let size, hp;
+            let size, hp, emoji, speed;
             const levelConfig = levelWatcher.getLevelConfig();
-            let speed = levelConfig.enemySpeed;
 
+            // Handle mixed spawning for Level 3
+            if (levelWatcher.currentLevel === 3) {
+                if (Math.random() < 0.5) {
+                    emoji = '👹';
+                    hp = levels[1].regularHp;
+                    speed = levels[1].enemySpeed;
+                } else {
+                    emoji = '🫦';
+                    hp = levels[2].regularHp;
+                    speed = levels[2].enemySpeed;
+                }
+            } else {
+                emoji = levelConfig.emoji;
+                speed = levelConfig.enemySpeed;
+                hp = levelConfig.regularHp;
+            }
+            
             if (enemiesDestroyed >= BOSS_ENEMY_SPAWN_THRESHOLD && Math.random() < 0.1) {
                 size = 60;
                 hp = levelConfig.bossHp;
                 speed = levelConfig.enemySpeed / 2;
             } else {
                 size = 30;
-                hp = levelConfig.regularHp;
+                // hp is already set
             }
 
             let startX, startY;
@@ -359,7 +421,7 @@
                 size: size,
                 hp: hp,
                 speed: speed,
-                emoji: levelConfig.emoji
+                emoji: emoji
             });
         }
 
@@ -415,6 +477,32 @@
             });
         }
 
+        function checkDragonCollidableCollision() {
+            const levelConfig = levelWatcher.getLevelConfig();
+            for (let i = 0; i < dragonSegments.length; i++) {
+                const segment = dragonSegments[i];
+                for (let j = 0; j < levelConfig.collidables.length; j++) {
+                    const collidable = levelConfig.collidables[j];
+                    
+                    const testX = Math.max(collidable.x, Math.min(segment.x, collidable.x + collidable.width));
+                    const testY = Math.max(collidable.y, Math.min(segment.y, collidable.y + collidable.height));
+
+                    const dx = segment.x - testX;
+                    const dy = segment.y - testY;
+                    let segmentSize = DRAGON_SEGMENT_SIZE;
+                    if (i === 0) {
+                        segmentSize *= 1.5;
+                    }
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < segmentSize) {
+                        // Colliding with an obstacle no longer ends the game.
+                        // The collision logic is still here to act as a barrier.
+                    }
+                }
+            }
+        }
+
         function checkDragonEnemyCollision() {
             enemies.forEach(enemy => {
                 for (let i = 0; i < dragonSegments.length; i++) {
@@ -450,6 +538,7 @@
                 splashTitle.style.textShadow = '0 0 20px #00ff00';
             }
             clearInterval(gameLoopInterval);
+            clearInterval(pelletInterval);
         }
 
         function endGame() {
@@ -468,6 +557,8 @@
             initializeDragon();
             updateScore();
             gameLoopInterval = setInterval(spawnEnemy, 1000);
+            const levelConfig = levelWatcher.getLevelConfig();
+            pelletInterval = setInterval(shootPellet, 1000 / levelConfig.aimSpeed);
             animate();
         }
 
@@ -483,6 +574,8 @@
             initializeDragon();
             updateScore();
             gameLoopInterval = setInterval(spawnEnemy, 1000);
+            const levelConfig = levelWatcher.getLevelConfig();
+            pelletInterval = setInterval(shootPellet, 1000 / levelConfig.aimSpeed);
             animate();
         }
 
@@ -500,9 +593,11 @@
             updatePellets();
             updateEnemies();
             
-            checkPelletEnemyCollision();
+            checkDragonCollidableCollision();
             checkDragonEnemyCollision();
+            checkPelletEnemyCollision();
             
+            drawCollidables();
             drawDragon();
             drawPellets();
             drawEnemies();
@@ -528,25 +623,21 @@
 
         function shootPellet() {
             if (isPaused) return;
-            const now = Date.now();
-            if (now - lastPelletTime > 150) {
-                lastPelletTime = now;
-                const head = dragonSegments[0];
-                const angle = head.angle;
-                projectiles.push({
-                    x: head.x + Math.cos(angle) * DRAGON_SEGMENT_SIZE * 2,
-                    y: head.y + Math.sin(angle) * DRAGON_SEGMENT_SIZE * 2,
-                    vx: Math.cos(angle) * PELLET_SPEED,
-                    vy: Math.sin(angle) * PELLET_SPEED,
-                    size: 8,
-                    color: `hsl(${Math.random() * 360}, 100%, 50%)`
-                });
+            const head = dragonSegments[0];
+            const angle = head.angle;
+            projectiles.push({
+                x: head.x + Math.cos(angle) * DRAGON_SEGMENT_SIZE * 2,
+                y: head.y + Math.sin(angle) * DRAGON_SEGMENT_SIZE * 2,
+                vx: Math.cos(angle) * PELLET_SPEED,
+                vy: Math.sin(angle) * PELLET_SPEED,
+                size: 8,
+                color: `hsl(${Math.random() * 360}, 100%, 50%)`
+            });
 
-                isMouthOpen = true;
-                setTimeout(() => {
-                    isMouthOpen = false;
-                }, OPEN_MOUTH_DURATION);
-            }
+            isMouthOpen = true;
+            setTimeout(() => {
+                isMouthOpen = false;
+            }, OPEN_MOUTH_DURATION);
         }
 
         function onDown(e) {
@@ -557,8 +648,6 @@
                 } else {
                     startNextLevel();
                 }
-            } else {
-                shootPellet();
             }
         }
 
@@ -587,23 +676,22 @@
                 }
                 return;
             }
-            const speed = DRAGON_SPEED;
             switch (e.key.toLowerCase()) {
                 case 'w':
                 case 'arrowup':
-                    keyboardVelocity.y = -speed;
+                    keyboardDirection.y = -1;
                     break;
                 case 's':
                 case 'arrowdown':
-                    keyboardVelocity.y = speed;
+                    keyboardDirection.y = 1;
                     break;
                 case 'a':
                 case 'arrowleft':
-                    keyboardVelocity.x = -speed;
+                    keyboardDirection.x = -1;
                     break;
                 case 'd':
                 case 'arrowright':
-                    keyboardVelocity.x = speed;
+                    keyboardDirection.x = 1;
                     break;
             }
         });
@@ -612,16 +700,16 @@
             if (isPaused) return;
             switch (e.key.toLowerCase()) {
                 case 'w':
-                case 's':
                 case 'arrowup':
+                case 's':
                 case 'arrowdown':
-                    keyboardVelocity.y = 0;
+                    keyboardDirection.y = 0;
                     break;
                 case 'a':
-                case 'd':
                 case 'arrowleft':
+                case 'd':
                 case 'arrowright':
-                    keyboardVelocity.x = 0;
+                    keyboardDirection.x = 0;
                     break;
             }
         });
