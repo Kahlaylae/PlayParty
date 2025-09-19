@@ -1,0 +1,38 @@
+[
+  {
+    "level": 1,
+    "target": 60,
+    "emoji": "mon1",
+    "aimSpeed": 1,
+    "multiplier": 5,
+    "spawnRate": 1,
+    "collidables": 0
+  },
+  {
+    "level": 2,
+    "target": 80,
+    "emoji": "mon2",
+    "aimSpeed": 1.5,
+    "multiplier": 7,
+    "spawnRate": 1,
+    "collidables": 1
+  },
+  {
+    "level": 3,
+    "target": 100,
+    "emoji": "mon1,mon2",
+    "aimSpeed": 2,
+    "multiplier": 10,
+    "spawnRate": 1,
+    "collidables": 3
+  },
+  {
+    "level": 4,
+    "target": 150,
+    "emoji": "mon3",
+    "aimSpeed": 5,
+    "multiplier": 5,
+    "spawnRate": 2,
+    "collidables": 2
+  }
+]

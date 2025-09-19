@@ -99,12 +99,101 @@
             50% { opacity: 1; }
             100% { opacity: 0.8; }
         }
+
+        /* Mini screen responsive adjustments (applied via body.miniScreen by JS) */
+        body.miniScreen #score {
+            top: 12px;
+            left: 8px;
+            font-size: 1.1rem;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        body.miniScreen #shoot-instructions {
+            top: 56px;
+            left: 8px;
+            font-size: 0.95rem;
+            padding: 6px 10px;
+            z-index: 19;
+            max-width: calc(100% - 24px);
+        }
+
+        /* Make the control buttons smaller and keep spacing from the right edge */
+        body.miniScreen #audio-toggle,
+        body.miniScreen #leaderboard-toggle,
+        body.miniScreen #pause-toggle {
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        /* Center the three controls at the top and keep them evenly spaced */
+        body.miniScreen #audio-toggle,
+        body.miniScreen #leaderboard-toggle,
+        body.miniScreen #pause-toggle {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: inline-block;
+        }
+        body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 72px)); }
+        body.miniScreen #leaderboard-toggle { transform: translateX(-50%); }
+        body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 72px)); }
+
+        /* Center score and instructions below the controls */
+        body.miniScreen #score {
+            left: 50%;
+            transform: translateX(-50%);
+            top: 56px;
+            text-align: center;
+            width: calc(100% - 24px);
+            max-width: 560px;
+        }
+
+        body.miniScreen #shoot-instructions {
+            left: 50%;
+            transform: translateX(-50%);
+            top: 96px;
+            text-align: center;
+            width: calc(100% - 24px);
+            max-width: 560px;
+        }
+
+        /* Extra narrow screens: tighten spacing and stack more tightly */
+        @media (max-width:420px), (max-height:480px) {
+            body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 56px)); }
+            body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 56px)); }
+            body.miniScreen #score { top: 64px; font-size: 1rem; }
+            body.miniScreen #shoot-instructions { top: 100px; font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body tabindex="0">
 
     <div id="score"></div>
     <div id="shoot-instructions">Tap to shoot faster</div>
+    <button id="audio-toggle" aria-label="Toggle audio" style="position:absolute;top:32px;right:32px;z-index:80;padding:8px 12px;border-radius:8px;background:rgba(13,17,23,0.85);color:#fff;border:0;">🔊</button>
+    <button id="leaderboard-toggle" aria-label="Toggle leaderboard" title="Toggle leaderboard" style="position:absolute;top:32px;right:108px;z-index:80;padding:8px 12px;border-radius:8px;background:rgba(13,17,23,0.85);color:#fff;border:0;">📊</button>
+    <button id="pause-toggle" aria-label="Pause game" title="Pause game" style="position:absolute;top:32px;right:184px;z-index:80;padding:8px 12px;border-radius:8px;background:rgba(13,17,23,0.85);color:#fff;border:0;">⏸</button>
+    <!-- audio-overlay removed: splash handles initial gesture and messaging -->
+    <!-- Leaderboard UI -->
+    <div id="leaderboard" style="position:absolute;right:32px;top:80px;z-index:25;background:rgba(13,17,23,0.9);padding:12px;border-radius:10px;color:#fff;min-width:260px;max-width:320px;">
+        <div style="display:flex;align-items:center;justify-content:center;margin:0 0 8px 0;position:relative;">
+            <h3 style="margin:0;">Leaderboard</h3>
+            <button id="leaderboard-close" title="Close leaderboard" aria-label="Close leaderboard" style="position:absolute;right:8px;background:transparent;border:0;color:#fff;font-size:1rem;cursor:pointer;padding:4px;border-radius:6px;">✖</button>
+        </div>
+        <div id="leaderboard-list" style="max-height:280px;overflow:auto;margin-bottom:8px;font-size:0.95rem;"></div>
+        <form id="leaderboard-form" style="display:flex;gap:6px;">
+            <input id="player-name" placeholder="Name" maxlength="20" style="flex:1;padding:6px;border-radius:6px;border:0;" />
+            <input id="player-score" placeholder="Score" type="number" min="0" style="width:80px;padding:6px;border-radius:6px;border:0;" />
+        </form>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+            <button id="submit-score" style="flex:1;padding:8px;border-radius:6px;border:0;background:#4CAF50;color:#000;">Submit</button>
+            <button id="clear-leaderboard" style="padding:8px;border-radius:6px;border:0;background:#ff5252;color:#fff;">Clear</button>
+        </div>
+        <div id="personal-hiscore" style="margin-top:8px;font-size:0.9rem;opacity:0.9;color:#cfcfcf;"></div>
+    </div>
     <canvas id="dragonCanvas"></canvas>
     
     <div id="splashScreen">
@@ -113,618 +202,6 @@
         <p class="restart-prompt" id="splashPrompt"></p>
     </div>
 
-    <script>
-        const canvas = document.getElementById('dragonCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
-        const splashScreen = document.getElementById('splashScreen');
-        const splashTitle = document.getElementById('splashTitle');
-        const splashMessage = document.getElementById('splashMessage');
-        const splashPrompt = document.getElementById('splashPrompt');
-
-        const DRAGON_SEGMENT_SIZE = 12;
-        const DRAGON_LENGTH = 4;
-        const SEGMENT_SPACING = DRAGON_SEGMENT_SIZE * 2;
-        const PELLET_SPEED = 15;
-        const DRAGON_SPEED = 5;
-        const OPEN_MOUTH_DURATION = 150;
-        const BOSS_ENEMY_SPAWN_THRESHOLD = 10;
-        
-        // The expandable dictionary of levels and their properties.
-        const levels = {
-            1: { 
-                target: 60, 
-                emoji: '👹', 
-                regularHp: 1, 
-                bossHp: 5, 
-                enemySpeed: 2.5,
-                aimSpeed: 2, // 2 pellets per second
-                collidables: [
-                    {x: 150, y: 150, width: 80, height: 80, color: 'rgba(255, 0, 255, 0.6)'},
-                    {x: 500, y: 400, width: 120, height: 120, color: 'rgba(255, 255, 0, 0.6)'}
-                ]
-            },
-            2: { 
-                target: 80, 
-                emoji: '🫦', 
-                regularHp: 2, 
-                bossHp: 4, 
-                enemySpeed: 3.5,
-                aimSpeed: 3, // 3 pellets per second
-                collidables: [
-                    {x: 250, y: 350, width: 60, height: 200, color: 'rgba(0, 255, 255, 0.6)'},
-                    {x: 600, y: 100, width: 200, height: 60, color: 'rgba(255, 0, 255, 0.6)'}
-                ]
-            },
-            3: { 
-                target: 100, 
-                emojis: ['👹', '🫦'], 
-                regularHp: 2, 
-                bossHp: 4, 
-                enemySpeed: 4.0,
-                aimSpeed: 4, // 4 pellets per second
-                collidables: [
-                    {x: 100, y: 100, width: 150, height: 40, color: 'rgba(255, 100, 100, 0.6)'},
-                    {x: 300, y: 500, width: 40, height: 150, color: 'rgba(100, 255, 100, 0.6)'},
-                    {x: 700, y: 200, width: 100, height: 100, color: 'rgba(100, 100, 255, 0.6)'}
-                ]
-            }
-        };
-        
-        // LevelWatcher class to manage the game's level progression.
-        class LevelWatcher {
-            constructor(levels) {
-                this.levels = levels;
-                this.currentLevel = 1;
-            }
-
-            nextLevel() {
-                if (this.currentLevel < Object.keys(this.levels).length) {
-                    this.currentLevel++;
-                    return true;
-                }
-                return false;
-            }
-
-            reset() {
-                this.currentLevel = 1;
-            }
-
-            getLevelConfig() {
-                return this.levels[this.currentLevel];
-            }
-
-            isLastLevel() {
-                return this.currentLevel === Object.keys(this.levels).length;
-            }
-        }
-        
-        const levelWatcher = new LevelWatcher(levels);
-
-        let gameLoopInterval;
-        let pelletInterval;
-        let dragonSegments = [];
-        let projectiles = [];
-        let enemies = [];
-        let target = { x: 0, y: 0 };
-        let keyboardDirection = { x: 0, y: 0 };
-        let isMouthOpen = false;
-        let dragonHit = false;
-        let enemiesDestroyed = 0;
-        let isPaused = false;
-        let isGameOver = false;
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            target.x = canvas.width / 2;
-            target.y = canvas.height / 2;
-            if (dragonSegments.length === 0) {
-                initializeDragon();
-            }
-        }
-
-        function initializeDragon() {
-            dragonSegments = [];
-            for (let i = 0; i < DRAGON_LENGTH; i++) {
-                dragonSegments.push({
-                    x: canvas.width / 2 - i * SEGMENT_SPACING,
-                    y: canvas.height / 2,
-                    angle: 0
-                });
-            }
-        }
-
-        function updateDragon() {
-            // Update target based on keyboard direction
-            if (keyboardDirection.x !== 0 || keyboardDirection.y !== 0) {
-                target.x += keyboardDirection.x * DRAGON_SPEED;
-                target.y += keyboardDirection.y * DRAGON_SPEED;
-            }
-
-            target.x = Math.max(0, Math.min(canvas.width, target.x));
-            target.y = Math.max(0, Math.min(canvas.height, target.y));
-
-            const head = dragonSegments[0];
-            const dx = target.x - head.x;
-            const dy = target.y - head.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance > 1) {
-                head.angle = Math.atan2(dy, dx);
-                const moveSpeed = Math.min(DRAGON_SPEED, distance);
-                head.x += Math.cos(head.angle) * moveSpeed;
-                head.y += Math.sin(head.angle) * moveSpeed;
-            }
-
-            for (let i = 1; i < dragonSegments.length; i++) {
-                const currentSegment = dragonSegments[i];
-                const prevSegment = dragonSegments[i - 1];
-                const angleToPrev = Math.atan2(prevSegment.y - currentSegment.y, prevSegment.x - currentSegment.x);
-                currentSegment.angle = angleToPrev;
-                currentSegment.x = prevSegment.x - Math.cos(angleToPrev) * SEGMENT_SPACING;
-                currentSegment.y = prevSegment.y - Math.sin(angleToPrev) * SEGMENT_SPACING;
-            }
-        }
-
-        function drawDragon() {
-            ctx.lineCap = 'round';
-            const baseColor = dragonHit ? 'rgba(138, 43, 226, 0.8)' : 'rgba(0, 255, 255, 0.8)';
-            const shadowColor = dragonHit ? 'rgba(75, 0, 130, 0.8)' : 'rgba(0, 255, 255, 0.5)';
-
-            for (let i = 0; i < dragonSegments.length; i++) {
-                const segment = dragonSegments[i];
-                const alpha = 1 - (i / dragonSegments.length) * 0.7;
-
-                if (i === 0) {
-                    ctx.beginPath();
-                    ctx.arc(segment.x, segment.y, DRAGON_SEGMENT_SIZE * 1.5, 0, Math.PI * 2);
-                    ctx.fillStyle = baseColor;
-                    ctx.shadowColor = shadowColor;
-                    ctx.shadowBlur = 15;
-                    ctx.fill();
-
-                    if (isMouthOpen) {
-                        ctx.beginPath();
-                        ctx.arc(segment.x, segment.y, DRAGON_SEGMENT_SIZE * 1.2, 0, Math.PI * 2);
-                        ctx.fillStyle = `rgba(255, 100, 100, 0.9)`;
-                        ctx.shadowColor = `rgba(255, 0, 0, 0.7)`;
-                        ctx.shadowBlur = 10;
-                        ctx.fill();
-                    }
-
-                    const eyeDist = DRAGON_SEGMENT_SIZE / 2;
-                    const eyeOffsetAngle = Math.PI / 2;
-                    const eye1X = segment.x + Math.cos(segment.angle + eyeOffsetAngle) * eyeDist;
-                    const eye1Y = segment.y + Math.sin(segment.angle + eyeOffsetAngle) * eyeDist;
-                    const eye2X = segment.x + Math.cos(segment.angle - eyeOffsetAngle) * eyeDist;
-                    const eye2Y = segment.y + Math.sin(segment.angle - eyeOffsetAngle) * eyeDist;
-                    
-                    ctx.beginPath();
-                    ctx.arc(eye1X, eye1Y, 3, 0, Math.PI * 2);
-                    ctx.arc(eye2X, eye2Y, 3, 0, Math.PI * 2);
-                    ctx.fillStyle = '#fff';
-                    ctx.shadowColor = '#fff';
-                    ctx.shadowBlur = 5;
-                    ctx.fill();
-                    
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(segment.x, segment.y, DRAGON_SEGMENT_SIZE, 0, Math.PI * 2);
-                    ctx.fillStyle = baseColor;
-                    ctx.shadowColor = shadowColor;
-                    ctx.shadowBlur = 15;
-                    ctx.fill();
-                }
-            }
-        }
-
-        function drawCollidables() {
-            const levelConfig = levelWatcher.getLevelConfig();
-            levelConfig.collidables.forEach(c => {
-                ctx.beginPath();
-                ctx.rect(c.x, c.y, c.width, c.height);
-                ctx.fillStyle = c.color;
-                ctx.shadowColor = c.color;
-                ctx.shadowBlur = 15;
-                ctx.fill();
-            });
-        }
-
-        function updatePellets() {
-            projectiles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-
-                if (p.x + p.size > canvas.width || p.x - p.size < 0) {
-                    p.vx = -p.vx;
-                    p.x = Math.max(p.size, Math.min(canvas.width - p.size, p.x));
-                    p.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                }
-
-                if (p.y + p.size > canvas.height || p.y - p.size < 0) {
-                    p.vy = -p.vy;
-                    p.y = Math.max(p.size, Math.min(canvas.height - p.size, p.y));
-                    p.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                }
-            });
-        }
-
-        function drawPellets() {
-            projectiles.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.shadowColor = p.color;
-                ctx.shadowBlur = 15;
-                ctx.fill();
-            });
-        }
-        
-        function spawnEnemy() {
-            if (isPaused) return;
-            let size, hp, emoji, speed;
-            const levelConfig = levelWatcher.getLevelConfig();
-
-            // Handle mixed spawning for Level 3
-            if (levelWatcher.currentLevel === 3) {
-                if (Math.random() < 0.5) {
-                    emoji = '👹';
-                    hp = levels[1].regularHp;
-                    speed = levels[1].enemySpeed;
-                } else {
-                    emoji = '🫦';
-                    hp = levels[2].regularHp;
-                    speed = levels[2].enemySpeed;
-                }
-            } else {
-                emoji = levelConfig.emoji;
-                speed = levelConfig.enemySpeed;
-                hp = levelConfig.regularHp;
-            }
-            
-            if (enemiesDestroyed >= BOSS_ENEMY_SPAWN_THRESHOLD && Math.random() < 0.1) {
-                size = 60;
-                hp = levelConfig.bossHp;
-                speed = levelConfig.enemySpeed / 2;
-            } else {
-                size = 30;
-                // hp is already set
-            }
-
-            let startX, startY;
-            const corner = Math.floor(Math.random() * 4);
-            switch (corner) {
-                case 0:
-                    startX = 0;
-                    startY = 0;
-                    break;
-                case 1:
-                    startX = canvas.width;
-                    startY = 0;
-                    break;
-                case 2:
-                    startX = 0;
-                    startY = canvas.height;
-                    break;
-                case 3:
-                    startX = canvas.width;
-                    startY = canvas.height;
-                    break;
-            }
-
-            enemies.push({
-                x: startX,
-                y: startY,
-                vx: 0,
-                vy: 0,
-                size: size,
-                hp: hp,
-                speed: speed,
-                emoji: emoji
-            });
-        }
-
-        function updateEnemies() {
-            const dragonHead = dragonSegments[0];
-            enemies.forEach(enemy => {
-                if (enemy.x + (enemy.size / 2) > canvas.width || enemy.x - (enemy.size / 2) < 0) {
-                    enemy.vx = -enemy.vx;
-                }
-                if (enemy.y + (enemy.size / 2) > canvas.height || enemy.y - (enemy.size / 2) < 0) {
-                    enemy.vy = -enemy.vy;
-                }
-                const dx = dragonHead.x - enemy.x;
-                const dy = dragonHead.y - enemy.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance > 0) {
-                    enemy.vx = (dx / distance) * enemy.speed;
-                    enemy.vy = (dy / distance) * enemy.speed;
-                }
-                enemy.x += enemy.vx;
-                enemy.y += enemy.vy;
-            });
-        }
-
-        function drawEnemies() {
-            enemies.forEach(enemy => {
-                ctx.font = `${enemy.size}px sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(enemy.emoji, enemy.x, enemy.y);
-            });
-        }
-
-        function checkPelletEnemyCollision() {
-            projectiles = projectiles.filter(pellet => {
-                let pelletHit = false;
-                enemies = enemies.filter(enemy => {
-                    const dx = pellet.x - enemy.x;
-                    const dy = pellet.y - enemy.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < pellet.size + (enemy.size / 2)) {
-                        pelletHit = true;
-                        enemy.hp--;
-                        if (enemy.hp <= 0) {
-                            enemiesDestroyed++;
-                            updateScore();
-                            return false;
-                        }
-                    }
-                    return true;
-                });
-                return !pelletHit;
-            });
-        }
-
-        function checkDragonCollidableCollision() {
-            const levelConfig = levelWatcher.getLevelConfig();
-            for (let i = 0; i < dragonSegments.length; i++) {
-                const segment = dragonSegments[i];
-                for (let j = 0; j < levelConfig.collidables.length; j++) {
-                    const collidable = levelConfig.collidables[j];
-                    
-                    const testX = Math.max(collidable.x, Math.min(segment.x, collidable.x + collidable.width));
-                    const testY = Math.max(collidable.y, Math.min(segment.y, collidable.y + collidable.height));
-
-                    const dx = segment.x - testX;
-                    const dy = segment.y - testY;
-                    let segmentSize = DRAGON_SEGMENT_SIZE;
-                    if (i === 0) {
-                        segmentSize *= 1.5;
-                    }
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < segmentSize) {
-                        // Colliding with an obstacle no longer ends the game.
-                        // The collision logic is still here to act as a barrier.
-                    }
-                }
-            }
-        }
-
-        function checkDragonEnemyCollision() {
-            enemies.forEach(enemy => {
-                for (let i = 0; i < dragonSegments.length; i++) {
-                    const segment = dragonSegments[i];
-                    const dx = segment.x - enemy.x;
-                    const dy = segment.y - enemy.y;
-                    let segmentSize = DRAGON_SEGMENT_SIZE;
-                    if (i === 0) {
-                        segmentSize *= 1.5;
-                    }
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < segmentSize + (enemy.size / 2)) {
-                        dragonHit = true;
-                        break;
-                    }
-                }
-            });
-        }
-        
-        function updateScore() {
-            const levelConfig = levelWatcher.getLevelConfig();
-            scoreElement.innerText = `Level ${levelWatcher.currentLevel}: ${enemiesDestroyed}/${levelConfig.target} Eliminated`;
-        }
-
-        function showSplashScreen(title, message, prompt) {
-            splashTitle.innerText = title;
-            splashMessage.innerText = message;
-            splashPrompt.innerText = prompt;
-            splashScreen.style.display = 'flex';
-            if (title === 'GAME OVER') {
-                splashTitle.style.textShadow = '0 0 20px #ff0000';
-            } else {
-                splashTitle.style.textShadow = '0 0 20px #00ff00';
-            }
-            clearInterval(gameLoopInterval);
-            clearInterval(pelletInterval);
-        }
-
-        function endGame() {
-            isPaused = true;
-            isGameOver = true;
-            showSplashScreen('GAME OVER', `You eliminated ${enemiesDestroyed} enemies!`, 'Click or tap to play again.');
-        }
-
-        function startNextLevel() {
-            levelWatcher.nextLevel();
-            enemiesDestroyed = 0;
-            projectiles = [];
-            enemies = [];
-            isPaused = false;
-            splashScreen.style.display = 'none';
-            initializeDragon();
-            updateScore();
-            gameLoopInterval = setInterval(spawnEnemy, 1000);
-            const levelConfig = levelWatcher.getLevelConfig();
-            pelletInterval = setInterval(shootPellet, 1000 / levelConfig.aimSpeed);
-            animate();
-        }
-
-        function restartGame() {
-            isPaused = false;
-            isGameOver = false;
-            dragonHit = false;
-            levelWatcher.reset();
-            enemiesDestroyed = 0;
-            projectiles = [];
-            enemies = [];
-            splashScreen.style.display = 'none';
-            initializeDragon();
-            updateScore();
-            gameLoopInterval = setInterval(spawnEnemy, 1000);
-            const levelConfig = levelWatcher.getLevelConfig();
-            pelletInterval = setInterval(shootPellet, 1000 / levelConfig.aimSpeed);
-            animate();
-        }
-
-        function animate() {
-            if (isPaused) {
-                return;
-            }
-
-            ctx.fillStyle = 'rgba(13, 17, 23, 0.4)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.shadowBlur = 0;
-            ctx.shadowColor = 'transparent';
-            
-            updateDragon();
-            updatePellets();
-            updateEnemies();
-            
-            checkDragonCollidableCollision();
-            checkDragonEnemyCollision();
-            checkPelletEnemyCollision();
-            
-            drawCollidables();
-            drawDragon();
-            drawPellets();
-            drawEnemies();
-
-            if (dragonHit) {
-                endGame();
-                return;
-            }
-            
-            const levelConfig = levelWatcher.getLevelConfig();
-            if (enemiesDestroyed >= levelConfig.target) {
-                if (!levelWatcher.isLastLevel()) {
-                    isPaused = true;
-                    showSplashScreen('LEVEL COMPLETE!', `You've completed Level ${levelWatcher.currentLevel}!`, 'Click or tap to continue to the next level.');
-                } else {
-                    isPaused = true;
-                    showSplashScreen('VICTORY!', `You have defeated all enemies!`, 'Click or tap to play again.');
-                }
-            }
-            
-            requestAnimationFrame(animate);
-        }
-
-        function shootPellet() {
-            if (isPaused) return;
-            const head = dragonSegments[0];
-            const angle = head.angle;
-            projectiles.push({
-                x: head.x + Math.cos(angle) * DRAGON_SEGMENT_SIZE * 2,
-                y: head.y + Math.sin(angle) * DRAGON_SEGMENT_SIZE * 2,
-                vx: Math.cos(angle) * PELLET_SPEED,
-                vy: Math.sin(angle) * PELLET_SPEED,
-                size: 8,
-                color: `hsl(${Math.random() * 360}, 100%, 50%)`
-            });
-
-            isMouthOpen = true;
-            setTimeout(() => {
-                isMouthOpen = false;
-            }, OPEN_MOUTH_DURATION);
-        }
-
-        function onDown(e) {
-            e.preventDefault();
-            if (isPaused) {
-                if (isGameOver) {
-                    restartGame();
-                } else {
-                    startNextLevel();
-                }
-            }
-        }
-
-        function onMove(e) {
-            let x, y;
-            if (e.type.startsWith('touch')) {
-                const touch = e.touches[0];
-                x = touch.clientX;
-                y = touch.clientY;
-            } else {
-                x = e.clientX;
-                y = e.clientY;
-            }
-            target.x = x;
-            target.y = y;
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (isPaused) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    if (isGameOver) {
-                        restartGame();
-                    } else {
-                        startNextLevel();
-                    }
-                }
-                return;
-            }
-            switch (e.key.toLowerCase()) {
-                case 'w':
-                case 'arrowup':
-                    keyboardDirection.y = -1;
-                    break;
-                case 's':
-                case 'arrowdown':
-                    keyboardDirection.y = 1;
-                    break;
-                case 'a':
-                case 'arrowleft':
-                    keyboardDirection.x = -1;
-                    break;
-                case 'd':
-                case 'arrowright':
-                    keyboardDirection.x = 1;
-                    break;
-            }
-        });
-
-        document.addEventListener('keyup', (e) => {
-            if (isPaused) return;
-            switch (e.key.toLowerCase()) {
-                case 'w':
-                case 'arrowup':
-                case 's':
-                case 'arrowdown':
-                    keyboardDirection.y = 0;
-                    break;
-                case 'a':
-                case 'arrowleft':
-                case 'd':
-                case 'arrowright':
-                    keyboardDirection.x = 0;
-                    break;
-            }
-        });
-
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('mousedown', onDown);
-        window.addEventListener('touchstart', onDown, { passive: false });
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('touchmove', onMove, { passive: false });
-        
-        window.onload = function() {
-            resizeCanvas();
-            restartGame();
-            document.body.focus();
-        };
-    </script>
+    <script src="script/playdragon.js"></script>
 </body>
 </html>
