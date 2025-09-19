@@ -511,6 +511,16 @@ function showSplashScreen(title, message, prompt) {
         splashPrompt.innerText = prompt;
     }
     splashScreen.style.display = 'flex';
+    // If in miniScreen mode, constrain the splash width so it scales nicely
+    try {
+        if (document.body.classList.contains('miniScreen')) {
+            splashScreen.style.maxWidth = '92%';
+            splashScreen.style.padding = '18px 12px';
+        } else {
+            splashScreen.style.maxWidth = '';
+            splashScreen.style.padding = '';
+        }
+    } catch (e) {}
     if (title === 'GAME OVER') {
         splashTitle.style.textShadow = '0 0 20px #ff0000';
     } else {

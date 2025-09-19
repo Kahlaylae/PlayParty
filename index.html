@@ -100,6 +100,51 @@
             100% { opacity: 0.8; }
         }
 
+        /* Make splash screens scale and scroll nicely on smaller screens */
+        body.miniScreen #splashScreen {
+            position: fixed; /* ensure it covers viewport and doesn't shift */
+            padding: 18px 12px;
+            box-sizing: border-box;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            max-height: 100vh;
+            text-align: center;
+        }
+
+        body.miniScreen #splashScreen h1 {
+            font-size: 2rem;
+            line-height: 1.1;
+            margin: 0 0 8px;
+            text-shadow: 0 0 6px #fff;
+            word-break: break-word;
+        }
+
+        body.miniScreen #splashScreen p {
+            font-size: 1rem;
+            margin: 6px 0;
+            padding: 0 8px;
+            word-break: break-word;
+        }
+
+        body.miniScreen #splashPrompt {
+            max-width: 92%;
+            margin-top: 8px;
+            word-break: break-word;
+        }
+
+        body.miniScreen #splashPrompt button {
+            max-width: 92%;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        body.miniScreen #splashScreen .restart-prompt {
+            font-size: 0.95rem;
+            margin-top: 10px;
+            animation: none;
+        }
+
         /* Mini screen responsive adjustments (applied via body.miniScreen by JS) */
         body.miniScreen #score {
             top: 12px;
