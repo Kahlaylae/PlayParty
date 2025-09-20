@@ -1,14 +1,126 @@
 // Script moved out of index.html to keep HTML slim.
 // All original game logic retained; do not rename this file unless updating index.html.
 
-const canvas = document.getElementById('dragonCanvas');
-const ctx = canvas.getContext('2d');
-const scoreElement = document.getElementById('score');
-const splashScreen = document.getElementById('splashScreen');
-const splashTitle = document.getElementById('splashTitle');
-const splashMessage = document.getElementById('splashMessage');
-const splashPrompt = document.getElementById('splashPrompt');
-const shootInstructions = document.getElementById('shoot-instructions');
+// UI variables will be initialized by createUI()
+let canvas, ctx, scoreElement, splashScreen, splashTitle, splashMessage, splashPrompt, shootInstructions;
+
+// Create control buttons dynamically so the entire UI is managed from JS
+function createControlButtons() {
+    const makeBtn = (id, text, aria, title) => {
+        const b = document.createElement('button');
+        b.id = id;
+        b.type = 'button';
+        b.setAttribute('aria-label', aria || '');
+        if (title) b.title = title;
+        b.textContent = text;
+        b.className = 'top-control';
+        return b;
+    };
+
+    const audioBtn = makeBtn('audio-toggle', '🔊', 'Toggle audio', 'Toggle audio');
+    const leaderboardBtn = makeBtn('leaderboard-toggle', '📊', 'Toggle leaderboard', 'Toggle leaderboard');
+    const pauseBtn = makeBtn('pause-toggle', '⏸', 'Pause game', 'Pause game');
+
+    document.body.appendChild(audioBtn);
+    document.body.appendChild(leaderboardBtn);
+    document.body.appendChild(pauseBtn);
+
+    return { audioBtn, leaderboardBtn, pauseBtn };
+}
+
+// create basic UI elements (score, instructions, canvas, splash, leaderboard)
+function createUI() {
+    // score
+    const scoreEl = document.createElement('div');
+    scoreEl.id = 'score';
+    document.body.appendChild(scoreEl);
+
+    // instructions
+    const instr = document.createElement('div');
+    instr.id = 'shoot-instructions';
+    instr.textContent = 'Tap to shoot faster';
+    document.body.appendChild(instr);
+
+    // canvas
+    const cvs = document.createElement('canvas');
+    cvs.id = 'dragonCanvas';
+    document.body.appendChild(cvs);
+
+    // splash
+    const splash = document.createElement('div');
+    splash.id = 'splashScreen';
+    const inner = document.createElement('div');
+    inner.className = 'splash-inner';
+    const h1 = document.createElement('h1'); h1.id = 'splashTitle';
+    const p = document.createElement('p'); p.id = 'splashMessage';
+    const prompt = document.createElement('p'); prompt.id = 'splashPrompt'; prompt.className = 'restart-prompt';
+    inner.appendChild(h1); inner.appendChild(p); inner.appendChild(prompt);
+    splash.appendChild(inner);
+    document.body.appendChild(splash);
+
+    // leaderboard (structure only; content is rendered by existing functions)
+    const lb = document.createElement('div'); lb.id = 'leaderboard';
+    const head = document.createElement('div'); head.className = 'leaderboard-head'; head.style.position='relative';
+    const title = document.createElement('h3'); title.textContent = 'Leaderboard'; title.style.margin='0';
+    const closeBtn = document.createElement('button'); closeBtn.id='leaderboard-close'; closeBtn.className='close-btn'; closeBtn.textContent='✖';
+    head.appendChild(title); head.appendChild(closeBtn); lb.appendChild(head);
+    const list = document.createElement('div'); list.id='leaderboard-list'; lb.appendChild(list);
+    const form = document.createElement('form'); form.id='leaderboard-form'; form.className='leaderboard-form';
+    const ni = document.createElement('input'); ni.id='player-name'; ni.placeholder='Name'; ni.maxLength=20; ni.className='lb-input';
+    const si = document.createElement('input'); si.id='player-score'; si.placeholder='Score'; si.type='number'; si.min='0'; si.className='lb-input';
+    form.appendChild(ni); form.appendChild(si); lb.appendChild(form);
+    const btnRow = document.createElement('div'); btnRow.className='btn-row';
+    const submit = document.createElement('button'); submit.id='submit-score'; submit.className='btn submit'; submit.textContent='Submit';
+    const clear = document.createElement('button'); clear.id='clear-leaderboard'; clear.className='btn clear'; clear.textContent='Clear';
+    btnRow.appendChild(submit); btnRow.appendChild(clear); lb.appendChild(btnRow);
+    const personal = document.createElement('div'); personal.id='personal-hiscore'; lb.appendChild(personal);
+    document.body.appendChild(lb);
+
+    // controls
+    const created = createControlButtons();
+    return {
+        canvasEl: cvs,
+        scoreEl,
+        instrEl: instr,
+        splashEl: splash,
+        splashTitleEl: h1,
+        splashMessageEl: p,
+        splashPromptEl: prompt,
+        leaderboardEl: lb,
+        leaderboardListEl: list,
+        leaderboardFormEl: form,
+        playerNameInputEl: ni,
+        playerScoreInputEl: si,
+        submitBtnEl: submit,
+        clearBtnEl: clear,
+        leaderboardCloseBtnEl: closeBtn,
+        audioBtn: created.audioBtn,
+        leaderboardBtn: created.leaderboardBtn,
+        pauseBtn: created.pauseBtn
+    };
+}
+
+const ui = createUI();
+// expose shorthand variables used elsewhere
+    canvas = ui.canvasEl;
+    ctx = canvas.getContext('2d');
+    scoreElement = ui.scoreEl;
+    splashScreen = ui.splashEl;
+    splashTitle = ui.splashTitleEl;
+    splashMessage = ui.splashMessageEl;
+    splashPrompt = ui.splashPromptEl;
+    shootInstructions = ui.instrEl;
+const audioToggleBtn = ui.audioBtn;
+const leaderboardToggleBtn = ui.leaderboardBtn;
+const pauseToggleBtn = ui.pauseBtn;
+const leaderboardElement = ui.leaderboardEl;
+const leaderboardList = ui.leaderboardListEl;
+const leaderboardForm = ui.leaderboardFormEl;
+const playerNameInput = ui.playerNameInputEl;
+const playerScoreInput = ui.playerScoreInputEl;
+    const submitBtn = ui.submitBtnEl;
+    const clearBtn = ui.clearBtnEl;
+const leaderboardCloseBtn = ui.leaderboardCloseBtnEl;
 
 // Background music setup (autoplay may be blocked by browser policies)
 const bgAudio = new Audio('assets/dragonpartyplay.mp3');
@@ -18,7 +130,6 @@ bgAudio.volume = 0.45;
 
 // Await the first user gesture; the splash will be used to both enable audio and resume the game
 let awaitingFirstGesture = true;
-const audioToggleBtn = document.getElementById('audio-toggle');
 // Mute state persisted in localStorage
 const MUTE_KEY = 'playdragon_muted';
 let isMuted = (localStorage.getItem(MUTE_KEY) === 'true');
@@ -511,14 +622,34 @@ function showSplashScreen(title, message, prompt) {
         splashPrompt.innerText = prompt;
     }
     splashScreen.style.display = 'flex';
-    // If in miniScreen mode, constrain the splash width so it scales nicely
+    // ensure overlay covers viewport; inner content (.splash-inner) is sized by CSS
     try {
-        if (document.body.classList.contains('miniScreen')) {
-            splashScreen.style.maxWidth = '92%';
-            splashScreen.style.padding = '18px 12px';
-        } else {
-            splashScreen.style.maxWidth = '';
-            splashScreen.style.padding = '';
+        const inner = document.querySelector('#splashScreen .splash-inner');
+        if (inner) {
+            // clear any inline widths on inner
+            inner.style.maxWidth = '';
+            inner.style.padding = '';
+            // toggle paused class for compact paused presentation
+            try {
+                const ut = (title || '').toUpperCase();
+                // treat PAUSED and level-complete screens as 'paused' (compact single-line title) so
+                // their title sizing/nowrap rules apply on small screens
+                if (ut === 'PAUSED' || ut.includes('LEVEL COMPLETE') || ut.includes('LEVEL ')) {
+                    inner.classList.add('paused');
+                } else {
+                    inner.classList.remove('paused');
+                }
+                if (ut.includes('GAME OVER') || ut === 'GAME OVER') {
+                    inner.classList.add('gameover');
+                } else {
+                    inner.classList.remove('gameover');
+                }
+                if (ut.includes('VICTORY') || ut === 'VICTORY') {
+                    inner.classList.add('victory');
+                } else {
+                    inner.classList.remove('victory');
+                }
+            } catch (e) {}
         }
     } catch (e) {}
     if (title === 'GAME OVER') {
@@ -917,10 +1048,13 @@ function setLeaderboardVisibility(visible, persist = true) {
             el.style.padding = '12px';
             el.style.right = 'auto';
             el.style.top = '52%';
+            // apply centered class for nicer presentation
+            el.classList.add('centered');
         } else {
             el.style.width = '';
             el.style.maxWidth = '320px';
             el.style.maxHeight = '';
+            el.classList.remove('centered');
         }
         // focus the name input if present
         try {
@@ -935,6 +1069,7 @@ function setLeaderboardVisibility(visible, persist = true) {
         el.style.top = '80px';
         el.style.transform = 'none';
         el.style.zIndex = '25';
+        el.classList.remove('centered');
     }
     leaderboardVisible = !!visible;
     if (persist) localStorage.setItem(LB_VISIBLE_KEY, leaderboardVisible ? 'true' : 'false');
@@ -1061,11 +1196,9 @@ function cryptoRandomId() {
     }
 }
 
-// Wire UI
-const submitBtn = document.getElementById('submit-score');
-const clearBtn = document.getElementById('clear-leaderboard');
-// Wire leaderboard toggle button
-const lbToggleBtn = document.getElementById('leaderboard-toggle');
+// Wire UI (submitBtn and clearBtn are provided by createUI and assigned above)
+// Wire leaderboard toggle button (use JS-created element)
+const lbToggleBtn = (typeof leaderboardToggleBtn !== 'undefined') ? leaderboardToggleBtn : document.getElementById('leaderboard-toggle');
 if (lbToggleBtn) {
     lbToggleBtn.addEventListener('click', () => {
         const newState = !leaderboardVisible;
@@ -1085,8 +1218,8 @@ if (lbCloseBtn) {
     });
 }
 
-// Pause toggle button
-const pauseBtn = document.getElementById('pause-toggle');
+// Pause toggle button (use JS-created element)
+const pauseBtn = (typeof pauseToggleBtn !== 'undefined') ? pauseToggleBtn : document.getElementById('pause-toggle');
 if (pauseBtn) {
     pauseBtn.addEventListener('click', (e) => {
         e.preventDefault();

@@ -37,7 +37,7 @@
             z-index: 20;
             background: rgba(13, 17, 23, 0.85);
             border-radius: 10px;
-            padding: 10px 18px;
+            padding: 6px 12px; /* reduced padding for a neater background */
         }
 
         #shoot-instructions {
@@ -48,7 +48,7 @@
             color: #fff;
             background: rgba(13, 17, 23, 0.7);
             border-radius: 8px;
-            padding: 8px 16px;
+            padding: 6px 12px; /* reduced padding */
             z-index: 19;
             text-shadow: 0 0 6px #4CAF50, 0 0 2px #000;
         }
@@ -100,49 +100,111 @@
             100% { opacity: 0.8; }
         }
 
-        /* Make splash screens scale and scroll nicely on smaller screens */
-        body.miniScreen #splashScreen {
-            position: fixed; /* ensure it covers viewport and doesn't shift */
-            padding: 18px 12px;
-            box-sizing: border-box;
+        /* Keep overlay full viewport; constrain inner content for small screens */
+        #splashScreen {
+            position: absolute;
+            inset: 0;
+            display: none;
             align-items: center;
             justify-content: center;
-            overflow-y: auto;
-            max-height: 100vh;
+            z-index: 20;
+            color: #fff;
+            text-shadow: 0 0 10px #fff;
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        .splash-inner {
+            width: 100%;
+            max-width: 920px;
+            padding: 24px 28px;
+            box-sizing: border-box;
             text-align: center;
         }
 
-        body.miniScreen #splashScreen h1 {
-            font-size: 2rem;
-            line-height: 1.1;
+        body.miniScreen .splash-inner {
+            max-width: 92%;
+            padding: 18px 12px;
+        }
+
+        /* On mini screens, keep the splash-inner compact; specific title sizing is handled by
+           the paused/gameover/victory rules so level-complete will match them. */
+        body.miniScreen .splash-inner h1 {
+            line-height: 1.15;
             margin: 0 0 8px;
-            text-shadow: 0 0 6px #fff;
             word-break: break-word;
         }
 
-        body.miniScreen #splashScreen p {
+        body.miniScreen .splash-inner p {
             font-size: 1rem;
             margin: 6px 0;
             padding: 0 8px;
             word-break: break-word;
         }
 
-        body.miniScreen #splashPrompt {
-            max-width: 92%;
-            margin-top: 8px;
-            word-break: break-word;
-        }
-
-        body.miniScreen #splashPrompt button {
-            max-width: 92%;
-            white-space: normal;
-            word-break: break-word;
-        }
-
-        body.miniScreen #splashScreen .restart-prompt {
+        body.miniScreen .splash-inner .restart-prompt {
             font-size: 0.95rem;
             margin-top: 10px;
             animation: none;
+        }
+
+        /* Uniform font sizing for PAUSED and GAME OVER on small screens - match the small restart prompt */
+        body.miniScreen .splash-inner.paused h1,
+        body.miniScreen .splash-inner.gameover h1,
+        body.miniScreen .splash-inner.paused h2,
+        body.miniScreen .splash-inner.gameover h2,
+        body.miniScreen .splash-inner.paused p,
+        body.miniScreen .splash-inner.gameover p,
+        body.miniScreen .splash-inner.paused .restart-prompt,
+        body.miniScreen .splash-inner.gameover .restart-prompt {
+            font-size: 0.95rem !important;
+            line-height: 1.15 !important;
+            margin: 6px 0 !important;
+        }
+
+        /* Preserve green/red glow for Victory/Game Over titles respectively */
+        body.miniScreen .splash-inner.gameover h1 { text-shadow: 0 0 12px #ff5050; }
+        body.miniScreen .splash-inner.victory h1 { text-shadow: 0 0 12px #7CFC00; }
+
+        /* Further tighten splash presentation for very small screens */
+        @media (max-width:380px), (max-height:420px) {
+            body.miniScreen .splash-inner {
+                padding: 12px 10px;
+            }
+            /* keep both title and message the same compact size on very small screens */
+            body.miniScreen .splash-inner h1 {      font-size: 24px; }
+            body.miniScreen .splash-inner p { font-size: 24px; }
+        }
+
+        /* Paused state: force a tighter single-line, centered title */
+        body.miniScreen .splash-inner.paused h1 {
+            font-size: 1.6rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 6px;
+        }
+        body.miniScreen .splash-inner.paused .restart-prompt {
+            font-size: 0.95rem;
+            margin-top: 6px;
+        }
+
+        /* Centered leaderboard styling when JS toggles .centered */
+        #leaderboard.centered {
+            transform: translate(-50%, -50%) scale(0.96);
+            transition: transform 180ms ease, box-shadow 180ms ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            left: 50% !important;
+            top: 50% !important;
+            position: fixed !important;
+            z-index: 70 !important;
+            width: 88% !important;
+            max-width: 600px !important;
+        }
+
+        /* Slightly reduce content size inside centered leaderboard for breathing room */
+        #leaderboard.centered #leaderboard-list {
+            max-height: 60vh;
         }
 
         /* Mini screen responsive adjustments (applied via body.miniScreen by JS) */
@@ -158,18 +220,93 @@
             top: 56px;
             left: 8px;
             font-size: 0.95rem;
-            padding: 6px 10px;
+            padding: 4px 8px; /* even tighter on mini screens */
             z-index: 19;
             max-width: calc(100% - 24px);
         }
 
-        /* Make the control buttons smaller and keep spacing from the right edge */
+        /* Make the control buttons smaller and keep spacing from the right edge; force uniform size and alignment */
+        /* Base styling for top control buttons (applies generally) */
+        .top-control {
+            background: rgba(13,17,23,0.85);
+            color: #fff;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            padding: 8px 12px;
+            min-width: 44px;
+            min-height: 36px;
+            position: absolute;
+            top: 32px;
+            z-index: 80;
+        }
+
+        /* FORCE: On regular (non-mini) screens place the three toggles in a row at the top-right */
+        @media (min-width: 481px) {
+            body:not(.miniScreen) #pause-toggle { right: 32px; }
+            body:not(.miniScreen) #leaderboard-toggle { right: 32px; transform: translateX(-56px); }
+            body:not(.miniScreen) #audio-toggle { right: 32px; transform: translateX(-112px); }
+            /* ensure transforms don't affect mini screens */
+            body.miniScreen #pause-toggle,
+            body.miniScreen #leaderboard-toggle,
+            body.miniScreen #audio-toggle { transform: none !important; }
+        }
+
+        /* Default leaderboard panel (JS will create this element) */
+        #leaderboard {
+            position: absolute;
+            right: 32px;
+            top: 80px;
+            z-index: 25;
+            background: rgba(13,17,23,0.9);
+            padding: 12px;
+            border-radius: 10px;
+            color: #fff;
+            min-width: 260px;
+            max-width: 320px;
+        }
+
+        #leaderboard .close-btn {
+            position: absolute;
+            right: 8px;
+            background: transparent;
+            border: 0;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        #leaderboard #leaderboard-list { max-height: 280px; overflow: auto; margin-bottom: 8px; font-size: 0.95rem; }
+        #leaderboard input { padding: 6px; border-radius: 6px; border: 0; }
+        #leaderboard .btn-row { display:flex; gap:6px; margin-top:8px; }
+        #leaderboard .btn-row .btn { padding:8px; border-radius:6px; border:0; cursor:pointer; }
+        #leaderboard .btn-row .submit { flex:1; background:#4CAF50; color:#000; }
+        #leaderboard .btn-row .clear { background:#ff5252; color:#fff; }
+
+        /* Make the control buttons smaller and keep spacing on mini screens; unified padding */
+        body.miniScreen .top-control,
         body.miniScreen #audio-toggle,
         body.miniScreen #leaderboard-toggle,
         body.miniScreen #pause-toggle {
-            padding: 6px 8px;
+            /* tighter, neater padding to avoid large stretched buttons */
+            padding: 6px 8px !important;
             border-radius: 6px;
             font-size: 0.95rem;
+            box-sizing: border-box;
+            min-width: 36px;
+            min-height: 36px;
+            width: auto !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
 
         /* Center the three controls at the top and keep them evenly spaced */
@@ -182,9 +319,10 @@
             transform: translateX(-50%);
             display: inline-block;
         }
-        body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 72px)); }
-        body.miniScreen #leaderboard-toggle { transform: translateX(-50%); }
-        body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 72px)); }
+    /* central alignment with balanced offsets; reduced default offsets to avoid overlap */
+    body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 56px)); }
+    body.miniScreen #leaderboard-toggle { transform: translateX(-50%); }
+    body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 56px)); }
 
         /* Center score and instructions below the controls */
         body.miniScreen #score {
@@ -192,8 +330,10 @@
             transform: translateX(-50%);
             top: 56px;
             text-align: center;
-            width: calc(100% - 24px);
-            max-width: 560px;
+            display: inline-block; /* size to content */
+            white-space: nowrap;
+            width: auto !important;
+            max-width: none !important;
         }
 
         body.miniScreen #shoot-instructions {
@@ -201,52 +341,53 @@
             transform: translateX(-50%);
             top: 96px;
             text-align: center;
-            width: calc(100% - 24px);
-            max-width: 560px;
+            display: inline-block; /* size to content */
+            white-space: nowrap;
+            width: auto !important;
+            max-width: none !important;
         }
 
         /* Extra narrow screens: tighten spacing and stack more tightly */
         @media (max-width:420px), (max-height:480px) {
-            body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 56px)); }
-            body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 56px)); }
+            /* Narrow screens: reduce spacing so controls don't overlap */
+            body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 44px)); }
+            body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 44px)); }
             body.miniScreen #score { top: 64px; font-size: 1rem; }
             body.miniScreen #shoot-instructions { top: 100px; font-size: 0.95rem; }
         }
+
+        /* Extra-narrow devices: compact padding and smallest offsets */
+        @media (max-width:360px), (max-height:420px) {
+            body.miniScreen .top-control { padding: 6px 8px !important; min-width: 36px; }
+            body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 36px)); }
+            body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 36px)); }
+            body.miniScreen #leaderboard-toggle { transform: translateX(-50%); }
+        }
+        /* Small-screen tweaks: make Victory title match Paused/GameOver title sizing so it doesn't overflow */
+        @media (max-width:480px), (max-height:560px) {
+            /* Ensure any splash overlay title is compact and single-line on narrow viewports */
+            #splashScreen .splash-inner.victory h1,
+            #splashScreen .splash-inner.paused h1,
+            #splashScreen .splash-inner.gameover h1,
+            body.miniScreen .splash-inner.victory h1,
+            body.miniScreen .splash-inner.paused h1,
+            body.miniScreen .splash-inner.gameover h1 {
+                font-size: 1.6rem !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                margin-bottom: 6px !important;
+            }
+            /* tighten pause button even more on tiny screens */
+            body.miniScreen #pause-toggle.top-control { padding: 6px 6px !important; min-width: 34px; }
+            /* prevent shoot-instructions from stretching too wide */
+            body.miniScreen #shoot-instructions { max-width: 320px; padding: 6px 10px; }
+        }
     </style>
-</head>
-<body tabindex="0">
+    </head>
+    <body>
+        <!-- All UI elements are created by script/playdragon.js -->
+        <script src="script/playdragon.js"></script>
+    </body>
+    </html>
 
-    <div id="score"></div>
-    <div id="shoot-instructions">Tap to shoot faster</div>
-    <button id="audio-toggle" aria-label="Toggle audio" style="position:absolute;top:32px;right:32px;z-index:80;padding:8px 12px;border-radius:8px;background:rgba(13,17,23,0.85);color:#fff;border:0;">🔊</button>
-    <button id="leaderboard-toggle" aria-label="Toggle leaderboard" title="Toggle leaderboard" style="position:absolute;top:32px;right:108px;z-index:80;padding:8px 12px;border-radius:8px;background:rgba(13,17,23,0.85);color:#fff;border:0;">📊</button>
-    <button id="pause-toggle" aria-label="Pause game" title="Pause game" style="position:absolute;top:32px;right:184px;z-index:80;padding:8px 12px;border-radius:8px;background:rgba(13,17,23,0.85);color:#fff;border:0;">⏸</button>
-    <!-- audio-overlay removed: splash handles initial gesture and messaging -->
-    <!-- Leaderboard UI -->
-    <div id="leaderboard" style="position:absolute;right:32px;top:80px;z-index:25;background:rgba(13,17,23,0.9);padding:12px;border-radius:10px;color:#fff;min-width:260px;max-width:320px;">
-        <div style="display:flex;align-items:center;justify-content:center;margin:0 0 8px 0;position:relative;">
-            <h3 style="margin:0;">Leaderboard</h3>
-            <button id="leaderboard-close" title="Close leaderboard" aria-label="Close leaderboard" style="position:absolute;right:8px;background:transparent;border:0;color:#fff;font-size:1rem;cursor:pointer;padding:4px;border-radius:6px;">✖</button>
-        </div>
-        <div id="leaderboard-list" style="max-height:280px;overflow:auto;margin-bottom:8px;font-size:0.95rem;"></div>
-        <form id="leaderboard-form" style="display:flex;gap:6px;">
-            <input id="player-name" placeholder="Name" maxlength="20" style="flex:1;padding:6px;border-radius:6px;border:0;" />
-            <input id="player-score" placeholder="Score" type="number" min="0" style="width:80px;padding:6px;border-radius:6px;border:0;" />
-        </form>
-        <div style="display:flex;gap:6px;margin-top:8px;">
-            <button id="submit-score" style="flex:1;padding:8px;border-radius:6px;border:0;background:#4CAF50;color:#000;">Submit</button>
-            <button id="clear-leaderboard" style="padding:8px;border-radius:6px;border:0;background:#ff5252;color:#fff;">Clear</button>
-        </div>
-        <div id="personal-hiscore" style="margin-top:8px;font-size:0.9rem;opacity:0.9;color:#cfcfcf;"></div>
-    </div>
-    <canvas id="dragonCanvas"></canvas>
-    
-    <div id="splashScreen">
-        <h1 id="splashTitle"></h1>
-        <p id="splashMessage"></p>
-        <p class="restart-prompt" id="splashPrompt"></p>
-    </div>
-
-    <script src="script/playdragon.js"></script>
-</body>
-</html>
