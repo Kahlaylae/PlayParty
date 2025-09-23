@@ -1,3 +1,27 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
+import { getFirestore, collection, getDocs, query as firestoreQuery, orderBy, limit as firestoreLimit, startAfter, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBeZMtBjXU06ebhdAPrDnOGxNFIheeutwU",
+    authDomain: "lizarddefender.firebaseapp.com",
+    projectId: "lizarddefender",
+    storageBucket: "lizarddefender.firebasestorage.app",
+    messagingSenderId: "498728449406",
+    appId: "1:498728449406:web:76aba4d9d1e5dc4aae2f2f",
+    measurementId: "G-QV7X9NDXCX"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+// Firestore (read-only queries for leaderboard)
+const db = getFirestore(app);
+// Auth (anonymous sign-in for owner-based rules)
+const auth = getAuth(app);
+signInAnonymously(auth).catch(e => console.warn('Anonymous sign-in failed', e));
+
 // Script moved out of index.html to keep HTML slim.
 // All original game logic retained; do not rename this file unless updating index.html.
 
@@ -65,12 +89,53 @@ function createUI() {
     const closeBtn = document.createElement('button'); closeBtn.id='leaderboard-close'; closeBtn.className='close-btn'; closeBtn.textContent='✖';
     head.appendChild(title); head.appendChild(closeBtn); lb.appendChild(head);
     const list = document.createElement('div'); list.id='leaderboard-list'; lb.appendChild(list);
+    // Tabs: Top 10 and All
+    const tabs = document.createElement('div');
+    tabs.className = 'lb-tabs';
+    tabs.style.display = 'flex';
+    tabs.style.gap = '6px';
+    tabs.style.margin = '8px 0 6px';
+    const tabTop = document.createElement('button');
+    tabTop.type = 'button';
+    tabTop.textContent = 'Top';
+    tabTop.className = 'tab-btn';
+    tabTop.style.padding = '6px 10px';
+    tabTop.style.border = '1px solid rgba(255,255,255,0.15)';
+    tabTop.style.background = 'transparent';
+    tabTop.style.color = '#fff';
+    tabTop.style.borderRadius = '6px';
+    tabTop.style.cursor = 'pointer';
+    const tabAll = document.createElement('button');
+    tabAll.type = 'button';
+    tabAll.textContent = 'All';
+    tabAll.className = 'tab-btn';
+    tabAll.style.padding = '6px 10px';
+    tabAll.style.border = '1px solid rgba(255,255,255,0.15)';
+    tabAll.style.background = 'transparent';
+    tabAll.style.color = '#9be7ff';
+    tabAll.style.borderRadius = '6px';
+    tabAll.style.cursor = 'pointer';
+    tabs.appendChild(tabTop); tabs.appendChild(tabAll);
+    lb.appendChild(tabs);
+    // All-list container (hidden by default); mirror list sizing/overflow
+    const listAll = document.createElement('div');
+    listAll.id = 'leaderboard-all-list';
+    listAll.style.display = 'none';
+    listAll.style.maxHeight = '280px';
+    listAll.style.overflow = 'auto';
+    listAll.style.marginBottom = '8px';
+    lb.appendChild(listAll);
     const form = document.createElement('form'); form.id='leaderboard-form'; form.className='leaderboard-form';
     const ni = document.createElement('input'); ni.id='player-name'; ni.placeholder='Name'; ni.maxLength=20; ni.className='lb-input';
     const si = document.createElement('input'); si.id='player-score'; si.placeholder='Score'; si.type='number'; si.min='0'; si.className='lb-input';
+    // Score is provided by the game only; make this field readonly to prevent UI edits
+    si.readOnly = true;
     form.appendChild(ni); form.appendChild(si); lb.appendChild(form);
     const btnRow = document.createElement('div'); btnRow.className='btn-row';
     const submit = document.createElement('button'); submit.id='submit-score'; submit.className='btn submit'; submit.textContent='Submit';
+    // Only allow submitting after a GAME OVER. Disable by default; enabled in endGame().
+    submit.disabled = true;
+    submit.title = 'Submit available only after GAME OVER';
     const clear = document.createElement('button'); clear.id='clear-leaderboard'; clear.className='btn clear'; clear.textContent='Clear';
     btnRow.appendChild(submit); btnRow.appendChild(clear); lb.appendChild(btnRow);
     const personal = document.createElement('div'); personal.id='personal-hiscore'; lb.appendChild(personal);
@@ -94,6 +159,9 @@ function createUI() {
         submitBtnEl: submit,
         clearBtnEl: clear,
         leaderboardCloseBtnEl: closeBtn,
+        leaderboardAllListEl: listAll,
+        leaderboardTabTopBtn: tabTop,
+        leaderboardTabAllBtn: tabAll,
         audioBtn: created.audioBtn,
         leaderboardBtn: created.leaderboardBtn,
         pauseBtn: created.pauseBtn
@@ -115,12 +183,15 @@ const leaderboardToggleBtn = ui.leaderboardBtn;
 const pauseToggleBtn = ui.pauseBtn;
 const leaderboardElement = ui.leaderboardEl;
 const leaderboardList = ui.leaderboardListEl;
+const leaderboardAllList = ui.leaderboardAllListEl;
 const leaderboardForm = ui.leaderboardFormEl;
 const playerNameInput = ui.playerNameInputEl;
 const playerScoreInput = ui.playerScoreInputEl;
     const submitBtn = ui.submitBtnEl;
     const clearBtn = ui.clearBtnEl;
 const leaderboardCloseBtn = ui.leaderboardCloseBtnEl;
+const tabTopBtn = ui.leaderboardTabTopBtn;
+const tabAllBtn = ui.leaderboardTabAllBtn;
 
 // Background music setup (autoplay may be blocked by browser policies)
 const bgAudio = new Audio('assets/dragonpartyplay.mp3');
@@ -703,6 +774,11 @@ function endGame() {
         document.body.dataset._prevLeaderboardVisible = prev;
         setLeaderboardVisibility(true, false);
     } catch (e) {}
+    // enable submit button now that game is over
+    try {
+        const sb = document.getElementById('submit-score');
+        if (sb) { sb.disabled = false; sb.title = 'Submit your score'; }
+    } catch (e) {}
 }
 
 function startNextLevel() {
@@ -1056,6 +1132,8 @@ function setLeaderboardVisibility(visible, persist = true) {
             el.style.maxHeight = '';
             el.classList.remove('centered');
         }
+        // load remote hiscores when opening leaderboard (best-effort, read-only)
+        try { loadHiscores().catch(() => {}); } catch (e) {}
         // focus the name input if present
         try {
             const nameInput = document.getElementById('player-name');
@@ -1125,6 +1203,50 @@ function renderLeaderboard() {
     }
 }
 
+// -------------------------
+// Firestore: read-only hiscores
+// -------------------------
+async function loadHiscores(limit = 10) {
+    const listEl = document.getElementById('leaderboard-list');
+    if (!listEl) return;
+    listEl.innerHTML = '<div style="opacity:0.85">Loading hiscores...</div>';
+    try {
+        const colRef = collection(db, 'hiscores');
+        const q = firestoreQuery(colRef, orderBy('score', 'desc'), firestoreLimit(limit));
+        const snap = await getDocs(q);
+        const items = [];
+        snap.forEach(doc => {
+            const data = doc.data();
+            items.push({ id: doc.id, name: data.name || 'Anon', score: Number(data.score || 0) });
+        });
+        renderHiscores(items);
+        return items;
+    } catch (e) {
+        console.warn('Failed to load hiscores from Firestore', e);
+        if (listEl) listEl.innerHTML = '<div style="opacity:0.8">Failed to load hiscores (offline or permissions). Showing local scores.</div>';
+        // fall back to local leaderboard rendering after a short delay so user sees message
+        setTimeout(renderLeaderboard, 700);
+        throw e;
+    }
+}
+
+function renderHiscores(items) {
+    const listEl = document.getElementById('leaderboard-list');
+    const personalEl = document.getElementById('personal-hiscore');
+    if (!listEl || !personalEl) return;
+    if (!Array.isArray(items) || items.length === 0) {
+        listEl.innerHTML = '<div style="opacity:0.8">No hiscores found.</div>';
+        return;
+    }
+    listEl.innerHTML = items.map((e, i) => {
+        const place = i + 1;
+        const name = escapeHtml(e.name || 'Anon');
+        const score = Number(e.score || 0);
+        return `<div style="padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.04);">#${place} <strong style="color:#ffd54f">${name}</strong> — ${score}</div>`;
+    }).join('');
+    // don't override personal hiscore area here; keep local personal display
+}
+
 // Initialize leaderboard visibility based on persisted value
 setTimeout(() => setLeaderboardVisibility(leaderboardVisible, false), 0);
 
@@ -1172,6 +1294,46 @@ async function addScoreEntry({ name, count }) {
         }
     }
 
+    // Try to write to Firestore (best-effort). If it fails, fall back to localStorage.
+    let remoteWritten = false;
+    try {
+        await saveHiscoreToFirestore({ name: entry.name, score: entry.count });
+        remoteWritten = true;
+    } catch (e) {
+        console.warn('Failed to save hiscore to Firestore, falling back to localStorage', e);
+        // show temporary message in leaderboard panel so user knows remote write failed and provide details
+        const listEl = document.getElementById('leaderboard-list');
+        if (listEl) {
+            const msg = document.createElement('div');
+            msg.style.opacity = '0.95';
+            msg.style.marginBottom = '8px';
+            msg.innerHTML = `Could not save to remote hiscores: <strong>${escapeHtml(e && e.message ? e.message : String(e))}</strong>`;
+            const retry = document.createElement('button');
+            retry.textContent = 'Retry remote save';
+            retry.className = 'btn submit';
+            retry.style.marginTop = '8px';
+            retry.addEventListener('click', async () => {
+                retry.disabled = true;
+                retry.textContent = 'Retrying...';
+                try {
+                    await saveHiscoreToFirestore({ name: entry.name, score: entry.count });
+                    // on success, reload remote hiscores
+                    await loadHiscores(LEADERBOARD_LIMIT);
+                } catch (err) {
+                    console.warn('Retry failed', err);
+                    retry.disabled = false;
+                    retry.textContent = 'Retry remote save';
+                    // update message
+                    msg.innerHTML = `Retry failed: <strong>${escapeHtml(err && err.message ? err.message : String(err))}</strong>`;
+                }
+            });
+            listEl.innerHTML = '';
+            listEl.appendChild(msg);
+            listEl.appendChild(retry);
+        }
+        // continue to save locally
+    }
+
     if (qualifiesForLeaderboard(entry.count)) {
         list.push(entry);
         list.sort((a, b) => Number(b.count) - Number(a.count));
@@ -1182,8 +1344,40 @@ async function addScoreEntry({ name, count }) {
         // Save as personal hiscore and don't add to public top list
         setPersonalHiscore(entry);
     }
-    renderLeaderboard();
+
+    // If remote write succeeded, refresh remote list in the leaderboard panel.
+    if (remoteWritten) {
+        try { await loadHiscores(LEADERBOARD_LIMIT); } catch (e) { /* ignore */ }
+    } else {
+        renderLeaderboard();
+    }
 }
+
+// Attempt to save a hiscore document to Firestore (best-effort). Throws on failure.
+async function saveHiscoreToFirestore({ name, score }) {
+    if (!db) throw new Error('Firestore not initialized');
+    const colRef = collection(db, 'hiscores');
+    const ownerUid = (auth && auth.currentUser) ? auth.currentUser.uid : null;
+    const payload = { name: String(name || 'Anon').slice(0, 40), score: Number(score || 0), ownerUid: ownerUid, ts: serverTimestamp() };
+    // addDoc will throw if permissions deny or network fails
+    return await addDoc(colRef, payload);
+}
+
+// Diagnostic helper: attempt a quick read to verify Firestore connectivity and rules
+window.testFirestoreConnectivity = async function(limit = 1) {
+    try {
+        console.log('Testing Firestore connectivity...');
+        const colRef = collection(db, 'hiscores');
+        const q = firestoreQuery(colRef, orderBy('score', 'desc'), firestoreLimit(limit));
+        const snap = await getDocs(q);
+        console.log('Firestore test read succeeded. Documents found:', snap.size);
+        snap.forEach(doc => console.log(' -', doc.id, doc.data()));
+        return { ok: true, count: snap.size };
+    } catch (e) {
+        console.error('Firestore connectivity test failed:', e);
+        return { ok: false, error: e };
+    }
+};
 
 function cryptoRandomId() {
     try {
@@ -1243,6 +1437,15 @@ document.addEventListener('visibilitychange', () => {
 if (submitBtn) {
     submitBtn.addEventListener('click', async (evt) => {
         evt.preventDefault();
+        // Only allow submit when the game is over
+        if (!isGameOver) {
+            // briefly flash a message
+            try {
+                const listEl = document.getElementById('leaderboard-list');
+                if (listEl) listEl.innerHTML = '<div style="opacity:0.9">You can only submit after GAME OVER.</div>';
+            } catch (e) {}
+            return;
+        }
         const nameInput = document.getElementById('player-name');
         const scoreInput = document.getElementById('player-score');
         const name = nameInput ? (nameInput.value.trim() || 'Anon') : 'Anon';
@@ -1250,6 +1453,8 @@ if (submitBtn) {
         await addScoreEntry({ name, count });
         if (nameInput) nameInput.value = '';
         if (scoreInput) scoreInput.value = '';
+        // after submit, disable button until next GAME OVER
+        try { submitBtn.disabled = true; submitBtn.title = 'Submit available only after GAME OVER'; } catch (e) {}
     });
 }
 
@@ -1271,4 +1476,188 @@ function prefillScoreAndShow(score) {
 
 // initial render
 renderLeaderboard();
+
+// -------------------------
+// Leaderboard Tabs + All Scores (infinite scroll)
+// -------------------------
+let lbCurrentTab = 'top'; // 'top' | 'all'
+let allScoresPageSize = 30;
+let allScoresLastDoc = null;
+let allScoresExhausted = false;
+let allScoresLoading = false;
+let allRenderedCount = 0; // for numbering
+
+function setActiveTabStyles() {
+    try {
+        if (tabTopBtn && tabAllBtn) {
+            if (lbCurrentTab === 'top') {
+                tabTopBtn.style.background = 'rgba(255,255,255,0.08)';
+                tabTopBtn.style.color = '#fff';
+                tabAllBtn.style.background = 'transparent';
+                tabAllBtn.style.color = '#9be7ff';
+            } else {
+                tabAllBtn.style.background = 'rgba(255,255,255,0.08)';
+                tabAllBtn.style.color = '#fff';
+                tabTopBtn.style.background = 'transparent';
+                tabTopBtn.style.color = '#9be7ff';
+            }
+        }
+    } catch (e) {}
+}
+
+function setLeaderboardTab(tab) {
+    lbCurrentTab = (tab === 'all') ? 'all' : 'top';
+    if (leaderboardList && leaderboardAllList) {
+        if (lbCurrentTab === 'top') {
+            leaderboardList.style.display = 'block';
+            leaderboardAllList.style.display = 'none';
+            // refresh top on switch
+            try { loadHiscores(LEADERBOARD_LIMIT).catch(() => {}); } catch (e) {}
+        } else {
+            leaderboardList.style.display = 'none';
+            leaderboardAllList.style.display = 'block';
+            if (!allScoresLastDoc && !allScoresLoading && !allScoresExhausted) {
+                resetAllScoresPagination();
+                loadMoreAllScores().catch(() => {});
+            }
+        }
+    }
+    setActiveTabStyles();
+}
+
+function resetAllScoresPagination() {
+    allScoresLastDoc = null;
+    allScoresExhausted = false;
+    allScoresLoading = false;
+    allRenderedCount = 0;
+    if (leaderboardAllList) leaderboardAllList.innerHTML = '';
+}
+
+async function loadMoreAllScores() {
+    if (allScoresLoading || allScoresExhausted) return;
+    allScoresLoading = true;
+    // Show loading indicator
+    try {
+        const indicatorId = 'lb-all-loading';
+        let ind = document.getElementById(indicatorId);
+        if (!ind && leaderboardAllList) {
+            ind = document.createElement('div');
+            ind.id = indicatorId;
+            ind.style.opacity = '0.85';
+            ind.style.padding = '6px 4px';
+            ind.textContent = 'Loading more...';
+            leaderboardAllList.appendChild(ind);
+        }
+    } catch (e) {}
+
+    try {
+        const colRef = collection(db, 'hiscores');
+        let q = firestoreQuery(colRef, orderBy('score', 'desc'), firestoreLimit(allScoresPageSize));
+        if (allScoresLastDoc) {
+            q = firestoreQuery(colRef, orderBy('score', 'desc'), startAfter(allScoresLastDoc), firestoreLimit(allScoresPageSize));
+        }
+        const snap = await getDocs(q);
+        const items = [];
+        snap.forEach(doc => {
+            const data = doc.data();
+            items.push({ id: doc.id, name: data.name || 'Anon', score: Number(data.score || 0) });
+        });
+        appendAllScores(items);
+        if (snap.docs.length > 0) {
+            allScoresLastDoc = snap.docs[snap.docs.length - 1];
+        }
+        if (snap.docs.length < allScoresPageSize) {
+            allScoresExhausted = true;
+            // Show end marker
+            if (leaderboardAllList) {
+                const end = document.createElement('div');
+                end.style.opacity = '0.75';
+                end.style.padding = '8px 4px';
+                end.textContent = 'No more scores';
+                leaderboardAllList.appendChild(end);
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to load all scores', e);
+        if (leaderboardAllList && leaderboardAllList.children.length === 0) {
+            leaderboardAllList.innerHTML = '<div style="opacity:0.85">Failed to load scores.</div>';
+        }
+    } finally {
+        // Remove loading indicator
+        try {
+            const ind = document.getElementById('lb-all-loading');
+            if (ind && ind.parentNode) ind.parentNode.removeChild(ind);
+        } catch (e) {}
+        allScoresLoading = false;
+    }
+}
+
+function appendAllScores(items) {
+    if (!leaderboardAllList) return;
+    if (!Array.isArray(items) || items.length === 0) {
+        if (allRenderedCount === 0) {
+            leaderboardAllList.innerHTML = '<div style="opacity:0.8">No scores yet.</div>';
+        }
+        return;
+    }
+    const html = items.map((e, i) => {
+        const place = allRenderedCount + i + 1;
+        const name = escapeHtml(e.name || 'Anon');
+        const score = Number(e.score || 0);
+        return `<div style="padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.04);">#${place} <strong style="color:#ffd54f">${name}</strong> — ${score}</div>`;
+    }).join('');
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    while (temp.firstChild) leaderboardAllList.appendChild(temp.firstChild);
+    allRenderedCount += items.length;
+}
+
+// Scroll listener for infinite loading
+if (leaderboardAllList) {
+    leaderboardAllList.addEventListener('scroll', () => {
+        const threshold = 40; // px from bottom
+        if (leaderboardAllList.scrollTop + leaderboardAllList.clientHeight >= leaderboardAllList.scrollHeight - threshold) {
+            if (!allScoresLoading && !allScoresExhausted) {
+                loadMoreAllScores().catch(() => {});
+            }
+        }
+    });
+}
+
+// Wire tab buttons
+if (tabTopBtn) tabTopBtn.addEventListener('click', () => setLeaderboardTab('top'));
+if (tabAllBtn) tabAllBtn.addEventListener('click', () => setLeaderboardTab('all'));
+
+// Default to Top tab on load
+setActiveTabStyles();
+
+// Enhance setLeaderboardVisibility to account for centered mode sizing for all-list too
+const _origSetLeaderboardVisibility = setLeaderboardVisibility;
+setLeaderboardVisibility = function(visible, persist = true) {
+    _origSetLeaderboardVisibility(visible, persist);
+    try {
+        if (!leaderboardElement) return;
+        if (visible) {
+            // Adjust all-list size similar to top list
+            if (document.body.classList.contains('miniScreen')) {
+                if (leaderboardAllList) {
+                    leaderboardAllList.style.maxHeight = '60vh';
+                }
+            } else {
+                if (leaderboardAllList) {
+                    leaderboardAllList.style.maxHeight = '280px';
+                }
+            }
+            // Load appropriate tab content
+            if (lbCurrentTab === 'all') {
+                if (!allScoresLastDoc && !allScoresExhausted && !allScoresLoading) {
+                    resetAllScoresPagination();
+                    loadMoreAllScores().catch(() => {});
+                }
+            } else {
+                try { loadHiscores(LEADERBOARD_LIMIT).catch(() => {}); } catch (e) {}
+            }
+        }
+    } catch (e) {}
+};
 

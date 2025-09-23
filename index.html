@@ -20,6 +20,48 @@
             cursor: none;
         }
 
+        /* Design tokens / variables for quick edits */
+        :root {
+            --bg: #0d1117;
+            --panel: rgba(13,17,23,0.85);
+            --panel-strong: rgba(13,17,23,0.9);
+            --accent: #4CAF50;
+            --muted: #c9d1d9;
+            --btn-pad: 8px 12px;
+            --btn-size: 36px;
+            --gap: 12px;
+        }
+
+        /* Reusable panel attribute so any element can get the dark "tile" background by adding: <div data-panel>
+           Prefer adding inline color overrides for text when needed (e.g. <h1 style="color:#fff">) while keeping
+           sizing/alignment/glow centralized in CSS below. */
+        [data-panel] {
+            background: var(--panel);
+            color: var(--muted);
+            border-radius: 10px;
+            padding: 8px 12px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+        }
+
+        /* Top-level controls sizing using variables (keeps per-button rules minimal) */
+        .top-control {
+            padding: var(--btn-pad);
+            min-width: 44px;
+            min-height: var(--btn-size);
+            background: var(--panel);
+            color: #fff;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            cursor: pointer;
+            box-sizing: border-box;
+            position: absolute;
+            top: 32px;
+            z-index: 80;
+        }
+
         canvas {
             background-color: #0d1117;
             border-radius: 12px;
@@ -69,15 +111,11 @@
             text-shadow: 0 0 10px #fff;
         }
 
-        #splashScreen h1 {
-            font-size: 4rem;
-            margin: 0;
-        }
-
-        #splashScreen p {
-            font-size: 1.5rem;
-            margin-top: 10px;
-        }
+        /* Global heading rules (declared once). Sizes kept as before on regular screens.
+           Use inline color on elements when you want a specific hue per-screen/overlay. */
+        h1 { font-size: 4rem; margin: 0; }
+        h2 { font-size: 2.4rem; margin: 0; }
+        p  { font-size: 1.5rem; margin-top: 10px; }
 
         #splashScreen .restart-prompt {
             font-size: 1rem;
@@ -126,6 +164,49 @@
             padding: 18px 12px;
         }
 
+    
+        @media (max-width:600px) {
+            /* base typography scaling for small screens */
+            h1, h2 { font-size: 1.6rem !important; line-height: 1.15; }
+            p { font-size: 1rem !important; }
+
+            /* compact control sizing */
+            .top-control { padding: 6px 8px !important; min-height: 34px !important; }
+
+            /* splash-inner adjustments previously declared for very small screens */
+            body.miniScreen .splash-inner { padding: 12px 10px; }
+            body.miniScreen .splash-inner h1 { font-size: 24px; }
+            body.miniScreen .splash-inner p { font-size: 24px; }
+
+            /* narrow-screen control offsets and instruction/score tweaks */
+            body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 44px)); }
+            body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 44px)); }
+            body.miniScreen #score { top: 64px; font-size: 1rem; }
+            body.miniScreen #shoot-instructions { top: 100px; font-size: 0.95rem; }
+
+            /* extra-narrow adjustments consolidated here */
+            body.miniScreen .top-control { padding: 6px 8px !important; min-width: 36px; }
+            body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 36px)); }
+            body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 36px)); }
+            body.miniScreen #leaderboard-toggle { transform: translateX(-50%); }
+
+            /* splash title compacting for overlays */
+            #splashScreen .splash-inner.victory h1,
+            #splashScreen .splash-inner.paused h1,
+            #splashScreen .splash-inner.gameover h1,
+            body.miniScreen .splash-inner.victory h1,
+            body.miniScreen .splash-inner.paused h1,
+            body.miniScreen .splash-inner.gameover h1 {
+                font-size: 1.6rem !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                margin-bottom: 6px !important;
+            }
+            body.miniScreen #pause-toggle.top-control { padding: 6px 6px !important; min-width: 34px; }
+            body.miniScreen #shoot-instructions { max-width: 320px; padding: 6px 10px; }
+        }
+
         /* On mini screens, keep the splash-inner compact; specific title sizing is handled by
            the paused/gameover/victory rules so level-complete will match them. */
         body.miniScreen .splash-inner h1 {
@@ -147,46 +228,15 @@
             animation: none;
         }
 
-        /* Uniform font sizing for PAUSED and GAME OVER on small screens - match the small restart prompt */
-        body.miniScreen .splash-inner.paused h1,
-        body.miniScreen .splash-inner.gameover h1,
-        body.miniScreen .splash-inner.paused h2,
-        body.miniScreen .splash-inner.gameover h2,
-        body.miniScreen .splash-inner.paused p,
-        body.miniScreen .splash-inner.gameover p,
-        body.miniScreen .splash-inner.paused .restart-prompt,
-        body.miniScreen .splash-inner.gameover .restart-prompt {
-            font-size: 0.95rem !important;
-            line-height: 1.15 !important;
-            margin: 6px 0 !important;
-        }
+        /* Unified small-screen overlay typography is handled once in the single @media (max-width:600px) block above */
 
         /* Preserve green/red glow for Victory/Game Over titles respectively */
         body.miniScreen .splash-inner.gameover h1 { text-shadow: 0 0 12px #ff5050; }
         body.miniScreen .splash-inner.victory h1 { text-shadow: 0 0 12px #7CFC00; }
 
-        /* Further tighten splash presentation for very small screens */
-        @media (max-width:380px), (max-height:420px) {
-            body.miniScreen .splash-inner {
-                padding: 12px 10px;
-            }
-            /* keep both title and message the same compact size on very small screens */
-            body.miniScreen .splash-inner h1 {      font-size: 24px; }
-            body.miniScreen .splash-inner p { font-size: 24px; }
-        }
+        /* small-screen details consolidated into the single @media (max-width:600px) block above */
 
-        /* Paused state: force a tighter single-line, centered title */
-        body.miniScreen .splash-inner.paused h1 {
-            font-size: 1.6rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 6px;
-        }
-        body.miniScreen .splash-inner.paused .restart-prompt {
-            font-size: 0.95rem;
-            margin-top: 6px;
-        }
+        /* Paused/gameover/victory overlay behavior delegated to consolidated rules above. */
 
         /* Centered leaderboard styling when JS toggles .centered */
         #leaderboard.centered {
@@ -284,13 +334,23 @@
         }
 
         #leaderboard #leaderboard-list { max-height: 280px; overflow: auto; margin-bottom: 8px; font-size: 0.95rem; }
+
         #leaderboard input { padding: 6px; border-radius: 6px; border: 0; }
         #leaderboard .btn-row { display:flex; gap:6px; margin-top:8px; }
         #leaderboard .btn-row .btn { padding:8px; border-radius:6px; border:0; cursor:pointer; }
         #leaderboard .btn-row .submit { flex:1; background:#4CAF50; color:#000; }
         #leaderboard .btn-row .clear { background:#ff5252; color:#fff; }
 
-        /* Make the control buttons smaller and keep spacing on mini screens; unified padding */
+        /* Visually indicate disabled submit button (when not GAME OVER) */
+        #leaderboard .btn-row .btn[disabled],
+        #leaderboard .btn-row .btn[disabled]:hover {
+            background: rgba(255,255,255,0.06) !important;
+            color: rgba(255,255,255,0.5) !important;
+            cursor: not-allowed !important;
+            opacity: 0.6 !important;
+            transform: none !important;
+        }
+
         body.miniScreen .top-control,
         body.miniScreen #audio-toggle,
         body.miniScreen #leaderboard-toggle,
@@ -347,47 +407,13 @@
             max-width: none !important;
         }
 
-        /* Extra narrow screens: tighten spacing and stack more tightly */
-        @media (max-width:420px), (max-height:480px) {
-            /* Narrow screens: reduce spacing so controls don't overlap */
-            body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 44px)); }
-            body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 44px)); }
-            body.miniScreen #score { top: 64px; font-size: 1rem; }
-            body.miniScreen #shoot-instructions { top: 100px; font-size: 0.95rem; }
-        }
-
-        /* Extra-narrow devices: compact padding and smallest offsets */
-        @media (max-width:360px), (max-height:420px) {
-            body.miniScreen .top-control { padding: 6px 8px !important; min-width: 36px; }
-            body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 36px)); }
-            body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 36px)); }
-            body.miniScreen #leaderboard-toggle { transform: translateX(-50%); }
-        }
-        /* Small-screen tweaks: make Victory title match Paused/GameOver title sizing so it doesn't overflow */
-        @media (max-width:480px), (max-height:560px) {
-            /* Ensure any splash overlay title is compact and single-line on narrow viewports */
-            #splashScreen .splash-inner.victory h1,
-            #splashScreen .splash-inner.paused h1,
-            #splashScreen .splash-inner.gameover h1,
-            body.miniScreen .splash-inner.victory h1,
-            body.miniScreen .splash-inner.paused h1,
-            body.miniScreen .splash-inner.gameover h1 {
-                font-size: 1.6rem !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                margin-bottom: 6px !important;
-            }
-            /* tighten pause button even more on tiny screens */
-            body.miniScreen #pause-toggle.top-control { padding: 6px 6px !important; min-width: 34px; }
-            /* prevent shoot-instructions from stretching too wide */
-            body.miniScreen #shoot-instructions { max-width: 320px; padding: 6px 10px; }
-        }
+        /* Note: small-screen tweaks consolidated into the single @media (max-width:600px) block above. */
     </style>
     </head>
     <body>
         <!-- All UI elements are created by script/playdragon.js -->
-        <script src="script/playdragon.js"></script>
+        <script type="module" src="script/playdragon.js"></script>
+        
     </body>
     </html>
 
