@@ -19,10 +19,10 @@
     <!-- If you know the exact dimensions, uncomment these for better previews -->
     <!-- <meta property="og:image:width" content="1200"> -->
     <!-- <meta property="og:image:height" content="630"> -->
-
+w
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="PlayParty.online">
+    <meta name="twitter:title" content  ="PlayParty.online">
     <meta name="twitter:description" content="Arcade-style mini games. Try Segmented Dragon and climb the leaderboard!">
     <meta name="twitter:image" content="https://playparty.online/assets/playpartylogo.webp">
 
@@ -33,23 +33,15 @@
 
 
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #0d1117; /* Dark background for a "neon" effect */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            color: #c9d1d9;
-            font-family: sans-serif;
-            cursor: none;
-        }
+        /*
+         Consolidated stylesheet: duplicates removed and rules merged.
+         Behaviour preserved: full-viewport canvas, two UI modes (mini vs regular),
+         splash/overlay rules, leaderboard, and HiDPI-friendly layout.
 
-        /* Design tokens / variables for quick edits */
-        :root {
+         Keep the JS constant `MINI_BREAKPOINT = 600` in sync with the media query below.
+        */
+
+        :root{
             --bg: #0d1117;
             --panel: rgba(13,17,23,0.85);
             --panel-strong: rgba(13,17,23,0.9);
@@ -60,382 +52,147 @@
             --gap: 12px;
         }
 
-        /* Reusable panel attribute so any element can get the dark "tile" background by adding: <div data-panel>
-           Prefer adding inline color overrides for text when needed (e.g. <h1 style="color:#fff">) while keeping
-           sizing/alignment/glow centralized in CSS below. */
-        [data-panel] {
-            background: var(--panel);
-            color: var(--muted);
-            border-radius: 10px;
-            padding: 8px 12px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+        html,body{ height:100%; margin:0; padding:0; }
+
+        body{
+            background:var(--bg);
+            color:var(--muted);
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            overflow:hidden; /* game handles its own viewport */
+            cursor:none;
         }
 
-        /* Top-level controls sizing using variables (keeps per-button rules minimal) */
-        .top-control {
-            padding: var(--btn-pad);
-            min-width: 44px;
-            min-height: var(--btn-size);
-            background: var(--panel);
-            color: #fff;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: 0;
-            cursor: pointer;
-            box-sizing: border-box;
+        [data-panel]{
+            background:var(--panel);
+            color:var(--muted);
+            border-radius:10px;
+            padding:8px 12px;
+            box-shadow:0 4px 18px rgba(0,0,0,0.4);
+        }
+
+        /* Canvas fills the viewport (fixed) so UI elements can layer above it.
+           Using explicit inset/top/left/right/bottom avoids mobile viewport quirks. */
+        canvas{
+            position:fixed; inset:0; width:100%; height:100%;
+            display:block; z-index:10; background:var(--bg); border-radius:0; box-shadow:none; max-width:none; max-height:none;
+        }
+
+        /* Top-right control buttons (shared base rules) */
+        .top-control{
+            padding:var(--btn-pad); min-width:44px; min-height:var(--btn-size);
+            background:var(--panel); color:#fff; border-radius:8px; border:0; cursor:pointer;
+            display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box;
+            position:absolute; top:32px; z-index:80; line-height:1;
+        }
+
+        /* Score and instructions (default positions for regular screens) */
+        #score{ position:absolute; top:32px; left:32px; font-size:1.5rem; font-weight:bold; color:var(--accent); text-shadow:0 0 10px var(--accent); z-index:20; background:rgba(13,17,23,0.85); border-radius:10px; padding:6px 12px; }
+        #shoot-instructions{ position:absolute; top:80px; left:32px; font-size:1.1rem; color:#fff; background:rgba(13,17,23,0.7); border-radius:8px; padding:6px 12px; z-index:19; text-shadow:0 0 6px var(--accent), 0 0 2px #000; }
+
+        /* Splash / overlays */
+        #splashScreen{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:20; color:#fff; text-shadow:0 0 10px #fff; background:rgba(0,0,0,0.7); }
+        .splash-inner{ width:100%; max-width:920px; padding:24px 28px; box-sizing:border-box; text-align:center; }
+        .splash-inner .restart-prompt{ font-size:1rem; margin-top:30px; opacity:0.8; animation:pulse 1.5s infinite; }
+        @keyframes pulse{ 0%{opacity:0.8} 50%{opacity:1} 100%{opacity:0.8} }
+
+        /* Headings default sizes (desktop) */
+        h1{ font-size:4rem; margin:0; } h2{ font-size:2.4rem; margin:0; } p{ font-size:1.5rem; margin-top:10px; }
+
+        /* Leaderboard panel */
+        #leaderboard{ position:absolute; right:32px; top:80px; z-index:25; background:rgba(13,17,23,0.9); padding:12px; border-radius:10px; color:#fff; min-width:260px; max-width:320px; }
+        #leaderboard .close-btn{ position:absolute; right:8px; background:transparent; border:0; color:#fff; font-size:1rem; cursor:pointer; padding:4px; border-radius:6px; }
+        #leaderboard #leaderboard-list{ max-height:280px; overflow:auto; margin-bottom:8px; font-size:0.95rem; }
+        #leaderboard input{ padding:6px; border-radius:6px; border:0; }
+        #leaderboard .btn-row{ display:flex; gap:6px; margin-top:8px; }
+        #leaderboard .btn-row .btn{ padding:8px; border-radius:6px; border:0; cursor:pointer; }
+        #leaderboard .btn-row .submit{ flex:1; background:#4CAF50; color:#000; }
+        #leaderboard .btn-row .clear{ background:#ff5252; color:#fff; }
+        #leaderboard .btn-row .btn[disabled], #leaderboard .btn-row .btn[disabled]:hover{ background:rgba(255,255,255,0.06) !important; color:rgba(255,255,255,0.5) !important; cursor:not-allowed !important; opacity:0.6 !important; transform:none !important; }
+
+        /* Centered leaderboard variant (JS toggles .centered) */
+        #leaderboard.centered{ transform:translate(-50%,-50%) scale(0.96); transition:transform 180ms ease, box-shadow 180ms ease; box-shadow:0 10px 30px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.2); border-radius:12px; left:50% !important; top:50% !important; position:fixed !important; z-index:70 !important; width:88% !important; max-width:600px !important; }
+        #leaderboard.centered #leaderboard-list{ max-height:60vh; }
+
+        /* Mini-screen adjustments applied by JS via `body.miniScreen` and by the media query below.
+           Keep this block focused and minimal — overrides for compact layout and centered controls. */
+        body.miniScreen .splash-inner{ max-width:92%; padding:18px 12px; }
+        body.miniScreen .splash-inner h1{ line-height:1.15; margin:0 0 8px; word-break:break-word; }
+        body.miniScreen .splash-inner p{ font-size:1rem; margin:6px 0; padding:0 8px; word-break:break-word; }
+        body.miniScreen .splash-inner .restart-prompt{ font-size:0.95rem; margin-top:10px; animation:none; }
+        body.miniScreen .splash-inner.gameover h1{ text-shadow:0 0 12px #ff5050; }
+        body.miniScreen .splash-inner.victory h1{ text-shadow:0 0 12px #7CFC00; }
+
+        /* Compact control sizing for mini screens and centralized controls */
+        body.miniScreen .top-control, body.miniScreen #audio-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #pause-toggle{
+            padding:6px 8px !important; border-radius:6px; font-size:0.95rem; box-sizing:border-box; min-width:36px; min-height:36px; display:inline-flex; align-items:center; justify-content:center; line-height:1;
+        }
+        body.miniScreen #audio-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #pause-toggle{ position:absolute; top:10px; left:50%; transform:translateX(-50%); display:inline-block; }
+        body.miniScreen #pause-toggle{ transform:translateX(calc(-50% - 56px)); }
+        body.miniScreen #leaderboard-toggle{ transform:translateX(-50%); }
+        body.miniScreen #audio-toggle{ transform:translateX(calc(-50% + 56px)); }
+
+        /* Centered score/instructions under the controls on mini screens.
+           Consolidated to a single rule and constrained so they never overflow the viewport. */
+        body.miniScreen #score{
             position: absolute;
-            top: 32px;
-            z-index: 80;
-        }
-
-        canvas {
-            background-color: #0d1117;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
-        }
-
-        #score {
-            position: absolute;
-            top: 32px;
-            left: 32px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #4CAF50;
-            text-shadow: 0 0 10px #4CAF50;
-            z-index: 20;
-            background: rgba(13, 17, 23, 0.85);
-            border-radius: 10px;
-            padding: 6px 12px; /* reduced padding for a neater background */
-        }
-
-        #shoot-instructions {
-            position: absolute;
-            top: 80px;
-            left: 32px;
-            font-size: 1.1rem;
-            color: #fff;
-            background: rgba(13, 17, 23, 0.7);
-            border-radius: 8px;
-            padding: 6px 12px; /* reduced padding */
-            z-index: 19;
-            text-shadow: 0 0 6px #4CAF50, 0 0 2px #000;
-        }
-        
-        #splashScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            color: #fff;
-            text-shadow: 0 0 10px #fff;
-        }
-
-        /* Global heading rules (declared once). Sizes kept as before on regular screens.
-           Use inline color on elements when you want a specific hue per-screen/overlay. */
-        h1 { font-size: 4rem; margin: 0; }
-        h2 { font-size: 2.4rem; margin: 0; }
-        p  { font-size: 1.5rem; margin-top: 10px; }
-
-        #splashScreen .restart-prompt {
-            font-size: 1rem;
-            margin-top: 30px;
-            opacity: 0.8;
-            animation: pulse 1.5s infinite;
-        }
-        
-        #gameOverScreen h1 {
-            text-shadow: 0 0 20px #ff0000;
-        }
-        
-        #levelCompleteScreen h1 {
-            text-shadow: 0 0 20px #00ff00;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
-        }
-
-        /* Keep overlay full viewport; constrain inner content for small screens */
-        #splashScreen {
-            position: absolute;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            color: #fff;
-            text-shadow: 0 0 10px #fff;
-            background-color: rgba(0,0,0,0.7);
-        }
-
-        .splash-inner {
-            width: 100%;
-            max-width: 920px;
-            padding: 24px 28px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        body.miniScreen .splash-inner {
-            max-width: 92%;
-            padding: 18px 12px;
-        }
-
-    
-        @media (max-width:600px) {
-            /* base typography scaling for small screens */
-            h1, h2 { font-size: 1.6rem !important; line-height: 1.15; }
-            p { font-size: 1rem !important; }
-
-            /* compact control sizing */
-            .top-control { padding: 6px 8px !important; min-height: 34px !important; }
-
-            /* splash-inner adjustments previously declared for very small screens */
-            body.miniScreen .splash-inner { padding: 12px 10px; }
-            body.miniScreen .splash-inner h1 { font-size: 24px; }
-            body.miniScreen .splash-inner p { font-size: 24px; }
-
-            /* narrow-screen control offsets and instruction/score tweaks */
-            body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 44px)); }
-            body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 44px)); }
-            body.miniScreen #score { top: 64px; font-size: 1rem; }
-            body.miniScreen #shoot-instructions { top: 100px; font-size: 0.95rem; }
-
-            /* extra-narrow adjustments consolidated here */
-            body.miniScreen .top-control { padding: 6px 8px !important; min-width: 36px; }
-            body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 36px)); }
-            body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 36px)); }
-            body.miniScreen #leaderboard-toggle { transform: translateX(-50%); }
-
-            /* splash title compacting for overlays */
-            #splashScreen .splash-inner.victory h1,
-            #splashScreen .splash-inner.paused h1,
-            #splashScreen .splash-inner.gameover h1,
-            body.miniScreen .splash-inner.victory h1,
-            body.miniScreen .splash-inner.paused h1,
-            body.miniScreen .splash-inner.gameover h1 {
-                font-size: 1.6rem !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                margin-bottom: 6px !important;
-            }
-            body.miniScreen #pause-toggle.top-control { padding: 6px 6px !important; min-width: 34px; }
-            body.miniScreen #shoot-instructions { max-width: 320px; padding: 6px 10px; }
-        }
-
-        /* On mini screens, keep the splash-inner compact; specific title sizing is handled by
-           the paused/gameover/victory rules so level-complete will match them. */
-        body.miniScreen .splash-inner h1 {
-            line-height: 1.15;
-            margin: 0 0 8px;
-            word-break: break-word;
-        }
-
-        body.miniScreen .splash-inner p {
-            font-size: 1rem;
-            margin: 6px 0;
-            padding: 0 8px;
-            word-break: break-word;
-        }
-
-        body.miniScreen .splash-inner .restart-prompt {
-            font-size: 0.95rem;
-            margin-top: 10px;
-            animation: none;
-        }
-
-        /* Unified small-screen overlay typography is handled once in the single @media (max-width:600px) block above */
-
-        /* Preserve green/red glow for Victory/Game Over titles respectively */
-        body.miniScreen .splash-inner.gameover h1 { text-shadow: 0 0 12px #ff5050; }
-        body.miniScreen .splash-inner.victory h1 { text-shadow: 0 0 12px #7CFC00; }
-
-        /* small-screen details consolidated into the single @media (max-width:600px) block above */
-
-        /* Paused/gameover/victory overlay behavior delegated to consolidated rules above. */
-
-        /* Centered leaderboard styling when JS toggles .centered */
-        #leaderboard.centered {
-            transform: translate(-50%, -50%) scale(0.96);
-            transition: transform 180ms ease, box-shadow 180ms ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.2);
-            border-radius: 12px;
-            left: 50% !important;
-            top: 50% !important;
-            position: fixed !important;
-            z-index: 70 !important;
-            width: 88% !important;
-            max-width: 600px !important;
-        }
-
-        /* Slightly reduce content size inside centered leaderboard for breathing room */
-        #leaderboard.centered #leaderboard-list {
-            max-height: 60vh;
-        }
-
-        /* Mini screen responsive adjustments (applied via body.miniScreen by JS) */
-        body.miniScreen #score {
-            top: 12px;
-            left: 8px;
-            font-size: 1.1rem;
-            padding: 6px 10px;
-            border-radius: 8px;
-        }
-
-        body.miniScreen #shoot-instructions {
-            top: 56px;
-            left: 8px;
-            font-size: 0.95rem;
-            padding: 4px 8px; /* even tighter on mini screens */
-            z-index: 19;
-            max-width: calc(100% - 24px);
-        }
-
-        /* Make the control buttons smaller and keep spacing from the right edge; force uniform size and alignment */
-        /* Base styling for top control buttons (applies generally) */
-        .top-control {
-            background: rgba(13,17,23,0.85);
-            color: #fff;
-            border: 0;
-            border-radius: 8px;
-            cursor: pointer;
-            box-sizing: border-box;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-            padding: 8px 12px;
-            min-width: 44px;
-            min-height: 36px;
-            position: absolute;
-            top: 32px;
-            z-index: 80;
-        }
-
-        /* FORCE: On regular (non-mini) screens place the three toggles in a row at the top-right */
-        @media (min-width: 481px) {
-            body:not(.miniScreen) #pause-toggle { right: 32px; }
-            body:not(.miniScreen) #leaderboard-toggle { right: 32px; transform: translateX(-56px); }
-            body:not(.miniScreen) #audio-toggle { right: 32px; transform: translateX(-112px); }
-            /* ensure transforms don't affect mini screens */
-            body.miniScreen #pause-toggle,
-            body.miniScreen #leaderboard-toggle,
-            body.miniScreen #audio-toggle { transform: none !important; }
-        }
-
-        /* Default leaderboard panel (JS will create this element) */
-        #leaderboard {
-            position: absolute;
-            right: 32px;
-            top: 80px;
-            z-index: 25;
-            background: rgba(13,17,23,0.9);
-            padding: 12px;
-            border-radius: 10px;
-            color: #fff;
-            min-width: 260px;
-            max-width: 320px;
-        }
-
-        #leaderboard .close-btn {
-            position: absolute;
-            right: 8px;
-            background: transparent;
-            border: 0;
-            color: #fff;
-            font-size: 1rem;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 6px;
-        }
-
-        #leaderboard #leaderboard-list { max-height: 280px; overflow: auto; margin-bottom: 8px; font-size: 0.95rem; }
-
-        #leaderboard input { padding: 6px; border-radius: 6px; border: 0; }
-        #leaderboard .btn-row { display:flex; gap:6px; margin-top:8px; }
-        #leaderboard .btn-row .btn { padding:8px; border-radius:6px; border:0; cursor:pointer; }
-        #leaderboard .btn-row .submit { flex:1; background:#4CAF50; color:#000; }
-        #leaderboard .btn-row .clear { background:#ff5252; color:#fff; }
-
-        /* Visually indicate disabled submit button (when not GAME OVER) */
-        #leaderboard .btn-row .btn[disabled],
-        #leaderboard .btn-row .btn[disabled]:hover {
-            background: rgba(255,255,255,0.06) !important;
-            color: rgba(255,255,255,0.5) !important;
-            cursor: not-allowed !important;
-            opacity: 0.6 !important;
-            transform: none !important;
-        }
-
-        body.miniScreen .top-control,
-        body.miniScreen #audio-toggle,
-        body.miniScreen #leaderboard-toggle,
-        body.miniScreen #pause-toggle {
-            /* tighter, neater padding to avoid large stretched buttons */
-            padding: 6px 8px !important;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            box-sizing: border-box;
-            min-width: 36px;
-            min-height: 36px;
-            width: auto !important;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-        }
-
-        /* Center the three controls at the top and keep them evenly spaced */
-        body.miniScreen #audio-toggle,
-        body.miniScreen #leaderboard-toggle,
-        body.miniScreen #pause-toggle {
-            position: absolute;
-            top: 10px;
             left: 50%;
             transform: translateX(-50%);
+            top: 56px;
+            text-align: center;
             display: inline-block;
-        }
-    /* central alignment with balanced offsets; reduced default offsets to avoid overlap */
-    body.miniScreen #pause-toggle { transform: translateX(calc(-50% - 56px)); }
-    body.miniScreen #leaderboard-toggle { transform: translateX(-50%); }
-    body.miniScreen #audio-toggle { transform: translateX(calc(-50% + 56px)); }
-
-        /* Center score and instructions below the controls */
-        body.miniScreen #score {
-            left: 50%;
-            transform: translateX(-50%);
-            top: 56px;
-            text-align: center;
-            display: inline-block; /* size to content */
             white-space: nowrap;
             width: auto !important;
-            max-width: none !important;
+            max-width: calc(100% - 24px) !important;
+            box-sizing: border-box;
         }
-
-        body.miniScreen #shoot-instructions {
+        body.miniScreen #shoot-instructions{
+            position: absolute;
             left: 50%;
             transform: translateX(-50%);
             top: 96px;
             text-align: center;
-            display: inline-block; /* size to content */
+            display: inline-block;
             white-space: nowrap;
             width: auto !important;
-            max-width: none !important;
+            max-width: calc(100% - 24px) !important;
+            box-sizing: border-box;
+            z-index: 19;
+            padding: 4px 8px;
         }
 
-        /* Note: small-screen tweaks consolidated into the single @media (max-width:600px) block above. */
+        /* Small-screen typography and other overrides handled in this media query; keep the breakpoint aligned with JS. */
+        @media (max-width:600px){
+            h1,h2{ font-size:1.6rem !important; line-height:1.15; }
+            p{ font-size:1rem !important; }
+            .top-control{ padding:6px 8px !important; min-height:34px !important; }
+            body.miniScreen .splash-inner{ padding:12px 10px; }
+            body.miniScreen .splash-inner h1{ font-size:24px; }
+            body.miniScreen .splash-inner p{ font-size:24px; }
+            /* compact offsets for tiny screens */
+            body.miniScreen #pause-toggle{ transform:translateX(calc(-50% - 44px)); }
+            body.miniScreen #audio-toggle{ transform:translateX(calc(-50% + 44px)); }
+            body.miniScreen #score{ top:64px; font-size:1rem; }
+            body.miniScreen #shoot-instructions{ top:100px; font-size:0.95rem; }
+            body.miniScreen .top-control{ padding:6px 8px !important; min-width:36px; }
+            body.miniScreen #pause-toggle{ transform:translateX(calc(-50% - 36px)); }
+            body.miniScreen #audio-toggle{ transform:translateX(calc(-50% + 36px)); }
+            body.miniScreen #leaderboard-toggle{ transform:translateX(-50%); }
+            #splashScreen .splash-inner.victory h1, #splashScreen .splash-inner.paused h1, #splashScreen .splash-inner.gameover h1,
+            body.miniScreen .splash-inner.victory h1, body.miniScreen .splash-inner.paused h1, body.miniScreen .splash-inner.gameover h1{
+                font-size:1.6rem !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; margin-bottom:6px !important;
+            }
+            body.miniScreen #pause-toggle.top-control{ padding:6px 6px !important; min-width:34px; }
+            body.miniScreen #shoot-instructions{ max-width:320px; padding:6px 10px; }
+        }
+
+        /* Desktop-aligned toggles: place three toggles in a row at top-right. Keep in sync with MINI_BREAKPOINT in JS. */
+        @media (min-width:600px){
+            body:not(.miniScreen) #pause-toggle{ right:32px; }
+            body:not(.miniScreen) #leaderboard-toggle{ right:32px; transform:translateX(-56px); }
+            body:not(.miniScreen) #audio-toggle{ right:32px; transform:translateX(-112px); }
+            /* ensure mini-screen transforms don't leak */
+            body.miniScreen #pause-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #audio-toggle{ transform:none !important; }
+        }
     </style>
     </head>
     <body>

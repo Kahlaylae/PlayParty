@@ -1,12 +1,12 @@
 [
   {
     "level": 1,
-    "target": 60,
+    "target": 10,
     "emoji": "mon1",
     "aimSpeed": 1,
     "multiplier": 5,
     "spawnRate": 1,
-    "collidables": 0
+    "obstacles": "towers"
   },
   {
     "level": 2,
@@ -15,7 +15,7 @@
     "aimSpeed": 1.5,
     "multiplier": 7,
     "spawnRate": 1,
-    "collidables": 1
+    "obstacles": "bats"
   },
   {
     "level": 3,
@@ -24,7 +24,7 @@
     "aimSpeed": 2,
     "multiplier": 10,
     "spawnRate": 1,
-    "collidables": 3
+    "obstacles": "towers,bats,plane"
   },
   {
     "level": 4,
@@ -33,6 +33,6 @@
     "aimSpeed": 5,
     "multiplier": 5,
     "spawnRate": 2,
-    "collidables": 2
+    "obstacles": "towers,tornado"
   }
 ]
