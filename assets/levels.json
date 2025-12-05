@@ -1,38 +1,61 @@
 [
   {
     "level": 1,
-    "target": 40,
-    "emoji": "mon1",
+    "target": 25,
+    "emoji": "mon1,mon5",
     "aimSpeed": 1,
     "multiplier": 5,
     "spawnRate": 1,
-    "obstacles": "towers"
+    "obstacles": [
+      { "name": "towers", "set": [".top", ".bottom"] }
+    ]
   },
   {
     "level": 2,
-    "target": 80,
+    "target": 50,
     "emoji": "mon2",
     "aimSpeed": 1.5,
     "multiplier": 7,
     "spawnRate": 1,
-    "obstacles": "bats"
+    "obstacles": [
+      { "name": "bats", "set": [".top", ".bottom", ".center"] }
+    ]
   },
   {
     "level": 3,
-    "target": 100,
-    "emoji": "mon1,mon2",
+    "target": 75,
+    "emoji": "mon1,mon2,mon5",
     "aimSpeed": 2,
     "multiplier": 10,
     "spawnRate": 1,
-    "obstacles": "towers,bats,plane"
+    "obstacles": [
+      { "name": "towers", "set": [".trailing", ".leading"] },
+      { "name": "bats", "set": [".top", ".bottom"] },
+      { "name": "plane", "set": [".center"] }
+    ]
   },
   {
     "level": 4,
-    "target": 150,
-    "emoji": "mon3",
+    "target": 100,
+    "emoji": "mon4,mon5,mon1",
     "aimSpeed": 5,
     "multiplier": 5,
     "spawnRate": 2,
-    "obstacles": "towers,tornado"
+    "obstacles": [
+      { "name": "towers", "set": [".top", ".bottom"] },
+      { "name": "tornado", "set": [".center"] }
+    ]
+  },
+  {
+    "level": 5,
+    "target": 150,
+    "emoji": "mon3,mon2,mon4",
+    "aimSpeed": 5,
+    "multiplier": 5,
+    "spawnRate": 2,
+    "obstacles": [
+      { "name": "towers", "set": [".top", ".bottom"] },
+      { "name": "tornado", "set": [".center"]}
+    ]
   }
 ]

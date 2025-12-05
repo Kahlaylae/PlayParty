@@ -10,28 +10,28 @@
     "monster": "mon2",
     "emoji": "👻",
     "normalHp": 2,
-    "bossHp": 4,
-    "enemySpeed": 2
+    "bossHp": 6,
+    "enemySpeed": 1.7
   },
   {
     "monster": "mon3",
     "emoji": "👽",
     "normalHp": 3,
-    "bossHp": 6,
+    "bossHp": 10,
     "enemySpeed": 1
   },
   {
     "monster": "mon4",
     "emoji": "🐷",
     "normalHp": 4,
-    "bossHp": 8,
+    "bossHp": 15,
     "enemySpeed": 0.5
   },
   {
     "monster": "mon5",
     "emoji": "👾",
     "normalHp": 3,
-    "bossHp": 5,
-    "enemySpeed": 1.75
+    "bossHp": 10,
+    "enemySpeed": 1.7
   }
 ]

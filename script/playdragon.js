@@ -147,16 +147,34 @@ function createUI() {
     cursorEl.style.position = 'fixed';
     cursorEl.style.left = '0px';
     cursorEl.style.top = '0px';
-    cursorEl.style.width = '14px';
-    cursorEl.style.height = '14px';
+    cursorEl.style.width = '16px';
+    cursorEl.style.height = '16px';
     cursorEl.style.borderRadius = '50%';
-    cursorEl.style.background = 'rgba(255,255,255,0.95)';
-    cursorEl.style.boxShadow = '0 0 8px rgba(255,255,255,0.6)';
+    cursorEl.style.background = 'radial-gradient(circle, rgba(0,255,255,0.9) 0%, rgba(0,255,255,0.6) 50%, rgba(0,255,255,0.2) 100%)';
+    cursorEl.style.border = '2px solid rgba(255,255,255,0.8)';
+    cursorEl.style.boxShadow = '0 0 15px rgba(0,255,255,0.8), inset 0 0 8px rgba(255,255,255,0.3)';
     cursorEl.style.pointerEvents = 'none';
     cursorEl.style.transform = 'translate(-50%, -50%)';
     cursorEl.style.zIndex = '9999';
     cursorEl.style.display = 'none'; // hidden until we have a position
+    cursorEl.style.animation = 'cursor-pulse 1.5s ease-in-out infinite';
     document.body.appendChild(cursorEl);
+
+    // Add CSS keyframe animation for cursor pulse
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes cursor-pulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.9;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.15);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
 
     // controls
     const created = createControlButtons();
@@ -280,7 +298,7 @@ const PELLET_SPEED = 900; // ~15 px/frame @60fps -> 900 world units/sec
 const DRAGON_SPEED = 300; // ~5 px/frame @60fps -> 300 world units/sec
 const ENEMY_SPEED_SCALE = 80; // multiplier to convert level enemySpeed to world-units/sec
 const OPEN_MOUTH_DURATION = 150;
-const BOSS_ENEMY_SPAWN_THRESHOLD = 10;
+const BOSS_ENEMY_SPAWN_THRESHOLD = 5;
         
 // Levels will be loaded from JSON files in /assets at runtime.
 // `levels` will be a map: levelNumber -> { target, monsters: [{monster, emoji, normalHp, bossHp, enemySpeed}], aimSpeed, spawnRate, collidables }
@@ -445,19 +463,19 @@ class Collidable {
                 try {
                     const pad = 8 * (this.scale || 1);
                     const radius = Math.max(this.width, this.height) / 2 + pad;
-                    // soft highlight + fade to transparent
+                    // soft highlight + fade to transparent - more subtle than before
                     const grad = ctx.createRadialGradient(cx - radius * 0.25, cy - radius * 0.25, Math.max(4, radius * 0.08), cx, cy, radius);
-                    grad.addColorStop(0, 'rgba(255,255,255,0.06)');
-                    grad.addColorStop(0.6, 'rgba(255,255,255,0.02)');
-                    grad.addColorStop(1, 'rgba(255,255,255,0)');
+                    grad.addColorStop(0, 'rgba(100,200,255,0.03)');
+                    grad.addColorStop(0.6, 'rgba(100,200,255,0.01)');
+                    grad.addColorStop(1, 'rgba(100,200,255,0)');
 
                     ctx.save();
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.beginPath();
                     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-                    // subtle shadow to read as a glow but keep transparent
-                    ctx.shadowColor = 'rgba(255,255,255,0.04)';
-                    ctx.shadowBlur = 16 * (this.scale || 1);
+                    // much more subtle shadow
+                    ctx.shadowColor = 'rgba(100,200,255,0.015)';
+                    ctx.shadowBlur = 12 * (this.scale || 1);
                     ctx.fillStyle = grad;
                     ctx.fill();
                     ctx.restore();
@@ -495,15 +513,15 @@ class Collidable {
                     const pad = 8 * (this.scale || 1);
                     const r = Math.max(radius, 8) + pad;
                     const grad = ctx.createRadialGradient(cx - r * 0.25, cy - r * 0.25, Math.max(4, r * 0.08), cx, cy, r);
-                    grad.addColorStop(0, 'rgba(255,255,255,0.06)');
-                    grad.addColorStop(0.6, 'rgba(255,255,255,0.02)');
-                    grad.addColorStop(1, 'rgba(255,255,255,0)');
+                    grad.addColorStop(0, 'rgba(100,200,255,0.03)');
+                    grad.addColorStop(0.6, 'rgba(100,200,255,0.01)');
+                    grad.addColorStop(1, 'rgba(100,200,255,0)');
                     ctx.save();
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.beginPath();
                     ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                    ctx.shadowColor = 'rgba(255,255,255,0.04)';
-                    ctx.shadowBlur = 16 * (this.scale || 1);
+                    ctx.shadowColor = 'rgba(100,200,255,0.015)';
+                    ctx.shadowBlur = 12 * (this.scale || 1);
                     ctx.fillStyle = grad;
                     ctx.fill();
                     ctx.restore();
@@ -829,6 +847,83 @@ window.runPathfindingDiagnostic = function(options = {}) {
 // monsterMap: monsterId -> monsterData (from monsters.json)
 let monsterMap = {};
 
+// 6-point positioning system for obstacles
+function calculateObstaclePosition(position, radiusWorld, w = 0, h = 0) {
+    const marginPx = 32; // spacing from viewport edge
+    let x, y, movementPath = null;
+    
+    switch (position) {
+        case '.topLeading': // Legacy - redirect to .leading
+        case '.bottomLeading': // Legacy - redirect to .leading  
+        case '.leading': // Consolidated left-side vertical mover
+            x = marginPx + radiusWorld;
+            y = WORLD_HEIGHT / 2; // Center vertically
+            // Vertical movement staying within viewport bounds
+            movementPath = {
+                direction: 'vertical',
+                amplitude: Math.min(
+                    (WORLD_HEIGHT / 2) - marginPx - radiusWorld, // Distance to top
+                    (WORLD_HEIGHT / 2) - marginPx - radiusWorld  // Distance to bottom
+                )
+            };
+            break;
+        case '.top': // 1
+            x = WORLD_WIDTH / 2;
+            y = marginPx + radiusWorld;
+            // Horizontal movement reaching both edges
+            movementPath = {
+                direction: 'horizontal',
+                amplitude: (WORLD_WIDTH / 2) - marginPx - radiusWorld
+            };
+            break;
+        case '.topTrailing': // Legacy - redirect to .trailing
+        case '.bottomTrailing': // Legacy - redirect to .trailing
+        case '.trailing': // Consolidated right-side vertical mover
+            x = WORLD_WIDTH - marginPx - radiusWorld;
+            y = WORLD_HEIGHT / 2; // Center vertically
+            // Vertical movement staying within viewport bounds
+            movementPath = {
+                direction: 'vertical',
+                amplitude: Math.min(
+                    (WORLD_HEIGHT / 2) - marginPx - radiusWorld, // Distance to top
+                    (WORLD_HEIGHT / 2) - marginPx - radiusWorld  // Distance to bottom
+                )
+            };
+            break;
+        case '.center': // 0
+            x = WORLD_WIDTH / 2;
+            y = WORLD_HEIGHT / 2;
+            // Horizontal movement reaching both edges
+            movementPath = {
+                direction: 'horizontal',
+                amplitude: (WORLD_WIDTH / 2) - marginPx - radiusWorld
+            };
+            break;
+        case '.centerVertical': // Vertical counterpart to .center
+            x = WORLD_WIDTH / 2;
+            y = WORLD_HEIGHT / 2;
+            // Vertical movement reaching top and bottom edges
+            movementPath = {
+                direction: 'vertical',
+                amplitude: (WORLD_HEIGHT / 2) - marginPx - radiusWorld
+            };
+            break;
+        case '.bottom': // 2
+            x = WORLD_WIDTH / 2;
+            y = WORLD_HEIGHT - marginPx - radiusWorld;
+            // Horizontal movement reaching both edges
+            movementPath = {
+                direction: 'horizontal',
+                amplitude: (WORLD_WIDTH / 2) - marginPx - radiusWorld
+            };
+            break;
+        default:
+            return null;
+    }
+    
+    return { x, y, movementPath };
+}
+
 async function loadLevelsAndMonsters() {
     // load monsters
     try {
@@ -860,93 +955,70 @@ async function loadLevelsAndMonsters() {
         levelsArr.forEach(l => {
             const monsterIds = String(l.emoji || '').split(',').map(s => s.trim()).filter(Boolean);
             const monsters = monsterIds.map(id => monsterMap[id]).filter(Boolean);
-            // Build collidables from obstacles list (new format). Backwards-compat: support l.collidables legacy.
-            let obstacleSpec = l.obstacles || l.collidables || null;
-            let obstacleNames = [];
-            if (obstacleSpec == null) {
-                obstacleNames = [];
-            } else if (typeof obstacleSpec === 'string') {
-                obstacleNames = obstacleSpec.split(',').map(s => s.trim()).filter(Boolean);
-            } else if (Array.isArray(obstacleSpec)) {
-                obstacleNames = obstacleSpec.map(String).map(s => s.trim()).filter(Boolean);
-            } else if (typeof obstacleSpec === 'number') {
-                // choose first N obstacle presets by input order without duplicating positions
-                const n = Math.max(0, Number(obstacleSpec) || 0);
-                const chosen = [];
-                const usedPositions = new Set();
-                for (let i = 0; i < obstaclesArr.length && chosen.length < n; i++) {
-                    const name = (obstaclesArr[i].name || obstaclesArr[i].obstacles || '').toString();
-                    const posStr = (obstaclesArr[i].position || '').toString();
-                    const tokens = posStr.split(',').map(t => t.trim()).filter(Boolean);
-                    // skip if any token collides with usedPositions
-                    let conflict = false;
-                    for (const t of tokens) { if (usedPositions.has(t)) { conflict = true; break; } }
-                    if (conflict) continue;
-                    chosen.push(name);
-                    tokens.forEach(t => usedPositions.add(t));
-                }
-                obstacleNames = chosen;
-            }
-
-            // For each requested obstacle name, convert to one or more Collidable entries based on its position tokens
+            
+            // Build collidables from obstacles list (new array format)
+            const obstacleSpec = l.obstacles || [];
             const collidables = [];
-            const MARGIN = 24; // margin from edges in world units
             const BASE_OBS_SIZE = 64; // base size for scale=1
-            const placedPositionTokens = new Set();
 
-            obstacleNames.forEach(name => {
+            // Process each obstacle entry in the array
+            console.log('Processing obstacles for level', l.level, ':', obstacleSpec);
+            obstacleSpec.forEach(obstacleEntry => {
+                const { name, set } = obstacleEntry;
+                console.log('Processing obstacle:', name, 'with positions:', set);
                 const def = obstaclesMap.get(name);
                 if (!def) {
                     console.warn('Unknown obstacle referenced in levels.json:', name);
                     return;
                 }
+                
                 const scale = Math.max(1, Math.min(3, Number(def.scale || 1)));
-                const w = BASE_OBS_SIZE * scale;
-                const h = BASE_OBS_SIZE * scale;
-                const posTokens = (String(def.position || 'center')).split(',').map(s => s.trim()).filter(Boolean);
-                posTokens.forEach(tok => {
-                    // skip if this token already used by another obstacle in this level (compatibility rule)
-                    if (placedPositionTokens.has(tok)) {
-                        console.warn(`Skipping obstacle ${name} at position ${tok} due to position conflict`);
+                const size = BASE_OBS_SIZE * scale;
+                const radius = size / 2;
+                const speed = Number(def.speed || 1);
+                console.log('Obstacle definition:', { name, scale, size, radius, speed, emoji: def.emoji });
+
+                // Process each position in the set array
+                set.forEach(position => {
+                    const positionData = calculateObstaclePosition(position, radius, size, size);
+                    if (!positionData) {
+                        console.warn(`Unknown position ${position} for obstacle ${name}`);
                         return;
                     }
-                    // compute world-space position relative to the current viewport edges so obstacles
-                    // align to the visible screen (top/left/right/bottom/center/corners). Use the
-                    // helper so resizing the canvas later can recompute positions.
-                    const radius = Math.max(w, h) / 2;
-                    const pos = worldPosForToken(tok, radius, w, h);
-                    const x = pos.x;
-                    const y = pos.y;
-                    // remember the token so we can reposition on resize
-                    // store as the original requested placement for this collidable
-                    const posToken = tok;
-                    placedPositionTokens.add(tok);
-                    // Create circular collidables centered on the emoji so the glow matches the collision shape
-                    const coll = new Collidable({
+
+                    const { x, y, movementPath } = positionData;
+                    console.log(`Creating obstacle at position ${position}:`, { x, y, movementPath });
+                    
+                    // Create collidable with movement configuration
+                    const collidable = new Collidable({
                         type: CollidableType.CIRCLE,
-                        x: x,
-                        y: y,
-                        radius: Math.max(w, h) / 2,
-                        color: 'rgba(0,0,0,0)', // invisible hitbox by default
-                        collidesWith: Object.assign({ dragon: true, pellets: true, enemies: true, cursor: false }, def.collidesWith || {}),
-                        flags: Object.assign({ bouncePellets: !!(def.flags && def.flags.bouncePellets) }, def.flags || {}),
-                        emoji: def.emoji || null,
-                        scale: scale,
-                        posToken: posToken,
-                        // store direction for potential motion (left-right default)
-                        direction: def.direction || 'ltr'
+                        x, y, 
+                        radius,
+                        emoji: def.emoji,
+                        scale,
+                        collidesWith: { dragon: true, pellets: true, enemies: true, cursor: false },
+                        flags: { bouncePellets: true, clampToViewport: false, activeOutside: false }
                     });
-                    // store motion parameters so obstacle can animate
-                    const dirRaw = (def.direction || 'ltr').toString().toLowerCase();
-                    const dir = (dirRaw.indexOf('vert') !== -1 || dirRaw.indexOf('t') === 0 || dirRaw.indexOf('b') === 0) ? 'vertical' : 'horizontal';
-                    const speed = Math.max(0.1, Number(def.speed || 1));
-                    const amplitude = Math.max(8, (Number(def.amplitude) || BASE_OBS_SIZE / 2) * scale);
-                    coll.baseX = coll.x;
-                    coll.baseY = coll.y;
-                    coll.motion = { dir, speed, amplitude, phase: Math.random() * Math.PI * 2 };
-                    // Consider obstacle moving if a direction is specified OR a non-zero speed is provided
-                    coll.moving = !!def.direction || (def.speed !== undefined && Number(def.speed) > 0);
-                    collidables.push(coll);
+                    
+                    // Store positioning info for responsive resizing
+                    collidable.positionToken = position; // Store the original position token
+                    collidable.originalRadius = radius; // Store original radius for recalculation
+                    
+                    // Add movement configuration
+                    if (movementPath) {
+                        collidable.moving = true;
+                        collidable.baseX = x;
+                        collidable.baseY = y;
+                        collidable.motion = {
+                            dir: movementPath.direction, // 'horizontal' or 'vertical'
+                            speed: speed * 0.5, // movement speed (rad/sec)
+                            amplitude: movementPath.amplitude,
+                            phase: Math.random() * Math.PI * 2 // random starting phase
+                        };
+                    }
+                    
+                    collidables.push(collidable);
+                    console.log('Added collidable:', collidable);
                 });
             });
 
@@ -955,9 +1027,10 @@ async function loadLevelsAndMonsters() {
                 monsters: monsters.length ? monsters : [{ monster: 'mon1', emoji: '👹', normalHp: 1, bossHp: 2, enemySpeed: 1.5 }],
                 aimSpeed: l.aimSpeed || 1,
                 spawnRate: l.spawnRate || 1,
-                        collidables: collidables,
+                collidables: collidables,
                 multiplier: (l.multiplier !== undefined) ? Number(l.multiplier) : 2
             };
+            console.log(`Level ${l.level} created with ${collidables.length} collidables:`, collidables);
         });
     } catch (err) {
         console.error('Failed to load levels.json', err);
@@ -969,26 +1042,90 @@ class LevelWatcher {
     constructor(levels) {
         this.levels = levels;
         this.currentLevel = 1;
+        this.isEndlessMode = false;
+        this.allMonsters = []; // Pool of all monsters from all levels
     }
 
     nextLevel() {
         if (this.currentLevel < Object.keys(this.levels).length) {
             this.currentLevel++;
             return true;
+        } else {
+            // Enter endless mode after final level
+            this.isEndlessMode = true;
+            this.buildAllMonsterPool();
+            return true;
         }
-        return false;
     }
 
     reset() {
         this.currentLevel = 1;
+        this.isEndlessMode = false;
+        this.allMonsters = [];
+    }
+
+    buildAllMonsterPool() {
+        // Collect all unique monsters from all levels
+        const monsterSet = new Set();
+        Object.values(this.levels).forEach(level => {
+            level.monsters.forEach(monster => {
+                monsterSet.add(JSON.stringify(monster));
+            });
+        });
+        this.allMonsters = Array.from(monsterSet).map(json => JSON.parse(json));
+        console.log('Built monster pool for endless mode:', this.allMonsters);
     }
 
     getLevelConfig() {
+        if (this.isEndlessMode) {
+            // Return endless mode configuration
+            return {
+                target: Infinity, // No completion target
+                monsters: this.allMonsters,
+                aimSpeed: 2.5, // Increased difficulty
+                spawnRate: 1.5, // Faster spawning
+                collidables: this.getRandomObstacles(),
+                multiplier: 5 // Multiplier for endless mode
+            };
+        }
         return this.levels[this.currentLevel];
     }
 
+    getRandomObstacles() {
+        // Generate random obstacles with max 1 per position
+        const obstacleTypes = ['towers', 'bats', 'plane', 'tornado'];
+        const positions = ['.leading', '.trailing', '.top', '.bottom', '.center', '.centerVertical'];
+        const result = [];
+        
+        // Randomly decide how many positions to fill (1-6)
+        const numPositions = Math.floor(Math.random() * 6) + 1;
+        
+        // Randomly select positions
+        const selectedPositions = positions.sort(() => 0.5 - Math.random()).slice(0, numPositions);
+        
+        // For each selected position, assign a random obstacle type
+        selectedPositions.forEach(position => {
+            const randomType = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+            result.push({
+                name: randomType,
+                set: [position]
+            });
+        });
+        
+        console.log('Generated endless mode obstacles:', result);
+        return result;
+    }
+
     isLastLevel() {
-        return this.currentLevel === Object.keys(this.levels).length;
+        return !this.isEndlessMode && this.currentLevel === Object.keys(this.levels).length;
+    }
+
+    isInEndlessMode() {
+        return this.isEndlessMode;
+    }
+
+    getDisplayLevel() {
+        return this.isEndlessMode ? 'Endless' : this.currentLevel;
     }
 }
         
@@ -1051,22 +1188,33 @@ function resizeCanvas() {
         if (collidableManager) {
             collidableManager.buildGrid(collidableManager.cellSize || 128, WORLD_WIDTH, WORLD_HEIGHT);
             collidableManager.sanitize(WORLD_WIDTH, WORLD_HEIGHT);
-            // If levels are loaded, reposition any token-aligned collidables relative to the new viewport
+            // Reposition all obstacles based on their position tokens for responsive layout
             try {
                 if (levelWatcher) {
                     const levelConfig = levelWatcher.getLevelConfig();
                     (levelConfig.collidables || []).forEach(c => {
-                        if (c && c.posToken) {
-                            const radius = (c.radius !== undefined) ? c.radius : Math.max((c.width||0), (c.height||0)) / 2;
-                            const p = worldPosForToken(c.posToken, radius, c.width || 0, c.height || 0);
-                            c.x = p.x; c.y = p.y;
-                            c.baseX = c.x; c.baseY = c.y;
+                        if (c && c.positionToken) {
+                            // Recalculate position using the stored token and current viewport
+                            const positionData = calculateObstaclePosition(c.positionToken, c.originalRadius || c.radius);
+                            if (positionData) {
+                                c.x = positionData.x;
+                                c.y = positionData.y;
+                                c.baseX = positionData.x;
+                                c.baseY = positionData.y;
+                                
+                                // Update movement path for new viewport size
+                                if (c.moving && positionData.movementPath) {
+                                    c.motion.amplitude = positionData.movementPath.amplitude;
+                                }
+                            }
                         }
                     });
                     // rebuild grid after repositioning
                     collidableManager.buildGrid(collidableManager.cellSize || 128, WORLD_WIDTH, WORLD_HEIGHT);
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.warn('Error repositioning obstacles on resize:', e);
+            }
         }
     } catch (e) {}
 }
@@ -1134,12 +1282,12 @@ function worldPosForToken(token, radiusWorld, w = 0, h = 0) {
         case 'bottom-left':
         case 'bottomleft':
             sx = Math.floor(marginPx + rScreen);
-            sy = Math.floor(screenH - (marginPx + rScreen));
+            sy = Math.floor(screenH - marginPx - rScreen);
             break;
         case 'bottom-right':
         case 'bottomright':
             sx = Math.floor(screenW - (marginPx + rScreen));
-            sy = Math.floor(screenH - (marginPx + rScreen));
+            sy = Math.floor(screenH - marginPx - rScreen);
             break;
         case 'center':
         default:
@@ -1256,7 +1404,7 @@ function drawDragon() {
 }
 
 function drawCollidables() {
-    // Prefer using the collidable manager; fall back to raw level config if manager empty
+    // Use the collidable manager to draw all obstacles
     try {
         if (collidableManager && typeof collidableManager.draw === 'function') {
             collidableManager.draw(ctx);
@@ -1265,26 +1413,33 @@ function drawCollidables() {
             }
             return;
         }
-    } catch (e) {}
-    const levelConfig = levelWatcher.getLevelConfig();
-    (levelConfig.collidables || []).forEach(c => {
+    } catch (e) {
+        console.error('Error using collidableManager:', e);
+    }
+
+    // Fallback: draw directly from level config if manager unavailable
+    const levelConfig = levelWatcher?.getLevelConfig();
+    (levelConfig?.collidables || []).forEach(c => {
         try {
             if (c && typeof c.draw === 'function') {
                 c.draw(ctx, false);
-            } else {
-                ctx.beginPath();
-                ctx.rect(c.x, c.y, c.width || 8, c.height || 8);
-                ctx.fillStyle = c.color || 'rgba(255,255,255,0.02)';
-                ctx.shadowColor = c.color || 'transparent';
-                ctx.shadowBlur = 15;
-                ctx.fill();
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('Error drawing collidable:', e);
+        }
     });
 }
 
 function updatePellets(dt = 0) {
-    projectiles.forEach(p => {
+    projectiles = projectiles.filter(p => {
+        // Update pellet age
+        p.timeAlive += dt;
+        
+        // Remove pellet if it has exceeded its lifespan
+        if (p.timeAlive >= p.lifespan) {
+            return false; // Remove from array
+        }
+        
         // velocities are world-units per second
         p.x += p.vx * dt;
         p.y += p.vy * dt;
@@ -1301,17 +1456,42 @@ function updatePellets(dt = 0) {
             p.y = Math.max(p.size, Math.min(WORLD_HEIGHT - p.size, p.y));
             p.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
         }
+        
+        return true; // Keep pellet in array
     });
 }
 
 function drawPellets() {
     projectiles.forEach(p => {
+        ctx.save();
+        
+        // Draw outer glow
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = p.color.replace('100%', '30%').replace('50%', '20%'); // dimmer outer glow
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 25;
+        ctx.globalAlpha = 0.3;
+        ctx.fill();
+        
+        // Draw main pellet with enhanced glow
+        ctx.globalAlpha = 1;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 20;
         ctx.fill();
+        
+        // Draw bright inner core
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.shadowColor = 'rgba(255,255,255,0.9)';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        
+        ctx.restore();
     });
 }
         
@@ -1643,7 +1823,13 @@ function checkDragonEnemyCollision() {
         
 function updateScore() {
     const levelConfig = levelWatcher.getLevelConfig();
-    scoreElement.innerText = `Level ${levelWatcher.currentLevel}: ${enemiesDestroyed}/${levelConfig.target} Eliminated`;
+    if (levelWatcher.isInEndlessMode()) {
+        // Endless mode: show total kills only
+        scoreElement.innerText = `Endless Mode: ${sessionKills} Total Kills`;
+    } else {
+        // Regular levels: show progress format
+        scoreElement.innerText = `Level ${levelWatcher.currentLevel}: ${enemiesDestroyed}/${levelConfig.target} Eliminated`;
+    }
 }
 
 function showSplashScreen(title, message, prompt) {
@@ -1818,10 +2004,14 @@ function startNextLevel() {
     // set collidables for the manager and sanitize against current viewport
     try {
         const levelConfig = levelWatcher.getLevelConfig();
+        console.log('Setting collidables in manager for startNextLevel:', levelConfig.collidables);
     collidableManager.set(levelConfig.collidables || []);
     collidableManager.buildGrid(128, WORLD_WIDTH, WORLD_HEIGHT);
     collidableManager.sanitize(WORLD_WIDTH, WORLD_HEIGHT);
-    } catch (e) {}
+        console.log('Collidable manager now has', collidableManager.list.length, 'collidables');
+    } catch (e) {
+        console.error('Error setting collidables in startNextLevel:', e);
+    }
     updateScore();
     if (gameLoopInterval) clearInterval(gameLoopInterval);
     gameLoopInterval = setInterval(spawnEnemy, 1000);
@@ -1846,10 +2036,14 @@ function restartGame() {
     // set collidables for the manager and sanitize against current viewport
     try {
         const levelConfig = levelWatcher.getLevelConfig();
+        console.log('Setting collidables in manager for restartGame:', levelConfig.collidables);
     collidableManager.set(levelConfig.collidables || []);
     collidableManager.buildGrid(128, WORLD_WIDTH, WORLD_HEIGHT);
     collidableManager.sanitize(WORLD_WIDTH, WORLD_HEIGHT);
-    } catch (e) {}
+        console.log('Collidable manager now has', collidableManager.list.length, 'collidables');
+    } catch (e) {
+        console.error('Error setting collidables in restartGame:', e);
+    }
     updateScore();
     if (gameLoopInterval) clearInterval(gameLoopInterval);
     gameLoopInterval = setInterval(spawnEnemy, 1000);
@@ -1935,13 +2129,16 @@ function animate() {
     }
 
     const levelConfig = levelWatcher.getLevelConfig();
-    if (enemiesDestroyed >= levelConfig.target) {
+    
+    // Only check for level completion in regular levels, not endless mode
+    if (!levelWatcher.isInEndlessMode() && enemiesDestroyed >= levelConfig.target) {
         if (!levelWatcher.isLastLevel()) {
             isPaused = true;
             showSplashScreen('LEVEL COMPLETE!', `You've completed Level ${levelWatcher.currentLevel}!`, 'Click or tap to continue to the next level.');
         } else {
+            // Last regular level completed - transition to endless mode
             isPaused = true;
-            showSplashScreen('VICTORY!', `You have defeated all enemies!`, 'Click or tap to play again.');
+            showSplashScreen('FINAL LEVEL COMPLETE!', `You've beaten all levels! Now survive as long as you can!`, 'Click or tap to enter Endless Mode.');
         }
     }
 
@@ -1958,7 +2155,9 @@ function shootPellet() {
         vx: Math.cos(angle) * PELLET_SPEED,
         vy: Math.sin(angle) * PELLET_SPEED,
         size: 8,
-        color: `hsl(${Math.random() * 360}, 100%, 50%)`
+        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+        timeAlive: 0, // Track how long pellet has existed
+        lifespan: 8.5 // 8.5 seconds before auto-disappearing
     });
 
     isMouthOpen = true;
