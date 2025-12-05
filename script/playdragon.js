@@ -463,19 +463,19 @@ class Collidable {
                 try {
                     const pad = 8 * (this.scale || 1);
                     const radius = Math.max(this.width, this.height) / 2 + pad;
-                    // soft highlight + fade to transparent - more subtle than before
+                    // soft white highlight + fade to transparent
                     const grad = ctx.createRadialGradient(cx - radius * 0.25, cy - radius * 0.25, Math.max(4, radius * 0.08), cx, cy, radius);
-                    grad.addColorStop(0, 'rgba(100,200,255,0.03)');
-                    grad.addColorStop(0.6, 'rgba(100,200,255,0.01)');
-                    grad.addColorStop(1, 'rgba(100,200,255,0)');
+                    grad.addColorStop(0, 'rgba(255,255,255,0.08)');
+                    grad.addColorStop(0.4, 'rgba(255,255,255,0.03)');
+                    grad.addColorStop(1, 'rgba(255,255,255,0)');
 
                     ctx.save();
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.beginPath();
                     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-                    // much more subtle shadow
-                    ctx.shadowColor = 'rgba(100,200,255,0.015)';
-                    ctx.shadowBlur = 12 * (this.scale || 1);
+                    // very subtle white shadow
+                    ctx.shadowColor = 'rgba(255,255,255,0.02)';
+                    ctx.shadowBlur = 8 * (this.scale || 1);
                     ctx.fillStyle = grad;
                     ctx.fill();
                     ctx.restore();
@@ -513,15 +513,15 @@ class Collidable {
                     const pad = 8 * (this.scale || 1);
                     const r = Math.max(radius, 8) + pad;
                     const grad = ctx.createRadialGradient(cx - r * 0.25, cy - r * 0.25, Math.max(4, r * 0.08), cx, cy, r);
-                    grad.addColorStop(0, 'rgba(100,200,255,0.03)');
-                    grad.addColorStop(0.6, 'rgba(100,200,255,0.01)');
-                    grad.addColorStop(1, 'rgba(100,200,255,0)');
+                    grad.addColorStop(0, 'rgba(255,255,255,0.08)');
+                    grad.addColorStop(0.4, 'rgba(255,255,255,0.03)');
+                    grad.addColorStop(1, 'rgba(255,255,255,0)');
                     ctx.save();
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.beginPath();
                     ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                    ctx.shadowColor = 'rgba(100,200,255,0.015)';
-                    ctx.shadowBlur = 12 * (this.scale || 1);
+                    ctx.shadowColor = 'rgba(255,255,255,0.02)';
+                    ctx.shadowBlur = 8 * (this.scale || 1);
                     ctx.fillStyle = grad;
                     ctx.fill();
                     ctx.restore();
@@ -996,6 +996,7 @@ async function loadLevelsAndMonsters() {
                         radius,
                         emoji: def.emoji,
                         scale,
+                        color: 'rgba(0,0,0,0)', // Transparent - rely on glow effect only
                         collidesWith: { dragon: true, pellets: true, enemies: true, cursor: false },
                         flags: { bouncePellets: true, clampToViewport: false, activeOutside: false }
                     });
@@ -1351,7 +1352,112 @@ function updateDragon(dt = 0) {
     }
 }
 
+// Dragon image assets - loaded once at startup
+let dragonImages = {
+    runLeft: null,
+    runRight: null,
+    shootLeft: null,
+    shootRight: null
+};
+
+// Load dragon images
+function loadDragonImages() {
+    const imagePromises = [
+        { name: 'runLeft', src: 'assets/run-left.png' },
+        { name: 'runRight', src: 'assets/run-right.png' },
+        { name: 'shootLeft', src: 'assets/shoot-left.png' },
+        { name: 'shootRight', src: 'assets/shoot-right.png' }
+    ].map(({ name, src }) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                dragonImages[name] = img;
+                resolve();
+            };
+            img.onerror = () => {
+                console.warn(`Failed to load dragon image: ${src}`);
+                resolve(); // Don't fail completely, just continue
+            };
+            img.src = src;
+        });
+    });
+    
+    return Promise.all(imagePromises);
+}
+
 function drawDragon() {
+    const head = dragonSegments[0];
+    
+    // Refined direction logic - consider movement velocity and cursor position
+    let isMovingLeft = false;
+    
+    // Check if dragon is actively moving towards cursor
+    const dx = target.x - head.x;
+    const dy = target.y - head.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance > 5) { // Only use direction when actively moving
+        isMovingLeft = dx < 0; // Moving left if target is to the left
+    } else {
+        // When stationary or very close, use last movement direction
+        // Fall back to simple position comparison
+        isMovingLeft = target.x < head.x;
+    }
+    
+    // Choose image set based on shooting state
+    const imageSet = isMouthOpen ? 'shoot' : 'run';
+    const direction = isMovingLeft ? 'Left' : 'Right';
+    const imageKey = imageSet + direction;
+    
+    const dragonImg = dragonImages[imageKey];
+    
+    // If images aren't loaded yet, fall back to simple circles
+    if (!dragonImg) {
+        drawDragonFallback();
+        return;
+    }
+
+    // Draw single dragon avatar at head position
+    ctx.save();
+    
+    // Add glow effect
+    const shadowColor = dragonHit ? 'rgba(138, 43, 226, 0.8)' : 'rgba(0, 255, 255, 0.6)';
+    ctx.shadowColor = shadowColor;
+    ctx.shadowBlur = 25;
+    
+    // Size the avatar bigger for better visibility
+    const avatarSize = DRAGON_SEGMENT_SIZE * 8; // Increased from 6 to 8
+    
+    // Draw the image centered on the head position (slightly offset up to avoid cursor overlap)
+    const imgWidth = avatarSize;
+    const imgHeight = avatarSize;
+    const verticalOffset = -2; // Move up by 2 pixels to keep face visible above cursor
+    
+    ctx.drawImage(
+        dragonImg,
+        head.x - imgWidth / 2,
+        head.y - imgHeight / 2 + verticalOffset,
+        imgWidth,
+        imgHeight
+    );
+    
+    // Add hit effect overlay
+    if (dragonHit) {
+        ctx.globalCompositeOperation = 'source-atop';
+        ctx.fillStyle = 'rgba(138, 43, 226, 0.5)';
+        ctx.fillRect(
+            head.x - imgWidth / 2,
+            head.y - imgHeight / 2 + verticalOffset,
+            imgWidth,
+            imgHeight
+        );
+    }
+    
+    ctx.restore();
+}
+
+// Fallback dragon drawing for when images aren't loaded
+function drawDragonFallback() {
     ctx.lineCap = 'round';
     const baseColor = dragonHit ? 'rgba(138, 43, 226, 0.8)' : 'rgba(0, 255, 255, 0.8)';
     const shadowColor = dragonHit ? 'rgba(75, 0, 130, 0.8)' : 'rgba(0, 255, 255, 0.5)';
@@ -1361,44 +1467,47 @@ function drawDragon() {
         const alpha = 1 - (i / dragonSegments.length) * 0.7;
 
         if (i === 0) {
-            ctx.beginPath();
-            ctx.arc(segment.x, segment.y, DRAGON_SEGMENT_SIZE * 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = baseColor;
-            ctx.shadowColor = shadowColor;
-            ctx.shadowBlur = 15;
-            ctx.fill();
-
-            if (isMouthOpen) {
-                ctx.beginPath();
-                ctx.arc(segment.x, segment.y, DRAGON_SEGMENT_SIZE * 1.2, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 100, 100, 0.9)`;
-                ctx.shadowColor = `rgba(255, 0, 0, 0.7)`;
-                ctx.shadowBlur = 10;
-                ctx.fill();
-            }
-
-            const eyeDist = DRAGON_SEGMENT_SIZE / 2;
-            const eyeOffsetAngle = Math.PI / 2;
-            const eye1X = segment.x + Math.cos(segment.angle + eyeOffsetAngle) * eyeDist;
-            const eye1Y = segment.y + Math.sin(segment.angle + eyeOffsetAngle) * eyeDist;
-            const eye2X = segment.x + Math.cos(segment.angle - eyeOffsetAngle) * eyeDist;
-            const eye2Y = segment.y + Math.sin(segment.angle - eyeOffsetAngle) * eyeDist;
+            // Draw dragon head using emoji
+            const headSize = DRAGON_SEGMENT_SIZE * 2.5;
+            const _dprDragon = (camera && camera.dpr) ? camera.dpr : 1;
+            const fontSize = Math.max(16, Math.floor(headSize / _dprDragon));
             
-            ctx.beginPath();
-            ctx.arc(eye1X, eye1Y, 3, 0, Math.PI * 2);
-            ctx.arc(eye2X, eye2Y, 3, 0, Math.PI * 2);
-            ctx.fillStyle = '#fff';
-            ctx.shadowColor = '#fff';
-            ctx.shadowBlur = 5;
-            ctx.fill();
+            ctx.save();
+            ctx.font = `${fontSize}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Add glow effect behind dragon head
+            ctx.shadowColor = shadowColor;
+            ctx.shadowBlur = 20;
+            
+            // Choose dragon emoji based on hit state
+            const dragonEmoji = dragonHit ? '🟣' : (isMouthOpen ? '🐲' : '🐉');
+            ctx.fillText(dragonEmoji, segment.x, segment.y);
+            ctx.restore();
             
         } else {
-            ctx.beginPath();
-            ctx.arc(segment.x, segment.y, DRAGON_SEGMENT_SIZE, 0, Math.PI * 2);
-            ctx.fillStyle = baseColor;
+            // Draw body segments with gradient and emoji
+            const bodySize = DRAGON_SEGMENT_SIZE * 1.5;
+            const _dprBody = (camera && camera.dpr) ? camera.dpr : 1;
+            const bodyFontSize = Math.max(12, Math.floor(bodySize / _dprBody));
+            
+            ctx.save();
+            ctx.font = `${bodyFontSize}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Add subtle glow
             ctx.shadowColor = shadowColor;
-            ctx.shadowBlur = 15;
-            ctx.fill();
+            ctx.shadowBlur = 10;
+            ctx.globalAlpha = alpha;
+            
+            // Use different emojis for body segments
+            const bodyEmojis = dragonHit ? ['🟣', '🟪', '🔮'] : ['🟢', '🔵', '💠'];
+            const segmentEmoji = bodyEmojis[i % bodyEmojis.length];
+            
+            ctx.fillText(segmentEmoji, segment.x, segment.y);
+            ctx.restore();
         }
     }
 }
@@ -2340,6 +2449,7 @@ window.onload = async function() {
     // Ensure the canvas and camera are sized before we compute viewport-aligned placements
     resizeCanvas();
     await loadLevelsAndMonsters();
+    await loadDragonImages(); // Load dragon sprite images
     // create a LevelWatcher now that `levels` is populated
     levelWatcher = new LevelWatcher(levels);
     restartGame();

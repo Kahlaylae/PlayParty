@@ -3,28 +3,24 @@
     "name": "towers",
     "emoji": "🗼",
     "speed": 2,
-    "position": "top,bottom",
     "scale": 2
   },
   {
     "name": "bats",
     "emoji": "🦇",
     "speed": 3,
-    "position": "top,bottom,center",
     "scale": 1
   },
   {
     "name": "plane",
     "emoji": "🛩️",
     "speed": 4,
-    "position": "top,center",
     "scale": 2
   },
   {
     "name": "tornado",
     "emoji": "🌪️",
     "speed": 1,
-    "position": "center",
     "scale": 3
   }
 ]
