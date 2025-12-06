@@ -1136,6 +1136,9 @@ let gameLoopInterval;
 let pelletInterval;
 let dragonSegments = [];
 let projectiles = [];
+// Object pool for better performance
+let projectilePool = [];
+const MAX_POOL_SIZE = 50;
 let enemies = [];
 let target = { x: 0, y: 0 };
 let keyboardDirection = { x: 0, y: 0 };
@@ -1153,11 +1156,25 @@ const COOLDOWN_DURATION = 2000; // ms
 // Session-wide kill counter (persists across levels during a single play session)
 let sessionKills = 0;
 
+// Performance optimization variables
+let lastFrameTime = 0;
+const TARGET_FPS = 60;
+const FRAME_TIME = 1000 / TARGET_FPS;
+let frameCount = 0;
+let lastFPSCheck = 0;
+
 function resizeCanvas() {
     // Use CSS viewport size for layout and compute a high-DPI drawing buffer using devicePixelRatio
     const cssWidth = Math.max(100, window.innerWidth);
     const cssHeight = Math.max(100, window.innerHeight);
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    let dpr = Math.max(1, window.devicePixelRatio || 1);
+    
+    // Reduce DPR on mobile devices for better performance
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    if (isMobile) {
+        dpr = Math.min(dpr, 1.5); // Cap DPR at 1.5 for mobile
+    }
+    
     // size the canvas in CSS pixels so DOM layout is correct
     canvas.style.width = cssWidth + 'px';
     canvas.style.height = cssHeight + 'px';
@@ -1546,6 +1563,10 @@ function updatePellets(dt = 0) {
         
         // Remove pellet if it has exceeded its lifespan
         if (p.timeAlive >= p.lifespan) {
+            // Return to pool for reuse
+            if (projectilePool.length < MAX_POOL_SIZE) {
+                projectilePool.push(p);
+            }
             return false; // Remove from array
         }
         
@@ -1753,8 +1774,8 @@ function updateEnemies(dt = 0) {
 
 function drawEnemies() {
     enemies.forEach(enemy => {
-        const _dprE = (camera && camera.dpr) ? camera.dpr : 1;
-        const fontSize = Math.max(12, Math.floor(enemy.size / _dprE));
+        // Use consistent sizing across all devices - no DPR scaling for uniform appearance
+        const fontSize = Math.max(16, Math.floor(enemy.size * 0.8)); // Direct pixel-based sizing
         ctx.font = `${fontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -1763,9 +1784,16 @@ function drawEnemies() {
 }
 
 function checkPelletEnemyCollision() {
+    // Limit collision checks on mobile for better performance
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    const maxCollisionChecks = isMobile ? 100 : 200;
+    let collisionChecks = 0;
+    
     projectiles = projectiles.filter(pellet => {
         let pelletHit = false;
         enemies = enemies.filter(enemy => {
+            if (collisionChecks++ > maxCollisionChecks) return true;
+            
             const dx = pellet.x - enemy.x;
             const dy = pellet.y - enemy.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -1781,6 +1809,12 @@ function checkPelletEnemyCollision() {
             }
             return true;
         });
+        
+        // Return pellet to pool when it hits
+        if (pelletHit && projectilePool.length < MAX_POOL_SIZE) {
+            projectilePool.push(pellet);
+        }
+        
         return !pelletHit;
     });
 }
@@ -2174,6 +2208,14 @@ function restartGame() {
 }
 
 function animate() {
+    // Frame rate limiting for mobile performance
+    const currentTime = performance.now();
+    if (currentTime - lastFrameTime < FRAME_TIME) {
+        requestAnimationFrame(animate);
+        return;
+    }
+    lastFrameTime = currentTime;
+    
     // timestamp-driven loop: use requestAnimationFrame timestamp to compute dt
     const now = performance.now();
     if (__lastTimestamp == null) __lastTimestamp = now;
@@ -2200,6 +2242,9 @@ function animate() {
     const _dpr = (camera && camera.dpr) ? camera.dpr : 1;
     const _s = (camera.scale || 1) * _dpr;
     ctx.setTransform(_s, 0, 0, _s, (camera.offsetX || 0) * _dpr, (camera.offsetY || 0) * _dpr);
+    
+    // Performance optimizations for mobile
+    ctx.imageSmoothingEnabled = false; // Disable for better performance
 
     // Update simulation using dt (seconds)
     // advance world time and movers before physics
@@ -2258,16 +2303,23 @@ function shootPellet() {
     if (isPaused) return;
     const head = dragonSegments[0];
     const angle = head.angle;
-    projectiles.push({
-        x: head.x + Math.cos(angle) * DRAGON_SEGMENT_SIZE * 2,
-        y: head.y + Math.sin(angle) * DRAGON_SEGMENT_SIZE * 2,
-        vx: Math.cos(angle) * PELLET_SPEED,
-        vy: Math.sin(angle) * PELLET_SPEED,
-        size: 8,
-        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-        timeAlive: 0, // Track how long pellet has existed
-        lifespan: 8.5 // 8.5 seconds before auto-disappearing
-    });
+    
+    // Use object pooling for better performance
+    let pellet = projectilePool.pop();
+    if (!pellet) {
+        pellet = {};
+    }
+    
+    pellet.x = head.x + Math.cos(angle) * DRAGON_SEGMENT_SIZE * 2;
+    pellet.y = head.y + Math.sin(angle) * DRAGON_SEGMENT_SIZE * 2;
+    pellet.vx = Math.cos(angle) * PELLET_SPEED;
+    pellet.vy = Math.sin(angle) * PELLET_SPEED;
+    pellet.size = 8;
+    pellet.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+    pellet.timeAlive = 0;
+    pellet.lifespan = 8.5;
+    
+    projectiles.push(pellet);
 
     isMouthOpen = true;
     setTimeout(() => {
