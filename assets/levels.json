@@ -38,7 +38,7 @@
     "level": 4,
     "target": 100,
     "emoji": "mon4,mon5,mon1",
-    "aimSpeed": 5,
+    "aimSpeed": 1.5,
     "multiplier": 5,
     "spawnRate": 2,
     "obstacles": [
@@ -50,7 +50,7 @@
     "level": 5,
     "target": 150,
     "emoji": "mon3,mon2,mon4",
-    "aimSpeed": 5,
+    "aimSpeed": 1,5,
     "multiplier": 5,
     "spawnRate": 2,
     "obstacles": [
