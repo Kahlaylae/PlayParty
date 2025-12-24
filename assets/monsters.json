@@ -1,12 +1,5 @@
 [
   {
-    "monster": "mon0",
-    "emoji": "🦅",
-    "normalHp": 0.5,
-    "bossHp": 9,
-    "enemySpeed": 5
-  },
-  {
     "monster": "mon1",
     "emoji": "👹",
     "normalHp": 1,

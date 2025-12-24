@@ -141,40 +141,26 @@ function createUI() {
     const personal = document.createElement('div'); personal.id='personal-hiscore'; lb.appendChild(personal);
     document.body.appendChild(lb);
 
-    // persistent cursor element (visible even when canvas animation is paused)
+    // persistent cursor element: subtle chevron that orbits the avatar and points toward target
     const cursorEl = document.createElement('div');
     cursorEl.id = 'game-cursor';
     cursorEl.style.position = 'fixed';
     cursorEl.style.left = '0px';
     cursorEl.style.top = '0px';
-    cursorEl.style.width = '16px';
-    cursorEl.style.height = '16px';
-    cursorEl.style.borderRadius = '50%';
-    cursorEl.style.background = 'radial-gradient(circle, rgba(0,255,255,0.9) 0%, rgba(0,255,255,0.6) 50%, rgba(0,255,255,0.2) 100%)';
-    cursorEl.style.border = '2px solid rgba(255,255,255,0.8)';
-    cursorEl.style.boxShadow = '0 0 15px rgba(0,255,255,0.8), inset 0 0 8px rgba(255,255,255,0.3)';
+    cursorEl.style.width = '24px';
+    cursorEl.style.height = '24px';
     cursorEl.style.pointerEvents = 'none';
-    cursorEl.style.transform = 'translate(-50%, -50%)';
     cursorEl.style.zIndex = '9999';
     cursorEl.style.display = 'none'; // hidden until we have a position
-    cursorEl.style.animation = 'cursor-pulse 1.5s ease-in-out infinite';
+    // Chevron SVG pointing upward (will be rotated via transform)
+    cursorEl.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 4px rgba(0,255,255,0.7));">
+            <path d="M12 6 L4 16 L8 16 L12 11 L16 16 L20 16 Z" fill="rgba(255,255,255,0.9)" stroke="rgba(0,220,255,0.8)" stroke-width="1"/>
+        </svg>
+    `;
     document.body.appendChild(cursorEl);
 
-    // Add CSS keyframe animation for cursor pulse
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes cursor-pulse {
-            0%, 100% { 
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 0.9;
-            }
-            50% { 
-                transform: translate(-50%, -50%) scale(1.15);
-                opacity: 1;
-            }
-        }
-    `;
-    document.head.appendChild(style);
+    // No CSS transitions - smoothing handled via JS lerping for better performance
 
     // controls
     const created = createControlButtons();
@@ -215,6 +201,38 @@ const ui = createUI();
     splashPrompt = ui.splashPromptEl;
     shootInstructions = ui.instrEl;
 const cursorEl = ui.cursorEl;
+let lastCursorAngle = 0; // Remember last cursor direction when movement stops
+let currentCursorAngle = 0; // Smoothly interpolated cursor angle for fluid orbit
+
+// Lerp helper for smooth interpolation
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
+
+// Lerp angles properly (handles wraparound at -PI/PI boundary)
+function lerpAngle(a, b, t) {
+    // Normalize the difference to -PI to PI range
+    let diff = b - a;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    return a + diff * t;
+}
+
+// Chevron cursor visibility helpers - show only during active gameplay
+function showChevronCursor() {
+    if (cursorEl) {
+        cursorEl.style.display = 'block';
+        document.body.style.cursor = 'none'; // Hide system cursor during gameplay
+    }
+}
+
+function hideChevronCursor() {
+    if (cursorEl) {
+        cursorEl.style.display = 'none';
+        document.body.style.cursor = 'auto'; // Restore system pointer cursor
+    }
+}
+
 const audioToggleBtn = ui.audioBtn;
 const leaderboardToggleBtn = ui.leaderboardBtn;
 const pauseToggleBtn = ui.pauseBtn;
@@ -1337,13 +1355,46 @@ function updateDragon(dt = 0) {
     target.x = Math.max(0, Math.min(WORLD_WIDTH, target.x));
     target.y = Math.max(0, Math.min(WORLD_HEIGHT, target.y));
 
-    // update persistent cursor position when the dragon/keyboard moves target
+    // update persistent cursor: orbit around avatar, point toward target
+    // Only show chevron cursor during active gameplay (not paused/game over)
     try {
-        if (cursorEl) {
-            cursorEl.style.display = 'block';
-            const scr = worldToScreen(target.x, target.y);
-            cursorEl.style.left = (scr.x) + 'px';
-            cursorEl.style.top = (scr.y) + 'px';
+        if (cursorEl && !isPaused && !isGameOver) {
+            const head = dragonSegments[0];
+            const headScr = worldToScreen(head.x, head.y);
+            const targetScr = worldToScreen(target.x, target.y);
+            
+            // Calculate angle from avatar to target
+            const dx = targetScr.x - headScr.x;
+            const dy = targetScr.y - headScr.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            // Calculate target angle (where cursor should eventually point)
+            let targetAngle;
+            if (dist > 5) {
+                targetAngle = Math.atan2(dy, dx);
+                lastCursorAngle = targetAngle; // Remember this direction
+            } else {
+                targetAngle = lastCursorAngle; // Use last direction when stationary
+            }
+            
+            // Smoothly interpolate current angle toward target angle
+            // Higher lerp factor = faster response, lower = smoother but laggier
+            const lerpSpeed = 0.15; // Adjust for desired smoothness (0.1-0.3 works well)
+            currentCursorAngle = lerpAngle(currentCursorAngle, targetAngle, lerpSpeed);
+            
+            // Fixed orbit radius around avatar (pixels) - consistent distance at all times
+            const orbitRadius = 52;
+            
+            // Position chevron on the orbit circle using smoothed angle
+            const cursorX = headScr.x + Math.cos(currentCursorAngle) * orbitRadius;
+            const cursorY = headScr.y + Math.sin(currentCursorAngle) * orbitRadius;
+            
+            cursorEl.style.left = cursorX + 'px';
+            cursorEl.style.top = cursorY + 'px';
+            
+            // Rotate chevron to point in orbit direction (SVG points up, so add 90deg offset)
+            const rotateDeg = (currentCursorAngle * 180 / Math.PI) + 90;
+            cursorEl.style.transform = `translate(-50%, -50%) rotate(${rotateDeg}deg)`;
         }
     } catch (e) {}
 
@@ -1976,6 +2027,8 @@ function updateScore() {
 }
 
 function showSplashScreen(title, message, prompt) {
+    // Hide chevron cursor and show pointer on splash screens
+    hideChevronCursor();
     splashTitle.innerText = title;
     splashMessage.innerText = message;
     // For GAME OVER, require an explicit button click to start a new game.
@@ -2045,6 +2098,8 @@ function showSplashScreen(title, message, prompt) {
 function pauseGame() {
     if (isPaused) return;
     isPaused = true;
+    // Hide chevron cursor during pause
+    hideChevronCursor();
     // show a paused splash with no extra message (title + prompt only)
     showSplashScreen('PAUSED', '', 'Click to continue');
     // pause background audio when the game is paused by user
@@ -2064,6 +2119,8 @@ function resumeGame() {
     splashScreen.style.display = 'none';
     awaitingFirstGesture = false;
     isPaused = false;
+    // Restore chevron cursor for gameplay
+    showChevronCursor();
     // resume loops
     const levelConfig = levelWatcher.getLevelConfig();
     if (gameLoopInterval) clearInterval(gameLoopInterval);
@@ -2132,6 +2189,8 @@ function startNextLevel() {
     enemies = [];
     isPaused = false;
     splashScreen.style.display = 'none';
+    // Show chevron cursor for gameplay
+    showChevronCursor();
     // Restore leaderboard visibility (restore temporary override if set)
     try {
         const prev = document.body.dataset._prevLeaderboardVisible;
@@ -2175,6 +2234,8 @@ function restartGame() {
     projectiles = [];
     enemies = [];
     splashScreen.style.display = 'none';
+    // Show chevron cursor for gameplay
+    showChevronCursor();
     initializeDragon();
     // set collidables for the manager and sanitize against current viewport
     try {

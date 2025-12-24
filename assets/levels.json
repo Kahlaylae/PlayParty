@@ -1,11 +1,11 @@
 [
   {
     "level": 1,
-    "target": 25,
+    "target": 20,
     "emoji": "mon1,mon5",
     "aimSpeed": 1,
     "multiplier": 5,
-    "spawnRate": 1,
+    "spawnRate": 10 ,
     "obstacles": [
       { "name": "towers", "set": [".top", ".bottom"] }
     ]
@@ -13,10 +13,10 @@
   {
     "level": 2,
     "target": 50,
-    "emoji": "mon2,mon0",
+    "emoji": "mon2,mon4",
     "aimSpeed": 1.5,
-    "multiplier": 7,
-    "spawnRate": 1,
+    "multiplier": 4,
+    "spawnRate": 10,
     "obstacles": [
       { "name": "bats", "set": [".top", ".bottom", ".center"] }
     ]
@@ -26,8 +26,8 @@
     "target": 75,
     "emoji": "mon1,mon2,mon5",
     "aimSpeed": 2,
-    "multiplier": 10,
-    "spawnRate": 1,
+    "multiplier": 4,
+    "spawnRate": 10,
     "obstacles": [
       { "name": "towers", "set": [".trailing", ".leading"] },
       { "name": "bats", "set": [".top", ".bottom"] },
@@ -37,8 +37,8 @@
   {
     "level": 4,
     "target": 100,
-    "emoji": "mon4,mon5,mon1,mon0",
-    "aimSpeed": 1.5,
+    "emoji": "mon4,mon5,mon1",
+    "aimSpeed": 5,
     "multiplier": 5,
     "spawnRate": 2,
     "obstacles": [
@@ -49,8 +49,8 @@
   {
     "level": 5,
     "target": 150,
-    "emoji": "mon3,mon2,mon4,mon0",
-    "aimSpeed": 1,5,
+    "emoji": "mon3,mon2,mon4",
+    "aimSpeed": 5,
     "multiplier": 5,
     "spawnRate": 2,
     "obstacles": [

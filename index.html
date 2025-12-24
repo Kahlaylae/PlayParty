@@ -19,7 +19,6 @@
     <!-- If you know the exact dimensions, uncomment these for better previews -->
     <!-- <meta property="og:image:width" content="1200"> -->
     <!-- <meta property="og:image:height" content="630"> -->
-w
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content  ="PlayParty.online">
@@ -86,8 +85,8 @@ w
         }
 
         /* Score and instructions (default positions for regular screens) */
-        #score{ position:absolute; top:32px; left:32px; font-size:1.5rem; font-weight:bold; color:var(--accent); text-shadow:0 0 10px var(--accent); z-index:20; background:rgba(13,17,23,0.85); border-radius:10px; padding:6px 12px; }
-        #shoot-instructions{ position:absolute; top:80px; left:32px; font-size:1.1rem; color:#fff; background:rgba(13,17,23,0.7); border-radius:8px; padding:6px 12px; z-index:19; text-shadow:0 0 6px var(--accent), 0 0 2px #000; }
+        #score{ position:absolute; top:32px; left:2px; font-size:1.5rem; font-weight:bold; color:var(--accent); text-shadow:0 0 10px var(--accent); z-index:20; background:rgba(13,17,23,0.85); border-radius:10px; padding:6px 12px; }
+        #shoot-instructions{ position:absolute; top:0px; left:2px; font-size:1.1rem; color:#fff; background:rgba(13,17,23,0.7); border-radius:8px; padding:6px 12px; z-index:19; text-shadow:0 0 6px var(--accent), 0 0 2px #000; }
 
         /* Splash / overlays */
         #splashScreen{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:20; color:#fff; text-shadow:0 0 10px #fff; background:rgba(0,0,0,0.7); }
@@ -123,17 +122,17 @@ w
         body.miniScreen .splash-inner.victory h1{ text-shadow:0 0 12px #7CFC00; }
 
         /* Compact control sizing for mini screens and centralized controls */
-        body.miniScreen .top-control, body.miniScreen #audio-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #pause-toggle{
+    /*    body.miniScreen .top-control, body.miniScreen #audio-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #pause-toggle{
             padding:6px 8px !important; border-radius:6px; font-size:0.95rem; box-sizing:border-box; min-width:36px; min-height:36px; display:inline-flex; align-items:center; justify-content:center; line-height:1;
-        }
-        body.miniScreen #audio-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #pause-toggle{ position:absolute; top:10px; left:50%; transform:translateX(-50%); display:inline-block; }
+        }*/
+      /*  body.miniScreen #audio-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #pause-toggle{ position:absolute; top:10px; left:50%; transform:translateX(-50%); display:inline-block; }*/
         body.miniScreen #pause-toggle{ transform:translateX(calc(-50% - 56px)); }
         body.miniScreen #leaderboard-toggle{ transform:translateX(-50%); }
         body.miniScreen #audio-toggle{ transform:translateX(calc(-50% + 56px)); }
 
         /* Centered score/instructions under the controls on mini screens.
            Consolidated to a single rule and constrained so they never overflow the viewport. */
-        body.miniScreen #score{
+       /* body.miniScreen #score{
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
@@ -145,6 +144,7 @@ w
             max-width: calc(100% - 24px) !important;
             box-sizing: border-box;
         }
+
         body.miniScreen #shoot-instructions{
             position: absolute;
             left: 50%;
@@ -158,7 +158,7 @@ w
             box-sizing: border-box;
             z-index: 19;
             padding: 4px 8px;
-        }
+        }*/
 
         /* Small-screen typography and other overrides handled in this media query; keep the breakpoint aligned with JS. */
         @media (max-width:600px){
@@ -171,8 +171,8 @@ w
             /* compact offsets for tiny screens */
             body.miniScreen #pause-toggle{ transform:translateX(calc(-50% - 44px)); }
             body.miniScreen #audio-toggle{ transform:translateX(calc(-50% + 44px)); }
-            body.miniScreen #score{ top:64px; font-size:1rem; }
-            body.miniScreen #shoot-instructions{ top:100px; font-size:0.95rem; }
+            body.miniScreen #score{ top:32px; font-size:1rem; }
+            body.miniScreen #shoot-instructions{ top:0px; font-size:0.95rem; }
             body.miniScreen .top-control{ padding:6px 8px !important; min-width:36px; }
             body.miniScreen #pause-toggle{ transform:translateX(calc(-50% - 36px)); }
             body.miniScreen #audio-toggle{ transform:translateX(calc(-50% + 36px)); }
@@ -192,6 +192,26 @@ w
             body:not(.miniScreen) #audio-toggle{ right:32px; transform:translateX(-112px); }
             /* ensure mini-screen transforms don't leak */
             body.miniScreen #pause-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #audio-toggle{ transform:none !important; }
+        }
+           @media (max-width:600px){
+            body:not(.miniScreen) #pause-toggle{ right:32px; }
+            body:not(.miniScreen) #leaderboard-toggle{ right:32px; transform:translateX(-56px); }
+            body:not(.miniScreen) #audio-toggle{ right:32px; transform:translateX(-112px); }
+            /* ensure mini-screen transforms don't leak */
+            body.miniScreen #pause-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #audio-toggle{ transform:none !important; }
+   
+            #pause-toggle, #leaderboard-toggle, #audio-toggle {
+                right: 16px !important;
+                transform: none !important;
+            }
+
+            #pause-toggle {
+                right: 64px !important;
+            }
+
+            #audio-toggle {
+                right: 112px !important;
+            }
         }
     </style>
     </head>
