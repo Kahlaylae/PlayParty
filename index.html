@@ -1,224 +1,118 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Segmented Dragon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
+    <title>Play Party Online | Free Indie Games</title>
+    <meta name="description" content="Quality indie games for solo and multiplayer fun. Play free arcade games directly in your browser!">
+    <meta name="keywords" content="Indie Games, Multiplayer, Solo Games, Online Games, Free Games, Emoji Hunter, Arcade Games">
+    
     <!-- Favicon -->
-    <link rel="icon" type="image/webp" href="assets/playpartylogo.webp">
-    <!-- Optional: Add PNG fallback for older browsers (create this file if needed) -->
-    <!-- <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"> -->
-
-    <!-- Open Graph (Facebook/Discord/etc.) -->
-    <meta property="og:title" content="PlayParty.online">
-    <meta property="og:description" content="Arcade-style mini games. Try Segmented Dragon and climb the leaderboard!">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="apple-touch-icon" href="assets/playpartylogo-500.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f0f0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Play Party Online | Free Indie Games">
+    <meta property="og:description" content="Quality indie games for solo and multiplayer fun. Play free arcade games directly in your browser!">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://playparty.online/">
-    <meta property="og:image" content="https://playparty.online/assets/playpartylogo.webp">
-    <meta property="og:image:type" content="image/webp">
-    <!-- If you know the exact dimensions, uncomment these for better previews -->
-    <!-- <meta property="og:image:width" content="1200"> -->
-    <!-- <meta property="og:image:height" content="630"> -->
+    <meta property="og:image" content="https://playparty.online/assets/playpartylogo-500.png">
+    
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content  ="PlayParty.online">
-    <meta name="twitter:description" content="Arcade-style mini games. Try Segmented Dragon and climb the leaderboard!">
-    <meta name="twitter:image" content="https://playparty.online/assets/playpartylogo.webp">
+    <meta name="twitter:title" content="Play Party Online | Free Indie Games">
+    <meta name="twitter:description" content="Quality indie games for solo and multiplayer fun. Play free arcade games directly in your browser!">
+    <meta name="twitter:image" content="https://playparty.online/assets/playpartylogo-500.png">
+    
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-3098807263908139">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3098807263908139" crossorigin="anonymous"></script>
+    
+    <!-- Stylesheet -->
+    <link href="design.css" rel="stylesheet">
+</head>
 
-<meta name="google-adsense-account" content="ca-pub-3098807263908139">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3098807263908139"
-     crossorigin="anonymous"></script>
+<body>
+    <!-- Universal Navigation -->
+    <nav>
+        <a href="index.html" class="logo">
+            <img src="assets/favicon.png" alt="Play Party">
+            <span>Play Party</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="active">Games</a>
+            <a href="emojihunter/index.html" class="play-btn">▶ Play</a>
+        </div>
+    </nav>
 
-
-
-    <style>
-        /*
-         Consolidated stylesheet: duplicates removed and rules merged.
-         Behaviour preserved: full-viewport canvas, two UI modes (mini vs regular),
-         splash/overlay rules, leaderboard, and HiDPI-friendly layout.
-
-         Keep the JS constant `MINI_BREAKPOINT = 600` in sync with the media query below.
-        */
-
-        :root{
-            --bg: #0d1117;
-            --panel: rgba(13,17,23,0.85);
-            --panel-strong: rgba(13,17,23,0.9);
-            --accent: #4CAF50;
-            --muted: #c9d1d9;
-            --btn-pad: 8px 12px;
-            --btn-size: 36px;
-            --gap: 12px;
-        }
-
-        html,body{ height:100%; margin:0; padding:0; }
-
-        body{
-            background:var(--bg);
-            color:var(--muted);
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-            overflow:hidden; /* game handles its own viewport */
-            cursor:none;
-        }
-
-        [data-panel]{
-            background:var(--panel);
-            color:var(--muted);
-            border-radius:10px;
-            padding:8px 12px;
-            box-shadow:0 4px 18px rgba(0,0,0,0.4);
-        }
-
-        /* Canvas fills the viewport (fixed) so UI elements can layer above it.
-           Using explicit inset/top/left/right/bottom avoids mobile viewport quirks. */
-        canvas{
-            position:fixed; inset:0; width:100%; height:100%;
-            display:block; z-index:10; background:var(--bg); border-radius:0; box-shadow:none; max-width:none; max-height:none;
-        }
-
-        /* Top-right control buttons (shared base rules) */
-        .top-control{
-            padding:var(--btn-pad); min-width:44px; min-height:var(--btn-size);
-            background:var(--panel); color:#fff; border-radius:8px; border:0; cursor:pointer;
-            display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box;
-            position:absolute; top:32px; z-index:80; line-height:1;
-        }
-
-        /* Score and instructions (default positions for regular screens) */
-        #score{ position:absolute; top:32px; left:2px; font-size:1.5rem; font-weight:bold; color:var(--accent); text-shadow:0 0 10px var(--accent); z-index:20; background:rgba(13,17,23,0.85); border-radius:10px; padding:6px 12px; }
-        #shoot-instructions{ position:absolute; top:0px; left:2px; font-size:1.1rem; color:#fff; background:rgba(13,17,23,0.7); border-radius:8px; padding:6px 12px; z-index:19; text-shadow:0 0 6px var(--accent), 0 0 2px #000; }
-
-        /* Splash / overlays */
-        #splashScreen{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:20; color:#fff; text-shadow:0 0 10px #fff; background:rgba(0,0,0,0.7); }
-        .splash-inner{ width:100%; max-width:920px; padding:24px 28px; box-sizing:border-box; text-align:center; }
-        .splash-inner .restart-prompt{ font-size:1rem; margin-top:30px; opacity:0.8; animation:pulse 1.5s infinite; }
-        @keyframes pulse{ 0%{opacity:0.8} 50%{opacity:1} 100%{opacity:0.8} }
-
-        /* Headings default sizes (desktop) */
-        h1{ font-size:4rem; margin:0; } h2{ font-size:2.4rem; margin:0; } p{ font-size:1.5rem; margin-top:10px; }
-
-        /* Leaderboard panel */
-        #leaderboard{ position:absolute; right:32px; top:80px; z-index:25; background:rgba(13,17,23,0.9); padding:12px; border-radius:10px; color:#fff; min-width:260px; max-width:320px; }
-        #leaderboard .close-btn{ position:absolute; right:8px; background:transparent; border:0; color:#fff; font-size:1rem; cursor:pointer; padding:4px; border-radius:6px; }
-        #leaderboard #leaderboard-list{ max-height:280px; overflow:auto; margin-bottom:8px; font-size:0.95rem; }
-        #leaderboard input{ padding:6px; border-radius:6px; border:0; }
-        #leaderboard .btn-row{ display:flex; gap:6px; margin-top:8px; }
-        #leaderboard .btn-row .btn{ padding:8px; border-radius:6px; border:0; cursor:pointer; }
-        #leaderboard .btn-row .submit{ flex:1; background:#4CAF50; color:#000; }
-        #leaderboard .btn-row .clear{ background:#ff5252; color:#fff; }
-        #leaderboard .btn-row .btn[disabled], #leaderboard .btn-row .btn[disabled]:hover{ background:rgba(255,255,255,0.06) !important; color:rgba(255,255,255,0.5) !important; cursor:not-allowed !important; opacity:0.6 !important; transform:none !important; }
-
-        /* Centered leaderboard variant (JS toggles .centered) */
-        #leaderboard.centered{ transform:translate(-50%,-50%) scale(0.96); transition:transform 180ms ease, box-shadow 180ms ease; box-shadow:0 10px 30px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.2); border-radius:12px; left:50% !important; top:50% !important; position:fixed !important; z-index:70 !important; width:88% !important; max-width:600px !important; }
-        #leaderboard.centered #leaderboard-list{ max-height:60vh; }
-
-        /* Mini-screen adjustments applied by JS via `body.miniScreen` and by the media query below.
-           Keep this block focused and minimal — overrides for compact layout and centered controls. */
-        body.miniScreen .splash-inner{ max-width:92%; padding:18px 12px; }
-        body.miniScreen .splash-inner h1{ line-height:1.15; margin:0 0 8px; word-break:break-word; }
-        body.miniScreen .splash-inner p{ font-size:1rem; margin:6px 0; padding:0 8px; word-break:break-word; }
-        body.miniScreen .splash-inner .restart-prompt{ font-size:0.95rem; margin-top:10px; animation:none; }
-        body.miniScreen .splash-inner.gameover h1{ text-shadow:0 0 12px #ff5050; }
-        body.miniScreen .splash-inner.victory h1{ text-shadow:0 0 12px #7CFC00; }
-
-        /* Compact control sizing for mini screens and centralized controls */
-    /*    body.miniScreen .top-control, body.miniScreen #audio-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #pause-toggle{
-            padding:6px 8px !important; border-radius:6px; font-size:0.95rem; box-sizing:border-box; min-width:36px; min-height:36px; display:inline-flex; align-items:center; justify-content:center; line-height:1;
-        }*/
-      /*  body.miniScreen #audio-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #pause-toggle{ position:absolute; top:10px; left:50%; transform:translateX(-50%); display:inline-block; }*/
-        body.miniScreen #pause-toggle{ transform:translateX(calc(-50% - 56px)); }
-        body.miniScreen #leaderboard-toggle{ transform:translateX(-50%); }
-        body.miniScreen #audio-toggle{ transform:translateX(calc(-50% + 56px)); }
-
-        /* Centered score/instructions under the controls on mini screens.
-           Consolidated to a single rule and constrained so they never overflow the viewport. */
-       /* body.miniScreen #score{
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            top: 56px;
-            text-align: center;
-            display: inline-block;
-            white-space: nowrap;
-            width: auto !important;
-            max-width: calc(100% - 24px) !important;
-            box-sizing: border-box;
-        }
-
-        body.miniScreen #shoot-instructions{
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            top: 96px;
-            text-align: center;
-            display: inline-block;
-            white-space: nowrap;
-            width: auto !important;
-            max-width: calc(100% - 24px) !important;
-            box-sizing: border-box;
-            z-index: 19;
-            padding: 4px 8px;
-        }*/
-
-        /* Small-screen typography and other overrides handled in this media query; keep the breakpoint aligned with JS. */
-        @media (max-width:600px){
-            h1,h2{ font-size:1.6rem !important; line-height:1.15; }
-            p{ font-size:1rem !important; }
-            .top-control{ padding:6px 8px !important; min-height:34px !important; }
-            body.miniScreen .splash-inner{ padding:12px 10px; }
-            body.miniScreen .splash-inner h1{ font-size:24px; }
-            body.miniScreen .splash-inner p{ font-size:24px; }
-            /* compact offsets for tiny screens */
-            body.miniScreen #pause-toggle{ transform:translateX(calc(-50% - 44px)); }
-            body.miniScreen #audio-toggle{ transform:translateX(calc(-50% + 44px)); }
-            body.miniScreen #score{ top:32px; font-size:1rem; }
-            body.miniScreen #shoot-instructions{ top:0px; font-size:0.95rem; }
-            body.miniScreen .top-control{ padding:6px 8px !important; min-width:36px; }
-            body.miniScreen #pause-toggle{ transform:translateX(calc(-50% - 36px)); }
-            body.miniScreen #audio-toggle{ transform:translateX(calc(-50% + 36px)); }
-            body.miniScreen #leaderboard-toggle{ transform:translateX(-50%); }
-            #splashScreen .splash-inner.victory h1, #splashScreen .splash-inner.paused h1, #splashScreen .splash-inner.gameover h1,
-            body.miniScreen .splash-inner.victory h1, body.miniScreen .splash-inner.paused h1, body.miniScreen .splash-inner.gameover h1{
-                font-size:1.6rem !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; margin-bottom:6px !important;
-            }
-            body.miniScreen #pause-toggle.top-control{ padding:6px 6px !important; min-width:34px; }
-            body.miniScreen #shoot-instructions{ max-width:320px; padding:6px 10px; }
-        }
-
-        /* Desktop-aligned toggles: place three toggles in a row at top-right. Keep in sync with MINI_BREAKPOINT in JS. */
-        @media (min-width:600px){
-            body:not(.miniScreen) #pause-toggle{ right:32px; }
-            body:not(.miniScreen) #leaderboard-toggle{ right:32px; transform:translateX(-56px); }
-            body:not(.miniScreen) #audio-toggle{ right:32px; transform:translateX(-112px); }
-            /* ensure mini-screen transforms don't leak */
-            body.miniScreen #pause-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #audio-toggle{ transform:none !important; }
-        }
-           @media (max-width:600px){
-            body:not(.miniScreen) #pause-toggle{ right:32px; }
-            body:not(.miniScreen) #leaderboard-toggle{ right:32px; transform:translateX(-56px); }
-            body:not(.miniScreen) #audio-toggle{ right:32px; transform:translateX(-112px); }
-            /* ensure mini-screen transforms don't leak */
-            body.miniScreen #pause-toggle, body.miniScreen #leaderboard-toggle, body.miniScreen #audio-toggle{ transform:none !important; }
-   
-            #pause-toggle, #leaderboard-toggle, #audio-toggle {
-                right: 16px !important;
-                transform: none !important;
-            }
-
-            #pause-toggle {
-                right: 64px !important;
-            }
-
-            #audio-toggle {
-                right: 112px !important;
-            }
-        }
-    </style>
-    </head>
-    <body>
-        <!-- All UI elements are created by script/playdragon.js -->
-        <script type="module" src="script/playdragon.js"></script>
-        
-    </body>
-    </html>
-
+    <!-- Main Content Area -->
+    <main>
+        <div class="landing-container">
+            <!-- Hero -->
+            <section class="hero">
+                <img src="assets/playpartylogo-500.png" alt="Play Party Logo" class="hero-logo">
+                <h1>Play Party Online</h1>
+                <p>Free arcade games. No downloads. Just play!</p>
+            </section>
+            
+            <!-- Ad Slot - Top -->
+            <section class="ad-container">
+                <div class="ad-slot">
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-3098807263908139"
+                         data-ad-slot="auto"
+                         data-ad-format="horizontal"
+                         data-full-width-responsive="true"></ins>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                </div>
+            </section>
+            
+            <!-- Games Grid -->
+            <section class="games-grid">
+                <a href="emojihunter/index.html" class="game-card">
+                    <span class="emoji-icon">🎯</span>
+                    <h3>Emoji Hunter</h3>
+                    <p>Hunt emojis in this fast-paced arcade shooter. Dodge obstacles and climb the leaderboard!</p>
+                    <span class="play-badge">▶ Play Now</span>
+                </a>
+                
+                <div class="game-card coming-soon">
+                    <span class="emoji-icon">🎲</span>
+                    <h3>Coming Soon</h3>
+                    <p>More games are on the way. Check back soon!</p>
+                    <span class="play-badge">Coming Soon</span>
+                </div>
+            </section>
+            
+            <!-- Ad Slot - Bottom -->
+            <section class="ad-container">
+                <div class="ad-slot">
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-3098807263908139"
+                         data-ad-slot="auto"
+                         data-ad-format="horizontal"
+                         data-full-width-responsive="true"></ins>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                </div>
+            </section>
+            
+            <!-- Footer -->
+            <footer>
+                <p>© 2026 Play Party Online</p>
+                <p><a href="mailto:contact@playparty.online">Contact</a></p>
+            </footer>
+        </div>
+    </main>
+</body>
+</html>
