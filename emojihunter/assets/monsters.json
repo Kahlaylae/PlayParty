@@ -17,21 +17,21 @@
     "monster": "mon3",
     "emoji": "👽",
     "normalHp": 5,
-    "bossHp": 10,
+    "bossHp": 300,
     "enemySpeed": 0.2
   },
   {
     "monster": "mon4",
     "emoji": "🐷",
     "normalHp": 4,
-    "bossHp": 10,
+    "bossHp": 100,
     "enemySpeed": 0.2
   },
   {
     "monster": "mon5",
     "emoji": "👾",
     "normalHp": 1,
-    "bossHp": 2.5,
+    "bossHp": 25,
     "enemySpeed": 1.7
   }
 ]
