@@ -1,0 +1,26 @@
+[
+  {
+    "name": "towers",
+    "emoji": "🗼",
+    "speed": 2,
+    "scale": 2
+  },
+  {
+    "name": "bats",
+    "emoji": "🦇",
+    "speed": 3,
+    "scale": 1
+  },
+  {
+    "name": "plane",
+    "emoji": "🛩️",
+    "speed": 4,
+    "scale": 2
+  },
+  {
+    "name": "tornado",
+    "emoji": "🌪️",
+    "speed": 1,
+    "scale": 3
+  }
+]
