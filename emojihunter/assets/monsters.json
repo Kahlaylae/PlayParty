@@ -1,0 +1,59 @@
+[
+  {
+    "monster": "oni",
+    "emoji": "👹",
+    "normalHp": 1,
+    "bossHp": 2,
+    "enemySpeed": 0.5
+  },
+  {
+    "monster": "ghost",
+    "emoji": "👻",
+    "normalHp": 2,
+    "bossHp": 3,
+    "enemySpeed": 0.7
+  },
+  {
+    "monster": "alien",
+    "emoji": "👽",
+    "normalHp": 5,
+    "bossHp": 10,
+    "enemySpeed": 0.2
+  },
+  {
+    "monster": "pig",
+    "emoji": "🐷",
+    "normalHp": 4,
+    "bossHp": 10,
+    "enemySpeed": 0.2
+  }, 
+  {
+    "monster": "zombie",
+    "emoji": "🧟",
+    "normalHp": 1,
+    "bossHp": 2.5,
+    "enemySpeed": 0.7
+  },
+  {
+    "monster": "virus",
+    "emoji": "👾",
+    "normalHp": 1,
+    "bossHp": 2.5,
+    "enemySpeed": 0.7
+  },
+  {
+    "monster": "germ",
+    "emoji": "🦠",
+    "normalHp": 1,
+    "bossHp": 2.5,
+    "enemySpeed": 0.7
+  },
+  {
+    "monster": "sakura",
+    "emoji": "🌸",
+    "normalHp": 1,
+    "bossHp": 2.5,
+    "enemySpeed": 0.7
+  }
+
+]
