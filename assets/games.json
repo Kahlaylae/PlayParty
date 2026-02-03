@@ -1,0 +1,20 @@
+{
+  "games": [
+    {
+      "id": "emojihunter",
+      "title": "Emoji Hunter",
+      "emoji": "🎯",
+      "description": "Hunt emojis in this fast-paced arcade shooter. Dodge obstacles and climb the leaderboard!",
+      "path": "emojihunter/index.html",
+      "status": "live"
+    },
+    {
+      "id": "coming-soon",
+      "title": "Coming Soon",
+      "emoji": "🎲",
+      "description": "More games are on the way. Check back soon!",
+      "path": null,
+      "status": "coming-soon"
+    }
+  ]
+}
