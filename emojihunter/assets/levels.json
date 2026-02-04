@@ -1,66 +1,77 @@
 [
   {
     "level": 1,
-    "target": 50 ,
-    "emoji": "oni,zombie",
+    "target": 5,
+    "emoji": "oni,virus",
     "aimSpeed": 1,
     "multiplier": 1,
-    "spawnRate": 1 ,
+    "spawnRate": 1,
     "background": "assets/levelbackgrounds/defaultbg.png",
     "obstacles": [
-      { "name": "towers", "set": [".top", ".bottom"] }
+      { "name": "towers", "set": [".center"] }
     ]
   },
   {
     "level": 2,
-    "target": 80,
-    "emoji": "ghost,pig",
+    "target": 8,
+    "emoji": "ghost,zombie,pig",
     "aimSpeed": 1,
-    "multiplier": 1,
-    "spawnRate": 1.5,
+    "multiplier": 2.5 ,
+    "spawnRate": 1,
     "background": "assets/levelbackgrounds/level2bg.png",
     "obstacles": [
-      { "name": "bats", "set": [".top", ".bottom", ".center"] }
+      { "name": "bats", "set": [".top", ".trailing", ".leading"] }
     ]
   },
   {
     "level": 3,
-    "target": 120,
-    "emoji": "oni,ghost,zombie",
-    "aimSpeed": 1,
-    "multiplier": 1,
+    "target": 1,
+    "emoji": "oni,ghost,zombie,germ",
+    "aimSpeed": 2,
+    "multiplier": 3.5,
     "spawnRate": 3,
     "background": "assets/levelbackgrounds/level3bg.png",
     "obstacles": [
       { "name": "towers", "set": [".trailing", ".leading"] },
-      { "name": "bats", "set": [".top", ".bottom"] },
-      { "name": "plane", "set": [".center"] }
+      { "name": "plane", "set": [".top",".bottom"] }
     ]
   },
   {
-    "level": 150,
-    "target": 12,
-    "emoji": "pig,zombie,oni",
-    "aimSpeed": 1,
-    "multiplier": 1,
+    "level": 4,
+    "target": 1,
+    "emoji": "pig,zombie,oni,sakura",
+    "aimSpeed": 2,
+    "multiplier": 4,
     "spawnRate": 3,
     "background": "assets/levelbackgrounds/level4bg.png",
     "obstacles": [
-      { "name": "towers", "set": [".top", ".bottom"] },
-      { "name": "tornado", "set": [".center"] }
+      { "name": "clouds", "set": [".trailing", ".leading"] },
+      { "name": "tornado", "set": [".bottom"] }
     ]
   },
   {
     "level": 5,
-    "target": 200 ,
-    "emoji": "alien,ghost,pig",
-    "aimSpeed": 1,
-    "multiplier": 1 ,
+    "target": 2,
+    "emoji": "alien,ghost,pig,",
+    "aimSpeed": 3,
+    "multiplier": 5,
     "spawnRate": 4,
     "background": "assets/levelbackgrounds/level5bg.png",
     "obstacles": [
-      { "name": "towers", "set": [".top", ".bottom"] },
-      { "name": "tornado", "set": [".center"]}
+      { "name": "bats", "set": [".top", ".trailing", ".leading"] }
+    ]
+  },
+  {
+    "level": "postgame",
+    "target": null,
+    "emoji": "oni,ghost,alien,pig,zombie,virus,germ",
+    "aimSpeed": 2,
+    "multiplier": 12,
+    "spawnRate": 15,
+    "background": "assets/levelbackgrounds/finallevelbackground.png",
+    "obstacles": [
+      { "name": "clouds", "set": [".top", ".trailing", ".leading"] },
+      { "name": "burg", "set": [".bottom"] }
     ]
   }
 ]

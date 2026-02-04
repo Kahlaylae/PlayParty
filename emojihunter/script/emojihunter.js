@@ -90,7 +90,7 @@ function createUI() {
 
     // canvas
     const cvs = document.createElement('canvas');
-    cvs.id = 'dragonCanvas';
+    cvs.id = 'gameCanvas';
     gameContainer.appendChild(cvs);
 
     // splash
@@ -279,18 +279,14 @@ bgAudio.loop = true;
 bgAudio.preload = 'auto';
 bgAudio.volume = 0.45;
 
-// Pop sound effect for monster kills
-const popSound = new Audio('assets/pop.mp3');
-popSound.preload = 'auto';
-popSound.volume = 0.5;
-
-// Play pop sound (clones audio for overlapping plays)
-function playPopSound() {
+// Pop sound for enemy death (cloned each play for overlap)
+const popSoundBase = new Audio('assets/pop.mp3');
+popSoundBase.preload = 'auto';
+function playPop() {
     if (isMuted) return;
-    // Clone the audio to allow overlapping sounds
-    const pop = popSound.cloneNode();
-    pop.volume = 0.5;
-    pop.play().catch(() => {}); // Ignore errors if blocked
+    const pop = popSoundBase.cloneNode();
+    pop.volume = 0.3;
+    pop.play().catch(() => {});
 }
 
 // Await the first user gesture; the splash will be used to both enable audio and resume the game
@@ -347,14 +343,12 @@ if (audioToggleBtn) {
 }
 
 // Sizes are expressed in world units
-const DRAGON_SEGMENT_SIZE = 12;
-const DRAGON_LENGTH = 4;
-const SEGMENT_SPACING = DRAGON_SEGMENT_SIZE * 2;
+const AVATAR_SIZE = 12;
 // Speeds are world-units per second
 const PELLET_SPEED = 900; // ~15 px/frame @60fps -> 900 world units/sec
-const DRAGON_SPEED = 300; // ~5 px/frame @60fps -> 300 world units/sec
+const AVATAR_SPEED = 300; // ~5 px/frame @60fps -> 300 world units/sec
 const ENEMY_SPEED_SCALE = 80; // multiplier to convert level enemySpeed to world-units/sec
-const OPEN_MOUTH_DURATION = 150;
+const OPEN_MOUTH_DURATION = 7;
 const BOSS_ENEMY_SPAWN_THRESHOLD = 5;
         
 // Levels will be loaded from JSON files in /assets at runtime.
@@ -409,237 +403,63 @@ let __resizeTimer = null;
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-// A small pool of collidable objects to be selected from by `collidables` count in levels.json
-const collidablesPool = [
-    {x: 150, y: 150, width: 80, height: 80, color: 'rgba(255, 0, 255, 0.6)'},
-    {x: 500, y: 400, width: 120, height: 120, color: 'rgba(255, 255, 0, 0.6)'},
-    {x: 250, y: 350, width: 60, height: 200, color: 'rgba(0, 255, 255, 0.6)'},
-    {x: 600, y: 100, width: 200, height: 60, color: 'rgba(255, 0, 255, 0.6)'},
-    {x: 100, y: 100, width: 150, height: 40, color: 'rgba(255, 100, 100, 0.6)'},
-    {x: 300, y: 500, width: 40, height: 150, color: 'rgba(100, 255, 100, 0.6)'},
-    {x: 700, y: 200, width: 100, height: 100, color: 'rgba(100, 100, 255, 0.6)'}
-];
-
 // -------------------------
-// Collidable system (modular)
+// Obstacle system - emoji-based collidables
 // -------------------------
-const CollidableType = {
-    RECT: 'rect',
-    CIRCLE: 'circle'
-};
-
 class Collidable {
     constructor(opts = {}) {
-        this.type = opts.type || CollidableType.RECT;
         this.x = Number(opts.x || 0);
         this.y = Number(opts.y || 0);
-        this.width = Number(opts.width || 0);
-        this.height = Number(opts.height || 0);
-        this.radius = Number(opts.radius || 0);
-        this.color = opts.color || 'rgba(255,255,255,0.6)';
         this.emoji = opts.emoji || null;
         this.scale = Number(opts.scale || 1);
         this.id = opts.id || `c-${Math.random().toString(36).slice(2,9)}`;
-        // collidesWith flags: dragon, pellets, enemies, cursor
-        this.collidesWith = Object.assign({ dragon: true, pellets: true, enemies: false, cursor: false }, opts.collidesWith || {});
-        // flags for behavior: bouncePellets, clampToViewport, activeOutside
-        this.flags = Object.assign({ bouncePellets: false, clampToViewport: false, activeOutside: false }, opts.flags || {});
-        // active indicates whether it's considered for collision queries
+        this.collidesWith = Object.assign({ dragon: true, pellets: true, enemies: false }, opts.collidesWith || {});
         this.active = true;
+        // Hitbox radius = emoji visual size + 2px buffer
+        // Base emoji renders at ~38px for scale 1, radius is half + buffer
+        this.radius = Number(opts.radius || (20 * this.scale + 2));
     }
 
-    // Compute a minimal push-out vector to move a circle at (cx,cy) with radius r
-    // outside this collidable. Returns {dx,dy} to add to cx,cy. If not overlapping, returns {dx:0,dy:0}
+    // Push-out vector for circle collision
     getPushOutVector(cx, cy, r) {
-        if (this.type === CollidableType.RECT) {
-            const nearestX = Math.max(this.x, Math.min(cx, this.x + this.width));
-            const nearestY = Math.max(this.y, Math.min(cy, this.y + this.height));
-            const dx = cx - nearestX;
-            const dy = cy - nearestY;
-            const dist2 = dx * dx + dy * dy;
-            if (dist2 === 0) {
-                // center is exactly at nearest point (inside or aligned). push out along shortest axis
-                // choose axis with more penetration
-                const penLeft = Math.abs(cx - this.x);
-                const penRight = Math.abs((this.x + this.width) - cx);
-                const penTop = Math.abs(cy - this.y);
-                const penBottom = Math.abs((this.y + this.height) - cy);
-                const minPen = Math.min(penLeft, penRight, penTop, penBottom);
-                if (minPen === penLeft) return { dx: -(r + 1), dy: 0 };
-                if (minPen === penRight) return { dx: (r + 1), dy: 0 };
-                if (minPen === penTop) return { dx: 0, dy: -(r + 1) };
-                return { dx: 0, dy: (r + 1) };
-            }
-            const dist = Math.sqrt(dist2);
-            const overlap = r - dist;
-            if (overlap >= 0) {
-                // normalize dx,dy
-                const nx = dx / (dist || 1);
-                const ny = dy / (dist || 1);
-                // push so circle edge lies just outside rectangle
-                return { dx: nx * (overlap + 1), dy: ny * (overlap + 1) };
-            }
-            return { dx: 0, dy: 0 };
-        }
-        // circle
-        const dx = cx - this.x; const dy = cy - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 0;
+        const dx = cx - this.x;
+        const dy = cy - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         const overlap = (r + this.radius) - dist;
-        if (overlap >= 0) {
-            const nx = (dist === 0) ? 1 : dx / dist;
-            const ny = (dist === 0) ? 0 : dy / dist;
-            return { dx: nx * (overlap + 1), dy: ny * (overlap + 1) };
+        if (overlap > 0) {
+            return { dx: (dx / dist) * (overlap + 1), dy: (dy / dist) * (overlap + 1) };
         }
         return { dx: 0, dy: 0 };
     }
 
     getBounds() {
-        if (this.type === CollidableType.RECT) {
-            return { x: this.x, y: this.y, w: this.width, h: this.height };
-        }
         return { x: this.x - this.radius, y: this.y - this.radius, w: this.radius * 2, h: this.radius * 2 };
-    }
-
-    containsPoint(px, py) {
-        if (!this.active) return false;
-        if (this.type === CollidableType.RECT) {
-            return px >= this.x && px <= (this.x + this.width) && py >= this.y && py <= (this.y + this.height);
-        }
-        const dx = px - this.x; const dy = py - this.y;
-        return dx * dx + dy * dy <= this.radius * this.radius;
     }
 
     intersectsCircle(cx, cy, r) {
         if (!this.active) return false;
-        if (this.type === CollidableType.RECT) {
-            const testX = Math.max(this.x, Math.min(cx, this.x + this.width));
-            const testY = Math.max(this.y, Math.min(cy, this.y + this.height));
-            const dx = cx - testX;
-            const dy = cy - testY;
-            return (dx * dx + dy * dy) <= (r * r);
-        }
-        const dx = cx - this.x; const dy = cy - this.y;
-        const dist2 = dx * dx + dy * dy;
-        const cr = r + this.radius;
-        return dist2 <= (cr * cr);
+        const dx = cx - this.x;
+        const dy = cy - this.y;
+        return (dx * dx + dy * dy) <= ((r + this.radius) * (r + this.radius));
     }
 
-    // draw; debug param will stroke bounds
-    draw(ctx, debug = false) {
+    draw(ctx) {
+        if (!this.emoji) return;
         ctx.save();
-        ctx.beginPath();
-        if (this.type === CollidableType.RECT) {
-            // Draw emoji if present. Emoji drawing is centered within the rect.
-            if (this.emoji) {
-                const cx = this.x + this.width / 2;
-                const cy = this.y + this.height / 2;
-                // font size ~ 80% of min(width,height). Adjust by DPR so visual size matches CSS px.
-                const rawFontSize = Math.max(12, Math.floor(Math.min(this.width, this.height) * 0.8));
-                const _dprFont = (camera && camera.dpr) ? camera.dpr : 1;
-                const fontSize = Math.max(12, Math.floor(rawFontSize / _dprFont));
-                ctx.font = `${fontSize}px sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                // optionally draw shadow for emoji to make it pop
-                try { ctx.shadowColor = this.color || 'rgba(0,0,0,0)'; ctx.shadowBlur = 6; } catch (e) {}
-                ctx.fillText(this.emoji, cx, cy);
-
-                // Draw a subtle translucent circular hit-area glow around emoji so players can
-                // visually see the collidable region. It's intentionally very faint and
-                // mostly transparent, with a soft specular-like highlight.
-                try {
-                    const pad = 8 * (this.scale || 1);
-                    const radius = Math.max(this.width, this.height) / 2 + pad;
-                    // soft white highlight + fade to transparent
-                    const grad = ctx.createRadialGradient(cx - radius * 0.25, cy - radius * 0.25, Math.max(4, radius * 0.08), cx, cy, radius);
-                    grad.addColorStop(0, 'rgba(255,255,255,0.08)');
-                    grad.addColorStop(0.4, 'rgba(255,255,255,0.03)');
-                    grad.addColorStop(1, 'rgba(255,255,255,0)');
-
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-                    // very subtle white shadow
-                    ctx.shadowColor = 'rgba(255,255,255,0.02)';
-                    ctx.shadowBlur = 8 * (this.scale || 1);
-                    ctx.fillStyle = grad;
-                    ctx.fill();
-                    ctx.restore();
-                } catch (e) {
-                    // non-fatal; continue without drawing glow
-                }
-            }
-            // Only draw the visible rect if color is not fully transparent or debug is enabled
-            const isTransparent = /^rgba\(0,0,0,0\)$/.test(String(this.color));
-            if (!isTransparent || debug) {
-                ctx.fillStyle = this.color;
-                ctx.shadowColor = this.color;
-                ctx.shadowBlur = 15;
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-            }
-            if (debug) {
-                ctx.strokeStyle = '#ffff66'; ctx.lineWidth = 1; ctx.strokeRect(this.x + 0.5, this.y + 0.5, this.width, this.height);
-            }
-        } else {
-            // Circle collidable — draw emoji-centered glow first (if present) then the (invisible) fill
-            if (this.emoji) {
-                const cx = this.x;
-                const cy = this.y;
-                const radius = this.radius;
-                const rawFontSizeC = Math.max(12, Math.floor(radius * 1.2));
-                const _dprFontC = (camera && camera.dpr) ? camera.dpr : 1;
-                const fontSize = Math.max(12, Math.floor(rawFontSizeC / _dprFontC));
-                ctx.font = `${fontSize}px sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                try { ctx.shadowColor = this.color || 'rgba(0,0,0,0)'; ctx.shadowBlur = 6; } catch (e) {}
-                ctx.fillText(this.emoji, cx, cy);
-
-                try {
-                    const pad = 8 * (this.scale || 1);
-                    const r = Math.max(radius, 8) + pad;
-                    const grad = ctx.createRadialGradient(cx - r * 0.25, cy - r * 0.25, Math.max(4, r * 0.08), cx, cy, r);
-                    grad.addColorStop(0, 'rgba(255,255,255,0.08)');
-                    grad.addColorStop(0.4, 'rgba(255,255,255,0.03)');
-                    grad.addColorStop(1, 'rgba(255,255,255,0)');
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                    ctx.shadowColor = 'rgba(255,255,255,0.02)';
-                    ctx.shadowBlur = 8 * (this.scale || 1);
-                    ctx.fillStyle = grad;
-                    ctx.fill();
-                    ctx.restore();
-                } catch (e) {}
-            }
-            // Invisible circle fill (preserves existing color/shadow logic if needed)
-            ctx.fillStyle = this.color;
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = 15;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fill();
-            if (debug) { ctx.strokeStyle = '#ffff66'; ctx.lineWidth = 1; ctx.stroke(); }
-        }
+        // Use scale for visual size (base 32px * scale)
+        const fontSize = Math.max(16, Math.floor(32 * this.scale));
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `${fontSize}px sans-serif`;
+        ctx.fillStyle = '#000'; // Required for Safari
+        ctx.fillText(this.emoji, this.x, this.y);
         ctx.restore();
     }
 
-    // clamp into viewport if flagged
     clampToViewport(w, h) {
-        if (this.type === CollidableType.RECT) {
-            if (this.x + this.width < 0 || this.x > w || this.y + this.height < 0 || this.y > h) return false;
-            this.x = Math.max(0, Math.min(this.x, Math.max(0, w - this.width)));
-            this.y = Math.max(0, Math.min(this.y, Math.max(0, h - this.height)));
-            return true;
-        }
-        if (this.type === CollidableType.CIRCLE) {
-            if (this.x + this.radius < 0 || this.x - this.radius > w || this.y + this.radius < 0 || this.y - this.radius > h) return false;
-            this.x = Math.max(this.radius, Math.min(this.x, Math.max(this.radius, w - this.radius)));
-            this.y = Math.max(this.radius, Math.min(this.y, Math.max(this.radius, h - this.radius)));
-            return true;
-        }
+        if (this.x + this.radius < 0 || this.x - this.radius > w || this.y + this.radius < 0 || this.y - this.radius > h) return false;
+        this.x = Math.max(this.radius, Math.min(this.x, w - this.radius));
+        this.y = Math.max(this.radius, Math.min(this.y, h - this.radius));
         return true;
     }
 }
@@ -647,57 +467,23 @@ class Collidable {
 class CollidableManager {
     constructor() {
         this.list = [];
-        this.debug = false; // visual debugging
-        // spatial grid for faster queries
         this.grid = new Map();
         this.cellSize = 128;
-        this.gridCols = 0;
-        this.gridRows = 0;
-        // pathfinding cache
-        this._pfCache = null; // { grid, cols, rows, cs, padding }
+        this._pfCache = null;
         this._pfDirty = true;
     }
     clear() { this.list.length = 0; }
     set(arr) { this.list = arr.slice(); this._pfDirty = true; }
     add(c) { this.list.push(c); this._pfDirty = true; }
-    addMany(arr) { arr.forEach(a => this.add(a)); this._pfDirty = true; }
     getAll() { return this.list.slice(); }
-    draw(ctx) { this.list.forEach(c => c.draw(ctx, this.debug)); }
+    draw(ctx) { this.list.forEach(c => c.draw(ctx)); }
 
-    // Draw hitbox outlines (useful for debugging and to visualize exact query bounds)
-    drawHitboxes(ctx) {
-        ctx.save();
-        ctx.strokeStyle = 'rgba(255,255,0,0.9)';
-        ctx.lineWidth = 1;
-        for (let i = 0; i < this.list.length; i++) {
-            const c = this.list[i];
-            if (!c) continue;
-            const b = c.getBounds();
-            ctx.beginPath();
-            if (c.type === CollidableType.RECT) {
-                ctx.strokeRect(b.x + 0.5, b.y + 0.5, b.w, b.h);
-            } else {
-                ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-        }
-        ctx.restore();
-    }
-
-    // sanitize: clamp or deactivate collidables outside viewport
+    // sanitize: deactivate collidables fully outside viewport
     sanitize(viewW, viewH) {
         this.list.forEach(c => {
-            if (c.flags.clampToViewport) {
-                c.clampToViewport(viewW, viewH);
-                c.active = true;
-            } else if (!c.flags.activeOutside) {
-                const b = c.getBounds();
-                // if fully outside, deactivate
-                if (b.x + b.w < 0 || b.x > viewW || b.y + b.h < 0 || b.y > viewH) {
-                    c.active = false;
-                } else {
-                    c.active = true;
-                }
+            const b = c.getBounds();
+            if (b.x + b.w < 0 || b.x > viewW || b.y + b.h < 0 || b.y > viewH) {
+                c.active = false;
             } else {
                 c.active = true;
             }
@@ -885,51 +671,10 @@ class CollidableManager {
         }
         return null; // no path
     }
-
-    // dragon collision: returns first hit info or {hit:false}
-    checkDragonCollision(segments, baseSegmentSize) {
-        for (let i = 0; i < segments.length; i++) {
-            const seg = segments[i];
-            let segSize = baseSegmentSize;
-            if (i === 0) segSize *= 1.5;
-            const hits = this.queryCircle(seg.x, seg.y, segSize, { groups: { dragon: true } });
-            if (hits && hits.length) return { hit: true, segmentIndex: i, collidables: hits };
-        }
-        return { hit: false };
-    }
 }
 
 // manager instance (current level)
 let collidableManager = new CollidableManager();
-window.collidableManager = collidableManager; // quick dev hook
-
-// Diagnostic helper: run a pathfinding occupancy and test a sample path
-window.runPathfindingDiagnostic = function(options = {}) {
-    try {
-        const cellSize = options.cellSize || 32;
-        const padding = options.padding || 0;
-        // Force rebuild
-        collidableManager._pfDirty = true;
-        const pf = collidableManager.buildPathfindingGrid(cellSize, padding, WORLD_WIDTH, WORLD_HEIGHT);
-        const blockedCount = pf.grid.reduce((acc, v) => acc + (v ? 1 : 0), 0);
-        console.log('Pathfinding diagnostic:', { cols: pf.cols, rows: pf.rows, cellSize: pf.cs, blocked: blockedCount });
-        // Try a sample path from near top-left to world center
-        const start = { x: 10, y: 10 };
-        const targ = { x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2 };
-        const path = collidableManager.findPath(start.x, start.y, targ.x, targ.y, options.radius || 8, cellSize);
-        if (!path) {
-            console.warn('No path found (blocked)');
-        } else {
-            console.log('Sample path length:', path.length);
-            // Expose last computed path for quick visualization in console
-            window._lastPfPath = path;
-        }
-        return { pf, path };
-    } catch (e) {
-        console.error('Pathfinding diagnostic failed', e);
-        return null;
-    }
-};
 
 // monsterMap: monsterId -> monsterData (from monsters.json)
 let monsterMap = {};
@@ -1045,74 +790,52 @@ async function loadLevelsAndMonsters() {
             const monsterIds = String(l.emoji || '').split(',').map(s => s.trim()).filter(Boolean);
             const monsters = monsterIds.map(id => monsterMap[id]).filter(Boolean);
             
-            // Build collidables from obstacles list (new array format)
+            // Build obstacles from level config
             const obstacleSpec = l.obstacles || [];
             const collidables = [];
-            const BASE_OBS_SIZE = 64; // base size for scale=1
 
-            // Process each obstacle entry in the array
-            console.log('Processing obstacles for level', l.level, ':', obstacleSpec);
             obstacleSpec.forEach(obstacleEntry => {
                 const { name, set } = obstacleEntry;
-                console.log('Processing obstacle:', name, 'with positions:', set);
                 const def = obstaclesMap.get(name);
-                if (!def) {
-                    console.warn('Unknown obstacle referenced in levels.json:', name);
-                    return;
-                }
+                if (!def) return;
                 
-                const scale = Math.max(1, Math.min(3, Number(def.scale || 1)));
-                const size = BASE_OBS_SIZE * scale;
-                const radius = size / 2;
+                const scale = Math.max(1, Number(def.scale || 1));
+                const radius = 32 * scale; // hitbox radius
                 const speed = Number(def.speed || 1);
-                console.log('Obstacle definition:', { name, scale, size, radius, speed, emoji: def.emoji });
 
-                // Process each position in the set array
                 set.forEach(position => {
-                    const positionData = calculateObstaclePosition(position, radius, size, size);
-                    if (!positionData) {
-                        console.warn(`Unknown position ${position} for obstacle ${name}`);
-                        return;
-                    }
+                    const positionData = calculateObstaclePosition(position, radius, 0, 0);
+                    if (!positionData) return;
 
                     const { x, y, movementPath } = positionData;
-                    console.log(`Creating obstacle at position ${position}:`, { x, y, movementPath });
                     
-                    // Create collidable with movement configuration
                     const collidable = new Collidable({
-                        type: CollidableType.CIRCLE,
-                        x, y, 
-                        radius,
+                        x, y, radius,
                         emoji: def.emoji,
                         scale,
-                        color: 'rgba(0,0,0,0)', // Transparent - rely on glow effect only
-                        collidesWith: { dragon: true, pellets: true, enemies: true, cursor: false },
-                        flags: { bouncePellets: true, clampToViewport: false, activeOutside: false }
+                        collidesWith: { dragon: true, pellets: true, enemies: true }
                     });
                     
-                    // Store positioning info for responsive resizing
-                    collidable.positionToken = position; // Store the original position token
-                    collidable.originalRadius = radius; // Store original radius for recalculation
+                    collidable.positionToken = position;
                     
-                    // Add movement configuration
                     if (movementPath) {
                         collidable.moving = true;
                         collidable.baseX = x;
                         collidable.baseY = y;
                         collidable.motion = {
-                            dir: movementPath.direction, // 'horizontal' or 'vertical'
-                            speed: speed * 0.5, // movement speed (rad/sec)
+                            dir: movementPath.direction,
+                            speed: speed * 0.5,
                             amplitude: movementPath.amplitude,
-                            phase: Math.random() * Math.PI * 2 // random starting phase
+                            phase: Math.random() * Math.PI * 2
                         };
                     }
                     
                     collidables.push(collidable);
-                    console.log('Added collidable:', collidable);
                 });
             });
 
             levels[l.level] = {
+                level: l.level, // Include level key for LevelWatcher parsing
                 target: l.target || 50,
                 monsters: monsters.length ? monsters : [{ monster: 'oni', emoji: '👹', normalHp: 1, bossHp: 2, enemySpeed: 0.5 }],
                 aimSpeed: l.aimSpeed || 1,
@@ -1121,7 +844,6 @@ async function loadLevelsAndMonsters() {
                 multiplier: (l.multiplier !== undefined) ? Number(l.multiplier) : 2,
                 background: l.background || 'assets/levelbackgrounds/defaultbg.png'
             };
-            console.log(`Level ${l.level} created with ${collidables.length} collidables:`, collidables);
         });
     } catch (err) {
         console.error('Failed to load levels.json', err);
@@ -1131,20 +853,31 @@ async function loadLevelsAndMonsters() {
 // LevelWatcher class to manage the game's level progression.
 class LevelWatcher {
     constructor(levels) {
-        this.levels = levels;
+        // Separate numbered levels from postgame
+        this.postgameConfig = null;
+        this.levels = {};
+        
+        // Parse levels - separate postgame from numbered levels
+        Object.values(levels).forEach(level => {
+            if (level.level === 'postgame') {
+                this.postgameConfig = level;
+            } else {
+                this.levels[level.level] = level;
+            }
+        });
+        
         this.currentLevel = 1;
+        this.maxLevel = Math.max(...Object.keys(this.levels).map(Number));
         this.isEndlessMode = false;
-        this.allMonsters = []; // Pool of all monsters from all levels
     }
 
     nextLevel() {
-        if (this.currentLevel < Object.keys(this.levels).length) {
+        if (this.currentLevel < this.maxLevel) {
             this.currentLevel++;
             return true;
         } else {
-            // Enter endless mode after final level
+            // Enter postgame/endless mode after final level
             this.isEndlessMode = true;
-            this.buildAllMonsterPool();
             return true;
         }
     }
@@ -1152,115 +885,17 @@ class LevelWatcher {
     reset() {
         this.currentLevel = 1;
         this.isEndlessMode = false;
-        this.allMonsters = [];
-    }
-
-    buildAllMonsterPool() {
-        // Collect all unique monsters from all levels
-        const monsterSet = new Set();
-        Object.values(this.levels).forEach(level => {
-            level.monsters.forEach(monster => {
-                monsterSet.add(JSON.stringify(monster));
-            });
-        });
-        this.allMonsters = Array.from(monsterSet).map(json => JSON.parse(json));
-        console.log('Built monster pool for endless mode:', this.allMonsters);
     }
 
     getLevelConfig() {
-        if (this.isEndlessMode) {
-            // Return endless mode configuration
-            return {
-                target: Infinity, // No completion target
-                monsters: this.allMonsters,
-                aimSpeed: 50, // Increased difficulty
-                spawnRate: 65, // Faster spawning
-                collidables: this.getRandomObstacles(),
-                multiplier: 10, // Multiplier for endless mode
-                background: 'assets/levelbackgrounds/finallevelbackground.png'
-            };
+        if (this.isEndlessMode && this.postgameConfig) {
+            return { ...this.postgameConfig, target: Infinity };
         }
         return this.levels[this.currentLevel];
     }
 
-    getRandomObstacles() {
-        // Generate random obstacles with max 1 per position
-        const obstacleTypes = ['towers', 'bats', 'plane', 'tornado'];
-        const positions = ['.leading', '.trailing', '.top', '.bottom', '.center', '.centerVertical'];
-        const collidables = [];
-        const BASE_OBS_SIZE = 64;
-        
-        // Get the obstacles map from global storage
-        const obstaclesMap = window.__obstaclesMap;
-        if (!obstaclesMap) {
-            console.warn('No obstacles map available for endless mode');
-            return [];
-        }
-        
-        // Randomly decide how many positions to fill (1-4 for balanced gameplay)
-        const numPositions = Math.floor(Math.random() * 4) + 1;
-        
-        // Randomly select positions
-        const shuffledPositions = [...positions].sort(() => 0.5 - Math.random());
-        const selectedPositions = shuffledPositions.slice(0, numPositions);
-        
-        // For each selected position, create an actual Collidable
-        selectedPositions.forEach(position => {
-            const randomType = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
-            const def = obstaclesMap.get(randomType);
-            if (!def) {
-                console.warn('Unknown obstacle type for endless mode:', randomType);
-                return;
-            }
-            
-            const scale = Math.max(1, Math.min(3, Number(def.scale || 1)));
-            const size = BASE_OBS_SIZE * scale;
-            const radius = size / 2;
-            const speed = Number(def.speed || 1);
-            
-            const positionData = calculateObstaclePosition(position, radius, size, size);
-            if (!positionData) {
-                console.warn(`Unknown position ${position} for endless obstacle`);
-                return;
-            }
-            
-            const { x, y, movementPath } = positionData;
-            
-            const collidable = new Collidable({
-                type: CollidableType.CIRCLE,
-                x, y,
-                radius,
-                emoji: def.emoji,
-                scale,
-                color: 'rgba(0,0,0,0)',
-                collidesWith: { dragon: true, pellets: true, enemies: true, cursor: false },
-                flags: { bouncePellets: true, clampToViewport: false, activeOutside: false }
-            });
-            
-            collidable.positionToken = position;
-            collidable.originalRadius = radius;
-            
-            if (movementPath) {
-                collidable.moving = true;
-                collidable.baseX = x;
-                collidable.baseY = y;
-                collidable.motion = {
-                    dir: movementPath.direction,
-                    speed: speed * 0.5,
-                    amplitude: movementPath.amplitude,
-                    phase: Math.random() * Math.PI * 2
-                };
-            }
-            
-            collidables.push(collidable);
-        });
-        
-        console.log('Generated endless mode obstacles:', collidables);
-        return collidables;
-    }
-
     isLastLevel() {
-        return !this.isEndlessMode && this.currentLevel === Object.keys(this.levels).length;
+        return !this.isEndlessMode && this.currentLevel === this.maxLevel;
     }
 
     isInEndlessMode() {
@@ -1276,7 +911,7 @@ let levelWatcher = null; // will be created after loading levels
 
 let gameLoopInterval;
 let pelletInterval;
-let dragonSegments = [];
+let avatarPosition = { x: 0, y: 0, angle: 0 };
 let projectiles = [];
 // Object pool for better performance
 let projectilePool = [];
@@ -1285,13 +920,14 @@ let enemies = [];
 let target = { x: 0, y: 0 };
 let keyboardDirection = { x: 0, y: 0 };
 let isMouthOpen = false;
-let dragonHit = false;
+let avatarHit = false;
 let enemiesDestroyed = 0;
 let isPaused = false;
 let isGameOver = false;
 let isBoosting = false;
 let boostTimeout = null;
-// Tap-to-burst: each tap fires multiplier*3 boosted pellets instantly
+const BOOST_DURATION = 500 ; // ms (boost lasts 1 second - shows activated sprite)
+// Cooldown removed - boost is now freely available but shorter and less powerful
 
 // gameLoopInterval = setInterval(spawnEnemy, 1000); // Always 1 enemy per second Session-wide kill counter (persists across levels during a single play session)
 let sessionKills = 0;
@@ -1355,7 +991,7 @@ function resizeCanvas() {
     const shouldMini = (window.innerWidth <= MINI_BREAKPOINT);
         document.body.classList.toggle('miniScreen', shouldMini);
     } catch (e) {}
-    if (dragonSegments.length === 0) initializeDragon();
+    if (!avatarPosition.x) initializeAvatar();
     // rebuild spatial grid in world units and sanitize collidables against world bounds
     try {
         if (collidableManager) {
@@ -1408,118 +1044,42 @@ function worldToScreen(wx, wy) {
     return { x: sx, y: sy };
 }
 
-// Coordinate helper: convert screen pixels to virtual/world coordinates
-function screenToVirtual(clientX, clientY) {
-    const rect = canvas.getBoundingClientRect();
-    const cx = clientX - rect.left;
-    const cy = clientY - rect.top;
-    // Account for letterbox/pillarbox offset and scale
-    const vx = (cx - canvasOffsetX) / canvasScale;
-    const vy = (cy - canvasOffsetY) / canvasScale;
-    return { x: vx, y: vy };
+function initializeAvatar() {
+    avatarPosition = {
+        x: WORLD_WIDTH / 2,
+        y: WORLD_HEIGHT / 2,
+        angle: 0
+    };
 }
 
-// Compute a world-space position for a viewport alignment token (top/bottom/left/right/center/corners)
-// radiusWorld is used so placements account for obstacle size when aligning to edges.
-function worldPosForToken(token, radiusWorld, w = 0, h = 0) {
-    // With virtual canvas, positions are in virtual coordinates (800x600)
-    const marginVirtual = 24; // spacing from edge in virtual units
-    const screenW = VIRTUAL_WIDTH;
-    const screenH = VIRTUAL_HEIGHT;
-    // virtual coordinates
-    let sx = Math.floor(screenW / 2);
-    let sy = Math.floor(screenH / 2);
-    const rScreen = Math.abs(radiusWorld || 0);
-    switch ((token || '').toString().toLowerCase()) {
-        case 'top':
-            sx = Math.floor(screenW / 2);
-            sy = Math.floor(marginVirtual + rScreen);
-            break;
-        case 'bottom':
-            sx = Math.floor(screenW / 2);
-            sy = Math.floor(screenH - (marginVirtual + rScreen));
-            break;
-        case 'left':
-        case 'leading':
-            sx = Math.floor(marginVirtual + rScreen);
-            sy = Math.floor(screenH / 2);
-            break;
-        case 'right':
-        case 'trailing':
-            sx = Math.floor(screenW - (marginVirtual + rScreen));
-            sy = Math.floor(screenH / 2);
-            break;
-        case 'top-left':
-        case 'topleft':
-            sx = Math.floor(marginVirtual + rScreen);
-            sy = Math.floor(marginVirtual + rScreen);
-            break;
-        case 'top-right':
-        case 'topright':
-            sx = Math.floor(screenW - (marginVirtual + rScreen));
-            sy = Math.floor(marginVirtual + rScreen);
-            break;
-        case 'bottom-left':
-        case 'bottomleft':
-            sx = Math.floor(marginVirtual + rScreen);
-            sy = Math.floor(screenH - marginVirtual - rScreen);
-            break;
-        case 'bottom-right':
-        case 'bottomright':
-            sx = Math.floor(screenW - (marginVirtual + rScreen));
-            sy = Math.floor(screenH - marginVirtual - rScreen);
-            break;
-        case 'center':
-        default:
-            sx = Math.floor(screenW / 2);
-            sy = Math.floor(screenH / 2);
-            break;
-    }
-    // Return virtual coordinates directly (already in world space)
-    return { x: sx, y: sy };
-}
-
-function initializeDragon() {
-    dragonSegments = [];
-    for (let i = 0; i < DRAGON_LENGTH; i++) {
-        dragonSegments.push({
-            x: WORLD_WIDTH / 2 - i * SEGMENT_SPACING,
-            y: WORLD_HEIGHT / 2,
-            angle: 0
-        });
-    }
-}
-
-function updateDragon(dt = 0) {
+function updateAvatar(dt = 0) {
     // Update target based on keyboard direction
     if (keyboardDirection.x !== 0 || keyboardDirection.y !== 0) {
-        target.x += keyboardDirection.x * DRAGON_SPEED * dt;
-        target.y += keyboardDirection.y * DRAGON_SPEED * dt;
+        target.x += keyboardDirection.x * AVATAR_SPEED * dt;
+        target.y += keyboardDirection.y * AVATAR_SPEED * dt;
     }
 
     target.x = Math.max(0, Math.min(WORLD_WIDTH, target.x));
     target.y = Math.max(0, Math.min(WORLD_HEIGHT, target.y));
 
-    // update persistent cursor: orbit around avatar, point toward target
+    // Update persistent cursor: orbit around avatar, point toward target
     // Only show chevron cursor during active gameplay (not paused/game over)
     try {
         if (cursorEl && !isPaused && !isGameOver) {
-            const head = dragonSegments[0];
-            
             // Get container offset for fixed positioning
             const containerRect = gameContainer.getBoundingClientRect();
             
-            // Convert head world position to screen coordinates
-            const headScr = worldToScreen(head.x, head.y);
+            // Convert avatar world position to screen coordinates
+            const avatarScr = worldToScreen(avatarPosition.x, avatarPosition.y);
             const targetScr = worldToScreen(target.x, target.y);
             
             // Add container offset since cursor uses fixed positioning
-            const headScreenX = headScr.x + containerRect.left;
-            const headScreenY = headScr.y + containerRect.top;
+            const avatarScreenX = avatarScr.x + containerRect.left;
+            const avatarScreenY = avatarScr.y + containerRect.top;
             
             // Calculate angle from avatar to target
-            const dx = targetScr.x - headScr.x;
-            const dy = targetScr.y - headScr.y;
+            const dx = targetScr.x - avatarScr.x;
+            const dy = targetScr.y - avatarScr.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
             
             // Calculate target angle (where cursor should eventually point)
@@ -1532,60 +1092,50 @@ function updateDragon(dt = 0) {
             }
             
             // Smoothly interpolate current angle toward target angle
-            const lerpSpeed = 0.18; // Slightly faster for more responsive feel
+            const lerpSpeed = 0.18;
             currentCursorAngle = lerpAngle(currentCursorAngle, targetAngle, lerpSpeed);
             
-            // Orbit radius: half avatar size + padding so cursor is clearly outside
-            // Avatar size is DRAGON_SEGMENT_SIZE * 8 = 96px, so radius is 48 + padding
-            const avatarRadius = (DRAGON_SEGMENT_SIZE * 8) / 2;
-            const orbitRadius = avatarRadius + 16; // 16px gap from avatar edge
+            // Orbit radius: avatar edge + fixed 10px gap (consistent across viewports)
+            const avatarScreenRadius = (AVATAR_SIZE * 8 * canvasScale) / 2;
+            const orbitRadius = avatarScreenRadius + 10;
             
             // Position chevron on the orbit circle using smoothed angle
-            const cursorX = headScreenX + Math.cos(currentCursorAngle) * orbitRadius;
-            const cursorY = headScreenY + Math.sin(currentCursorAngle) * orbitRadius;
+            const cursorX = avatarScreenX + Math.cos(currentCursorAngle) * orbitRadius;
+            const cursorY = avatarScreenY + Math.sin(currentCursorAngle) * orbitRadius;
             
             cursorEl.style.left = cursorX + 'px';
             cursorEl.style.top = cursorY + 'px';
             
-            // Rotate chevron to point in orbit direction (SVG points up, so add 90deg offset)
+            // Rotate chevron to point in orbit direction
             const rotateDeg = (currentCursorAngle * 180 / Math.PI) + 90;
             cursorEl.style.transform = `translate(-50%, -50%) rotate(${rotateDeg}deg)`;
             cursorEl.style.display = 'block';
         }
     } catch (e) {}
 
-    const head = dragonSegments[0];
-    const dx = target.x - head.x;
-    const dy = target.y - head.y;
+    // Move avatar toward target
+    const dx = target.x - avatarPosition.x;
+    const dy = target.y - avatarPosition.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
     if (distance > 1e-2) {
-        head.angle = Math.atan2(dy, dx);
-        const moveStep = Math.min(DRAGON_SPEED * dt, distance);
-        head.x += Math.cos(head.angle) * moveStep;
-        head.y += Math.sin(head.angle) * moveStep;
-    }
-
-    for (let i = 1; i < dragonSegments.length; i++) {
-        const currentSegment = dragonSegments[i];
-        const prevSegment = dragonSegments[i - 1];
-        const angleToPrev = Math.atan2(prevSegment.y - currentSegment.y, prevSegment.x - currentSegment.x);
-        currentSegment.angle = angleToPrev;
-        currentSegment.x = prevSegment.x - Math.cos(angleToPrev) * SEGMENT_SPACING;
-        currentSegment.y = prevSegment.y - Math.sin(angleToPrev) * SEGMENT_SPACING;
+        avatarPosition.angle = Math.atan2(dy, dx);
+        const moveStep = Math.min(AVATAR_SPEED * dt, distance);
+        avatarPosition.x += Math.cos(avatarPosition.angle) * moveStep;
+        avatarPosition.y += Math.sin(avatarPosition.angle) * moveStep;
     }
 }
 
-// Dragon sprite assets - Lottie animations rendered to offscreen canvases
-let dragonSprites = {
+// Avatar sprite assets - Lottie animations rendered to offscreen canvases
+let avatarSprites = {
     default: { anim: null, canvas: null, ctx: null, ready: false },
     activated: { anim: null, canvas: null, ctx: null, ready: false }
 };
 
 const SPRITE_SIZE = 200; // Size of the offscreen canvas for Lottie rendering
 
-// Load dragon sprites using Lottie
-function loadDragonImages() {
+// Load avatar sprites using Lottie
+function loadAvatarSprites() {
     const sprites = [
         { name: 'default', src: 'assets/spritedefault.json' },
         { name: 'activated', src: 'assets/spriteactivated.json' }
@@ -1614,7 +1164,7 @@ function loadDragonImages() {
             });
             
             anim.addEventListener('DOMLoaded', () => {
-                dragonSprites[name] = {
+                avatarSprites[name] = {
                     anim: anim,
                     container: container,
                     canvas: offCanvas,
@@ -1636,7 +1186,7 @@ function loadDragonImages() {
 
 // Get current frame from Lottie animation as drawable canvas
 function getLottieSpriteCanvas(spriteName) {
-    const sprite = dragonSprites[spriteName];
+    const sprite = avatarSprites[spriteName];
     if (!sprite || !sprite.ready || !sprite.anim) return null;
     
     // Get the internal canvas from Lottie's canvas renderer
@@ -1740,109 +1290,42 @@ function drawParallaxBackground() {
     ctx.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 }
 
-function drawDragon() {
-    const head = dragonSegments[0];
-    
-    // Refined direction logic - consider movement velocity and cursor position
-    let isMovingLeft = false;
-    
-    // Check if dragon is actively moving towards cursor
-    const dx = target.x - head.x;
-    const dy = target.y - head.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    
-    if (distance > 5) { // Only use direction when actively moving
-        isMovingLeft = dx < 0; // Moving left if target is to the left
-    } else {
-        // When stationary or very close, use last movement direction
-        // Fall back to simple position comparison
-        isMovingLeft = target.x < head.x;
-    }
-    
-    // Choose sprite based on boost state (activated sprite during power-up)
+function drawAvatar() {
+    // If Lottie sprite isn't loaded yet, skip drawing
     const spriteKey = isBoosting ? 'activated' : 'default';
     const lottieCanvas = getLottieSpriteCanvas(spriteKey);
-    
-    // If Lottie isn't loaded yet, fall back to simple circles
-    if (!lottieCanvas) {
-        drawDragonFallback();
-        return;
-    }
+    if (!lottieCanvas) return;
 
-    // Draw single dragon avatar at head position
+    // Direction logic - determine if avatar should face left
+    const dx = target.x - avatarPosition.x;
+    const dy = target.y - avatarPosition.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const isMovingLeft = distance > 5 ? dx < 0 : target.x < avatarPosition.x;
+
     ctx.save();
     
-    // Flip horizontally if moving left
-    const flipX = isMovingLeft ? -1 : 1;
-    
-    // Size the avatar bigger for better visibility
-    const avatarSize = DRAGON_SEGMENT_SIZE * 8; // Increased from 6 to 8
+    // Size the avatar
+    const avatarSize = AVATAR_SIZE * 8;
     const imgWidth = avatarSize;
     const imgHeight = avatarSize;
-    const verticalOffset = -2; // Move up by 2 pixels to keep face visible above cursor
+    const verticalOffset = -2;
     
-    // === DOUBLE OUTLINE EFFECT (Black inner, White outer) ===
-    // Draw white outer outline (3px offset)
-    ctx.shadowColor = 'white';
-    ctx.shadowBlur = 0;
-    const whiteOutline = 3;
-    const whiteOffsets = [
-        [-whiteOutline, 0], [whiteOutline, 0], [0, -whiteOutline], [0, whiteOutline],
-        [-whiteOutline, -whiteOutline], [whiteOutline, -whiteOutline],
-        [-whiteOutline, whiteOutline], [whiteOutline, whiteOutline]
-    ];
-    whiteOffsets.forEach(([ox, oy]) => {
-        ctx.shadowOffsetX = ox;
-        ctx.shadowOffsetY = oy;
-        ctx.drawImage(
-            lottieCanvas,
-            head.x - imgWidth / 2,
-            head.y - imgHeight / 2 + verticalOffset,
-            imgWidth,
-            imgHeight
-        );
-    });
-    
-    // Draw black inner outline (1.5px offset)
-    ctx.shadowColor = 'black';
-    const blackOutline = 1.5;
-    const blackOffsets = [
-        [-blackOutline, 0], [blackOutline, 0], [0, -blackOutline], [0, blackOutline],
-        [-blackOutline, -blackOutline], [blackOutline, -blackOutline],
-        [-blackOutline, blackOutline], [blackOutline, blackOutline]
-    ];
-    blackOffsets.forEach(([ox, oy]) => {
-        ctx.shadowOffsetX = ox;
-        ctx.shadowOffsetY = oy;
-        ctx.drawImage(
-            lottieCanvas,
-            head.x - imgWidth / 2,
-            head.y - imgHeight / 2 + verticalOffset,
-            imgWidth,
-            imgHeight
-        );
-    });
-    
-    // Reset shadow and draw the actual avatar on top
-    ctx.shadowColor = 'transparent';
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    
+    // Draw the avatar (outline effects removed for Safari compatibility)
     ctx.drawImage(
         lottieCanvas,
-        head.x - imgWidth / 2,
-        head.y - imgHeight / 2 + verticalOffset,
+        avatarPosition.x - imgWidth / 2,
+        avatarPosition.y - imgHeight / 2 + verticalOffset,
         imgWidth,
         imgHeight
     );
     
     // Add hit effect overlay
-    if (dragonHit) {
+    if (avatarHit) {
         ctx.globalCompositeOperation = 'source-atop';
         ctx.fillStyle = 'rgba(138, 43, 226, 0.5)';
         ctx.fillRect(
-            head.x - imgWidth / 2,
-            head.y - imgHeight / 2 + verticalOffset,
+            avatarPosition.x - imgWidth / 2,
+            avatarPosition.y - imgHeight / 2 + verticalOffset,
             imgWidth,
             imgHeight
         );
@@ -1851,87 +1334,13 @@ function drawDragon() {
     ctx.restore();
 }
 
-// Fallback dragon drawing for when Lottie isn't loaded
-function drawDragonFallback() {
-    ctx.lineCap = 'round';
-    const baseColor = dragonHit ? 'rgba(138, 43, 226, 0.8)' : 'rgba(0, 255, 255, 0.8)';
-    const shadowColor = dragonHit ? 'rgba(75, 0, 130, 0.8)' : 'rgba(0, 255, 255, 0.5)';
-
-    for (let i = 0; i < dragonSegments.length; i++) {
-        const segment = dragonSegments[i];
-        const alpha = 1 - (i / dragonSegments.length) * 0.7;
-
-        if (i === 0) {
-            // Draw dragon head using emoji
-            const headSize = DRAGON_SEGMENT_SIZE * 2.5;
-            const _dprDragon = (camera && camera.dpr) ? camera.dpr : 1;
-            const fontSize = Math.max(16, Math.floor(headSize / _dprDragon));
-            
-            ctx.save();
-            ctx.font = `${fontSize}px sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // Add glow effect behind dragon head
-            ctx.shadowColor = shadowColor;
-            ctx.shadowBlur = 20;
-            
-            // Choose dragon emoji based on hit state
-            const dragonEmoji = dragonHit ? '🟣' : (isMouthOpen ? '🐲' : '🐉');
-            ctx.fillText(dragonEmoji, segment.x, segment.y);
-            ctx.restore();
-            
-        } else {
-            // Draw body segments with gradient and emoji
-            const bodySize = DRAGON_SEGMENT_SIZE * 1.5;
-            const _dprBody = (camera && camera.dpr) ? camera.dpr : 1;
-            const bodyFontSize = Math.max(12, Math.floor(bodySize / _dprBody));
-            
-            ctx.save();
-            ctx.font = `${bodyFontSize}px sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // Add subtle glow
-            ctx.shadowColor = shadowColor;
-            ctx.shadowBlur = 10;
-            ctx.globalAlpha = alpha;
-            
-            // Use different emojis for body segments
-            const bodyEmojis = dragonHit ? ['🟣', '🟪', '🔮'] : ['🟢', '🔵', '💠'];
-            const segmentEmoji = bodyEmojis[i % bodyEmojis.length];
-            
-            ctx.fillText(segmentEmoji, segment.x, segment.y);
-            ctx.restore();
-        }
-    }
-}
-
 function drawCollidables() {
     // Use the collidable manager to draw all obstacles
     try {
         if (collidableManager && typeof collidableManager.draw === 'function') {
             collidableManager.draw(ctx);
-            if (collidableManager.debug && typeof collidableManager.drawHitboxes === 'function') {
-                collidableManager.drawHitboxes(ctx);
-            }
-            return;
         }
-    } catch (e) {
-        console.error('Error using collidableManager:', e);
-    }
-
-    // Fallback: draw directly from level config if manager unavailable
-    const levelConfig = levelWatcher?.getLevelConfig();
-    (levelConfig?.collidables || []).forEach(c => {
-        try {
-            if (c && typeof c.draw === 'function') {
-                c.draw(ctx, false);
-            }
-        } catch (e) {
-            console.error('Error drawing collidable:', e);
-        }
-    });
+    } catch (e) {}
 }
 
 function updatePellets(dt = 0) {
@@ -2005,6 +1414,8 @@ function drawPellets() {
         
 function spawnEnemy() {
     if (isPaused) return;
+    // Cap enemies to prevent lag in endless mode
+    if (enemies.length >= 30) return;
     let size, hp, emoji, speed;
     const levelConfig = levelWatcher.getLevelConfig();
 
@@ -2016,11 +1427,11 @@ function spawnEnemy() {
     speed = (monsterChoice.enemySpeed || 1) * ENEMY_SPEED_SCALE;
 
     if (enemiesDestroyed >= BOSS_ENEMY_SPAWN_THRESHOLD && Math.random() < 0.1) {
-        size = 60;
+        size = 70;
         hp = monsterChoice.bossHp || monsterChoice.normalHp * 2;
         speed = ((monsterChoice.enemySpeed || 1) * ENEMY_SPEED_SCALE) / 2;
     } else {
-        size = 30;
+        size = 50;
     }
 
     let startX, startY;
@@ -2057,8 +1468,6 @@ function spawnEnemy() {
 }
 
 function updateEnemies(dt = 0) {
-    const dragonHead = dragonSegments[0];
-    
     // === MONSTER-TO-MONSTER COLLISION ===
     // Push overlapping enemies apart (bigger + faster = more force)
     for (let i = 0; i < enemies.length; i++) {
@@ -2105,9 +1514,9 @@ function updateEnemies(dt = 0) {
         if (enemy.y + (enemy.size / 2) > WORLD_HEIGHT || enemy.y - (enemy.size / 2) < 0) {
             enemy.vy = -enemy.vy;
         }
-        // desired direction toward dragon head
-        let dx = dragonHead.x - enemy.x;
-        let dy = dragonHead.y - enemy.y;
+        // desired direction toward avatar
+        let dx = avatarPosition.x - enemy.x;
+        let dy = avatarPosition.y - enemy.y;
         let distance = Math.sqrt(dx * dx + dy * dy) || 1;
         let desiredVx = (dx / distance) * enemy.speed;
         let desiredVy = (dy / distance) * enemy.speed;
@@ -2125,9 +1534,9 @@ function updateEnemies(dt = 0) {
         } catch (e) { blocked = false; }
 
         if (blocked) {
-            // Try a simple grid-based A* path to the dragon head
+            // Try a simple grid-based A* path to the avatar
             try {
-                const path = collidableManager.findPath(enemy.x, enemy.y, dragonHead.x, dragonHead.y, radius, 32);
+                const path = collidableManager.findPath(enemy.x, enemy.y, avatarPosition.x, avatarPosition.y, radius, 32);
                 if (path && path.length > 1) {
                     const next = path[1];
                     const ddx = next.x - enemy.x;
@@ -2204,40 +1613,13 @@ function drawEnemies() {
         // Use consistent sizing across all devices - no DPR scaling for uniform appearance
         const baseSize = Math.max(16, Math.floor(enemy.size * 0.8)); // Direct pixel-based sizing
         const fontSize = Math.floor(baseSize * breathScale);
-        ctx.font = `${fontSize}px sans-serif`;
+        
+        ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        
-        // Draw white outline by rendering emoji multiple times with offsets
-        // This creates a stroke effect that hugs the emoji shape
-        const outlineWidth = 2;
-        ctx.save();
-        
-        // Use shadow for a smoother outline effect that follows emoji shape
-        ctx.shadowColor = 'white';
-        ctx.shadowBlur = 0;
-        
-        // Draw multiple offset copies to create outline
-        const offsets = [
-            [-outlineWidth, 0], [outlineWidth, 0], [0, -outlineWidth], [0, outlineWidth],
-            [-outlineWidth, -outlineWidth], [outlineWidth, -outlineWidth],
-            [-outlineWidth, outlineWidth], [outlineWidth, outlineWidth]
-        ];
-        
-        // Draw white outline layer
-        ctx.globalAlpha = 1;
-        offsets.forEach(([ox, oy]) => {
-            ctx.shadowOffsetX = ox;
-            ctx.shadowOffsetY = oy;
-            ctx.fillText(enemy.emoji, enemy.x, enemy.y);
-        });
-        
-        // Reset shadow and draw the actual emoji on top
-        ctx.shadowColor = 'transparent';
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
+        ctx.font = `${fontSize + 20}px sans-serif`;
+        ctx.fillStyle = '#000'; // Required for Safari
         ctx.fillText(enemy.emoji, enemy.x, enemy.y);
-        
         ctx.restore();
     });
 }
@@ -2273,7 +1655,7 @@ function checkPelletEnemyCollision() {
                     enemiesDestroyed++;
                     sessionKills++;
                     updateScore();
-                    playPopSound(); // Bubble pop!
+                    playPop();
                     return false; // Remove dead enemy
                 }
             }
@@ -2289,35 +1671,23 @@ function checkPelletEnemyCollision() {
     });
 }
 
-function checkDragonCollidableCollision() {
-    // Use the collidable manager to check collisions. Collisions will now push the dragon
-    // head out of obstacles so the dragon cannot pass through them.
+function checkAvatarCollidableCollision() {
+    // Use the collidable manager to check collisions
+    // Push avatar out of obstacles so it cannot pass through them
     try {
         if (collidableManager) {
-            const res = collidableManager.checkDragonCollision(dragonSegments, DRAGON_SEGMENT_SIZE);
-            if (res.hit) {
-                // compute a combined push vector from all hits for the head
-                const head = dragonSegments[0];
+            const hits = collidableManager.queryCircle(avatarPosition.x, avatarPosition.y, AVATAR_SIZE * 1.5, { groups: { dragon: true } });
+            if (hits && hits.length) {
+                // Compute combined push vector from all hits
                 let totalDx = 0, totalDy = 0;
-                res.collidables.forEach(c => {
-                    const v = c.getPushOutVector(head.x, head.y, DRAGON_SEGMENT_SIZE * 1.5);
+                hits.forEach(c => {
+                    const v = c.getPushOutVector(avatarPosition.x, avatarPosition.y, AVATAR_SIZE * 1.5);
                     totalDx += v.dx; totalDy += v.dy;
                 });
-                // average
-                const count = Math.max(1, res.collidables.length);
-                const avgDx = totalDx / count; const avgDy = totalDy / count;
-                // apply push-out
-                head.x += avgDx;
-                head.y += avgDy;
-                // re-link following segments so they follow the head without penetrating
-                for (let i = 1; i < dragonSegments.length; i++) {
-                    const currentSegment = dragonSegments[i];
-                    const prevSegment = dragonSegments[i - 1];
-                    const angleToPrev = Math.atan2(prevSegment.y - currentSegment.y, prevSegment.x - currentSegment.x);
-                    currentSegment.angle = angleToPrev;
-                    currentSegment.x = prevSegment.x - Math.cos(angleToPrev) * SEGMENT_SPACING;
-                    currentSegment.y = prevSegment.y - Math.sin(angleToPrev) * SEGMENT_SPACING;
-                }
+                // Average and apply push-out
+                const count = Math.max(1, hits.length);
+                avatarPosition.x += totalDx / count;
+                avatarPosition.y += totalDy / count;
             }
         }
     } catch (e) {
@@ -2325,7 +1695,7 @@ function checkDragonCollidableCollision() {
     }
 }
 
-// Handle pellet collisions with collidables: bounce or remove pellets based on flags
+// Handle pellet collisions with collidables: bounce pellets off obstacles
 function checkPelletCollidableCollision() {
     if (!collidableManager) return;
     for (let i = projectiles.length - 1; i >= 0; i--) {
@@ -2334,40 +1704,22 @@ function checkPelletCollidableCollision() {
         if (hits && hits.length) {
             const c = hits[0];
             if (!c) continue;
-                // approximate bounce depending on shape
-                let push = { dx: 0, dy: 0 };
-                if (c.type === CollidableType.RECT) {
-                    const testX = Math.max(c.x, Math.min(p.x, c.x + c.width));
-                    const testY = Math.max(c.y, Math.min(p.y, c.y + c.height));
-                    const dx = p.x - testX;
-                    const dy = p.y - testY;
-                    if (Math.abs(dx) > Math.abs(dy)) {
-                        p.vx = -p.vx;
-                        // push pellet out using collidable push vector to avoid trapping
-                        push = c.getPushOutVector(p.x, p.y, p.size);
-                        p.x += push.dx || p.vx;
-                        p.y += push.dy || 0;
-                    } else {
-                        p.vy = -p.vy;
-                        push = c.getPushOutVector(p.x, p.y, p.size);
-                        p.x += push.dx || 0;
-                        p.y += push.dy || p.vy;
-                    }
-                } else {
-                    // circle: reflect velocity across normal
-                    const dx = p.x - c.x;
-                    const dy = p.y - c.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                    const nx = dx / dist, ny = dy / dist;
-                    const vdotn = p.vx * nx + p.vy * ny;
-                    p.vx = p.vx - 2 * vdotn * nx;
-                    p.vy = p.vy - 2 * vdotn * ny;
-                    push = c.getPushOutVector(p.x, p.y, p.size);
-                    p.x += push.dx || p.vx;
-                    p.y += push.dy || p.vy;
-                }
+            
+            // Circle bounce: reflect velocity across normal from obstacle center
+            const dx = p.x - c.x;
+            const dy = p.y - c.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const nx = dx / dist, ny = dy / dist;
+            const vdotn = p.vx * nx + p.vy * ny;
+            p.vx = p.vx - 2 * vdotn * nx;
+            p.vy = p.vy - 2 * vdotn * ny;
+            
+            // Push pellet out to avoid getting stuck
+            const push = c.getPushOutVector(p.x, p.y, p.size);
+            p.x += push.dx;
+            p.y += push.dy;
 
-                // Apply push to nearby enemies and to the dragon head if they are close to the collision point
+                // Apply push to nearby enemies and to the avatar if close to the collision point
                 try {
                     const COLLIDE_POINT_X = p.x;
                     const COLLIDE_POINT_Y = p.y;
@@ -2388,24 +1740,12 @@ function checkPelletCollidableCollision() {
                             enemy.vy = (enemy.vy || 0) + (push.dy || 0) * PUSH_VEL;
                         }
                     }
-                    // push dragon head (and re-link segments) if head is near collision
-                    if (dragonSegments && dragonSegments.length) {
-                        const head = dragonSegments[0];
-                        const dh = Math.hypot(head.x - COLLIDE_POINT_X, head.y - COLLIDE_POINT_Y);
-                        const headTrigger = (DRAGON_SEGMENT_SIZE * 1.5) + (p.size || 0) + 8;
-                        if (dh <= headTrigger) {
-                            head.x += (push.dx || 0) * PUSH_DISPLACE;
-                            head.y += (push.dy || 0) * PUSH_DISPLACE;
-                            // re-link segments so they follow the pushed head
-                            for (let si = 1; si < dragonSegments.length; si++) {
-                                const currentSegment = dragonSegments[si];
-                                const prevSegment = dragonSegments[si - 1];
-                                const angleToPrev = Math.atan2(prevSegment.y - currentSegment.y, prevSegment.x - currentSegment.x);
-                                currentSegment.angle = angleToPrev;
-                                currentSegment.x = prevSegment.x - Math.cos(angleToPrev) * SEGMENT_SPACING;
-                                currentSegment.y = prevSegment.y - Math.sin(angleToPrev) * SEGMENT_SPACING;
-                            }
-                        }
+                    // push avatar if near collision
+                    const dh = Math.hypot(avatarPosition.x - COLLIDE_POINT_X, avatarPosition.y - COLLIDE_POINT_Y);
+                    const avatarTrigger = (AVATAR_SIZE * 1.5) + (p.size || 0) + 8;
+                    if (dh <= avatarTrigger) {
+                        avatarPosition.x += (push.dx || 0) * PUSH_DISPLACE;
+                        avatarPosition.y += (push.dy || 0) * PUSH_DISPLACE;
                     }
                 } catch (e) {
                     // non-fatal; continue
@@ -2415,21 +1755,14 @@ function checkPelletCollidableCollision() {
 }
 
 
-function checkDragonEnemyCollision() {
+function checkAvatarEnemyCollision() {
+    const avatarRadius = AVATAR_SIZE * 1.5;
     enemies.forEach(enemy => {
-        for (let i = 0; i < dragonSegments.length; i++) {
-            const segment = dragonSegments[i];
-            const dx = segment.x - enemy.x;
-            const dy = segment.y - enemy.y;
-            let segmentSize = DRAGON_SEGMENT_SIZE;
-            if (i === 0) {
-                segmentSize *= 1.5;
-            }
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < segmentSize + (enemy.size / 2)) {
-                dragonHit = true;
-                break;
-            }
+        const dx = avatarPosition.x - enemy.x;
+        const dy = avatarPosition.y - enemy.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < avatarRadius + (enemy.size / 2)) {
+            avatarHit = true;
         }
     });
 }
@@ -2627,23 +1960,19 @@ function startNextLevel() {
             setLeaderboardVisibility(leaderboardVisible, false);
         }
     } catch (e) {}
-    initializeDragon();
+    initializeAvatar();
     // set collidables for the manager and sanitize against current viewport
     try {
         const levelConfig = levelWatcher.getLevelConfig();
-        console.log('Setting collidables in manager for startNextLevel:', levelConfig.collidables);
-    collidableManager.set(levelConfig.collidables || []);
-    collidableManager.buildGrid(128, WORLD_WIDTH, WORLD_HEIGHT);
-    collidableManager.sanitize(WORLD_WIDTH, WORLD_HEIGHT);
-        console.log('Collidable manager now has', collidableManager.list.length, 'collidables');
+        collidableManager.set(levelConfig.collidables || []);
+        collidableManager.buildGrid(128, WORLD_WIDTH, WORLD_HEIGHT);
+        collidableManager.sanitize(WORLD_WIDTH, WORLD_HEIGHT);
         
         // Load the background image for this level
         if (levelConfig.background) {
             loadBackgroundImage(levelConfig.background);
         }
-    } catch (e) {
-        console.error('Error setting collidables in startNextLevel:', e);
-    }
+    } catch (e) {}
     updateScore();
     if (gameLoopInterval) clearInterval(gameLoopInterval);
     const levelConfig2 = levelWatcher.getLevelConfig();
@@ -2658,7 +1987,7 @@ function startNextLevel() {
 function restartGame() {
     isPaused = false;
     isGameOver = false;
-    dragonHit = false;
+    avatarHit = false;
     if (levelWatcher) levelWatcher.reset();
     enemiesDestroyed = 0;
     sessionKills = 0; // full restart clears session total
@@ -2672,23 +2001,19 @@ function restartGame() {
     splashScreen.style.display = 'none';
     // Show chevron cursor for gameplay
     showChevronCursor();
-    initializeDragon();
+    initializeAvatar();
     // set collidables for the manager and sanitize against current viewport
     try {
         const levelConfig = levelWatcher.getLevelConfig();
-        console.log('Setting collidables in manager for restartGame:', levelConfig.collidables);
-    collidableManager.set(levelConfig.collidables || []);
-    collidableManager.buildGrid(128, WORLD_WIDTH, WORLD_HEIGHT);
-    collidableManager.sanitize(WORLD_WIDTH, WORLD_HEIGHT);
-        console.log('Collidable manager now has', collidableManager.list.length, 'collidables');
+        collidableManager.set(levelConfig.collidables || []);
+        collidableManager.buildGrid(128, WORLD_WIDTH, WORLD_HEIGHT);
+        collidableManager.sanitize(WORLD_WIDTH, WORLD_HEIGHT);
         
         // Load the background image for this level
         if (levelConfig.background) {
             loadBackgroundImage(levelConfig.background);
         }
-    } catch (e) {
-        console.error('Error setting collidables in restartGame:', e);
-    }
+    } catch (e) {}
     updateScore();
     if (gameLoopInterval) clearInterval(gameLoopInterval);
     const levelConfig2 = levelWatcher.getLevelConfig();
@@ -2766,24 +2091,24 @@ function animate() {
         }
     } catch (e) {}
 
-    updateDragon(dt);
+    updateAvatar(dt);
     updatePellets(dt);
     try { checkPelletCollidableCollision(); } catch (e) {}
     updateEnemies(dt);
 
-    checkDragonCollidableCollision();
-    checkDragonEnemyCollision();
+    checkAvatarCollidableCollision();
+    checkAvatarEnemyCollision();
     checkPelletEnemyCollision();
 
     // Draw scene in world coordinates
     drawCollidables();
-    drawDragon();
+    drawAvatar();
     drawPellets();
     drawEnemies();
 
     ctx.restore();
 
-    if (dragonHit) {
+    if (avatarHit) {
         endGame();
         return;
     }
@@ -2807,8 +2132,7 @@ function animate() {
 
 function shootPellet() {
     if (isPaused) return;
-    const head = dragonSegments[0];
-    const angle = head.angle;
+    const angle = avatarPosition.angle;
     
     // Use object pooling for better performance
     let pellet = projectilePool.pop();
@@ -2816,12 +2140,12 @@ function shootPellet() {
         pellet = {};
     }
     
-    // Boosted pellets are slightly faster and deal more damage (reduced from previous)
+    // Boosted pellets are slightly faster and deal more damage
     const speedMultiplier = isBoosting ? 1.25 : 1;
     const currentSpeed = PELLET_SPEED * speedMultiplier;
     
-    pellet.x = head.x + Math.cos(angle) * DRAGON_SEGMENT_SIZE * 2;
-    pellet.y = head.y + Math.sin(angle) * DRAGON_SEGMENT_SIZE * 2;
+    pellet.x = avatarPosition.x + Math.cos(angle) * AVATAR_SIZE * 2;
+    pellet.y = avatarPosition.y + Math.sin(angle) * AVATAR_SIZE * 2;
     pellet.vx = Math.cos(angle) * currentSpeed;
     pellet.vy = Math.sin(angle) * currentSpeed;
     pellet.size = isBoosting ? 9 : 8; // Slightly bigger pellets during boost
@@ -2846,60 +2170,34 @@ function getBoostStatusText() {
 }
 
 function startBoost() {
-    // Instant burst: each tap fires multiplier*3 boosted pellets immediately
-    if (isPaused || !levelWatcher) return;
+    // Quick burst boost: no cooldown, shorter duration, less powerful but freely usable
+    if (isPaused || !levelWatcher || isBoosting) return;
     
     const levelConfig = levelWatcher.getLevelConfig();
     if (!levelConfig) return;
 
-    const multiplier = Number(levelConfig.multiplier) || 1;
-    const pelletsToFire = multiplier * 3;
-    
-    // Temporarily enable boost mode for enhanced pellets
     isBoosting = true;
     
-    // Fire all pellets with slight angle spread for visual effect
-    const head = dragonSegments[0];
-    const baseAngle = head.angle;
-    const spreadAngle = 0.15; // radians spread between pellets
+    // update UI
+    if (shootInstructions) shootInstructions.innerText = 'Boosted!';
     
-    for (let i = 0; i < pelletsToFire; i++) {
-        // Calculate spread: center pellets, spread outward
-        const offsetIndex = i - (pelletsToFire - 1) / 2;
-        const angle = baseAngle + (offsetIndex * spreadAngle);
-        
-        // Create boosted pellet
-        let pellet = projectilePool.pop() || {};
-        const currentSpeed = PELLET_SPEED * 1.25;
-        
-        pellet.x = head.x + Math.cos(angle) * DRAGON_SEGMENT_SIZE * 2;
-        pellet.y = head.y + Math.sin(angle) * DRAGON_SEGMENT_SIZE * 2;
-        pellet.vx = Math.cos(angle) * currentSpeed;
-        pellet.vy = Math.sin(angle) * currentSpeed;
-        pellet.size = 9;
-        pellet.color = `hsl(${45 + Math.random() * 30}, 100%, 60%)`; // Gold/orange
-        pellet.timeAlive = 0;
-        pellet.lifespan = 8.5;
-        pellet.damage = 1.5;
-        
-        projectiles.push(pellet);
-    }
-    
-    // End boost mode immediately (it was just for the burst)
-    isBoosting = false;
-    
-    // Visual feedback
-    isMouthOpen = true;
-    setTimeout(() => { isMouthOpen = false; }, OPEN_MOUTH_DURATION);
-    
-    // Brief UI feedback
-    if (shootInstructions) {
-        shootInstructions.innerText = `Burst! x${pelletsToFire}`;
-        setTimeout(() => {
-            if (shootInstructions) shootInstructions.innerText = 'Tap to boost';
-        }, 300);
-    }
+    // Fire one immediately for responsiveness
+    shootPellet();
+    clearInterval(pelletInterval);
+    const boostedSpeed = levelConfig.aimSpeed * (Number(levelConfig.multiplier) || 1);
+    pelletInterval = setInterval(shootPellet, 1000 / boostedSpeed);
+
+    boostTimeout = setTimeout(() => {
+        // boost ending: restore normal fire rate (no cooldown)
+        isBoosting = false;
+        clearInterval(pelletInterval);
+        const currentLevel = levelWatcher.getLevelConfig();
+        pelletInterval = setInterval(shootPellet, 1000 / (currentLevel.aimSpeed || 1));
+        boostTimeout = null;
+        if (shootInstructions) shootInstructions.innerText = getBoostStatusText();
+    }, BOOST_DURATION);
 }
+
 function stopBoost() {
     // No-op for now; retained for API compatibility
 }
@@ -3041,7 +2339,7 @@ window.onload = async function() {
     // Ensure the canvas and camera are sized before we compute viewport-aligned placements
     resizeCanvas();
     await loadLevelsAndMonsters();
-    await loadDragonImages(); // Load dragon sprite images
+    await loadAvatarSprites(); // Load avatar sprite images
     // create a LevelWatcher now that `levels` is populated
     levelWatcher = new LevelWatcher(levels);
     
