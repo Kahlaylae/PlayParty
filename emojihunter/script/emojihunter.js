@@ -282,11 +282,55 @@ bgAudio.volume = 0.45;
 // Pop sound for enemy death (cloned each play for overlap)
 const popSoundBase = new Audio('assets/pop.mp3');
 popSoundBase.preload = 'auto';
+
+// Batch pop sound for rapid kills (3+ in 0.88s)
+const popx3SoundBase = new Audio('assets/popx3.mp3');
+popx3SoundBase.preload = 'auto';
+popx3SoundBase.loop = true;
+
+// Kill tracking for batch sound switching
+let recentKillTimes = []; // timestamps of recent kills
+let popx3Playing = false;
+let popx3Instance = null;
+let popx3StopTimeout = null;
+
 function playPop() {
     if (isMuted) return;
-    const pop = popSoundBase.cloneNode();
-    pop.volume = 0.3;
-    pop.play().catch(() => {});
+    
+    const now = performance.now();
+    recentKillTimes.push(now);
+    
+    // Keep only kills within the last 880ms
+    recentKillTimes = recentKillTimes.filter(t => now - t < 880);
+    
+    // If 3+ kills in 880ms, switch to batch sound
+    if (recentKillTimes.length >= 3) {
+        // Start or continue popx3
+        if (!popx3Playing) {
+            popx3Instance = popx3SoundBase.cloneNode();
+            popx3Instance.loop = true;
+            popx3Instance.volume = 0.35;
+            popx3Instance.play().catch(() => {});
+            popx3Playing = true;
+        }
+        
+        // Reset the stop timer - keep playing until 1s gap
+        if (popx3StopTimeout) clearTimeout(popx3StopTimeout);
+        popx3StopTimeout = setTimeout(() => {
+            if (popx3Instance) {
+                popx3Instance.pause();
+                popx3Instance.currentTime = 0;
+                popx3Instance = null;
+            }
+            popx3Playing = false;
+            recentKillTimes = [];
+        }, 1000);
+    } else if (!popx3Playing) {
+        // Normal single pop for sparse kills
+        const pop = popSoundBase.cloneNode();
+        pop.volume = 0.3;
+        pop.play().catch(() => {});
+    }
 }
 
 // Await the first user gesture; the splash will be used to both enable audio and resume the game
@@ -446,12 +490,14 @@ class Collidable {
     draw(ctx) {
         if (!this.emoji) return;
         ctx.save();
-        // Use scale for visual size (base 32px * scale)
-        const fontSize = Math.max(16, Math.floor(32 * this.scale));
+        // Scale = 32px * obstacles.json scale value
+        const scale = (this.scale > 0) ? this.scale : 1;
+        const fontSize = Math.max(16, Math.floor(32 * scale));
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = `${fontSize}px sans-serif`;
-        ctx.fillStyle = '#000'; // Required for Safari
+        // Safari needs explicit emoji font family to scale emojis properly
+        ctx.font = `${fontSize}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+        ctx.fillStyle = '#000'; // Required for Safari to render
         ctx.fillText(this.emoji, this.x, this.y);
         ctx.restore();
     }
@@ -1237,19 +1283,22 @@ function drawParallaxBackground() {
     const tiltX = cursorOffsetY * maxTilt; // Y cursor offset affects X-axis tilt
     const tiltY = cursorOffsetX * maxTilt; // X cursor offset affects Y-axis tilt
     
-    // Background is slightly larger than canvas to allow for parallax + tilt
-    const oversize = maxShift * 2 + 40; // Extra padding for tilt
+    // Background covers full canvas with extra padding for parallax + tilt
+    const oversize = maxShift * 2 + 60; // Extra padding for tilt and edge coverage
     const imgAspect = img.width / img.height;
     const canvasAspect = VIRTUAL_WIDTH / VIRTUAL_HEIGHT;
     
     let drawWidth, drawHeight;
     
+    // Always cover entire canvas - use max of both dimensions
     if (imgAspect > canvasAspect) {
+        // Wide image: fit height, width will overflow
         drawHeight = VIRTUAL_HEIGHT + oversize;
-        drawWidth = drawHeight * imgAspect;
+        drawWidth = Math.max(VIRTUAL_WIDTH + oversize, drawHeight * imgAspect);
     } else {
+        // Tall image: fit width, height will overflow
         drawWidth = VIRTUAL_WIDTH + oversize;
-        drawHeight = drawWidth / imgAspect;
+        drawHeight = Math.max(VIRTUAL_HEIGHT + oversize, drawWidth / imgAspect);
     }
     
     // Save context state before applying transforms

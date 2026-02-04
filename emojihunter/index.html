@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Emoji Hunter | Play Party Online</title>
-    
     <link rel="icon" type="image/png" href="../assets/favicon.png">
     <meta name="google-adsense-account" content="ca-pub-3098807263908139">
     
@@ -19,7 +18,22 @@
     
     <style>
         /* Game-specific UI styles (injected elements from JS) */
-        .game-window { cursor: none; }
+        .game-window {
+            cursor: none;
+        }
+        
+        /* Desktop: enforce fixed height with margin at bottom */
+        @media (min-width: 601px) and (min-height: 600px) {
+            main {
+                padding: 1rem;
+                justify-content: flex-start;
+            }
+            .game-window {
+                height: 600px !important;
+                max-height: 600px !important;
+                flex-shrink: 0;
+            }
+        }
         
         #gameCanvas {
             position: absolute;
