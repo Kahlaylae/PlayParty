@@ -22,16 +22,45 @@
             cursor: none;
         }
         
-        /* Desktop: enforce fixed height with margin at bottom */
-        @media (min-width: 601px) and (min-height: 600px) {
+        /* Desktop (>600px): 16:9 aspect ratio, centered with padding */
+        @media (min-width: 601px) {
             main {
                 padding: 1rem;
-                justify-content: flex-start;
+                justify-content: center;
+                align-items: center;
             }
             .game-window {
-                height: 600px !important;
-                max-height: 600px !important;
+                /* 16:9 ratio - max width/height constrained by viewport */
+                width: min(calc(100vw - 2rem), calc((100vh - var(--nav-height) - 2rem) * 16 / 9));
+                height: min(calc(100vh - var(--nav-height) - 2rem), calc((100vw - 2rem) * 9 / 16));
+                max-width: 1200px;
+                max-height: 675px; /* 1200 * 9/16 */
+                aspect-ratio: 16 / 9;
                 flex-shrink: 0;
+            }
+        }
+        
+        /* Mobile (<600px): 9:16 aspect ratio, fill screen with small padding */
+        @media (max-width: 600px) {
+            main {
+                padding: 8px !important;
+                justify-content: center !important;
+                align-items: center !important;
+            }
+            .game-window {
+                /* Override design.css absolute positioning */
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                bottom: auto !important;
+                /* 9:16 ratio - fill most of the screen */
+                width: min(calc(100vw - 16px), calc((100vh - var(--nav-height) - 16px) * 9 / 16)) !important;
+                height: min(calc(100vh - var(--nav-height) - 16px), calc((100vw - 16px) * 16 / 9)) !important;
+                max-width: none !important;
+                aspect-ratio: 9 / 16;
+                border-radius: var(--radius-md) !important;
+                box-shadow: var(--shadow-md) !important;
             }
         }
         
@@ -152,7 +181,7 @@
         <section class="ad-container" style="padding: 8px; text-align: center;">
             <ins class="adsbygoogle"
                  style="display:block"
-                 data-ad-client="ca-pub-3098807263908139"
+      \           data-ad-client="ca-pub-3098807263908139"
                  data-ad-slot="5178682122"
                  data-ad-format="auto"
                  data-full-width-responsive="true"></ins>

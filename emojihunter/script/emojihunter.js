@@ -400,11 +400,13 @@ const BOSS_ENEMY_SPAWN_THRESHOLD = 5;
 let levels = {};
 
 // --- VIRTUAL CANVAS / WORLD / CAMERA / TIMING ---
-// Virtual canvas provides a fixed coordinate system that scales to any viewport
-const VIRTUAL_WIDTH = 800;
-const VIRTUAL_HEIGHT = 600;
+// Virtual canvas adapts to viewport aspect ratio while maintaining consistent gameplay area
+// Desktop (16:9): wider playfield | Mobile (9:16): taller playfield
+const VIRTUAL_BASE = 600; // Base dimension - shortest side is always 600
+let VIRTUAL_WIDTH = 800;  // Will adapt to viewport
+let VIRTUAL_HEIGHT = 600; // Will adapt to viewport
 let canvasScale = 1; // Scale factor from virtual to screen coords
-let canvasOffsetX = 0; // Letterbox/pillarbox offset
+let canvasOffsetX = 0; // Letterbox/pillarbox offset (should be 0 with adaptive sizing)
 let canvasOffsetY = 0;
 
 // World size matches virtual canvas for consistent gameplay
@@ -450,6 +452,37 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 // -------------------------
 // Obstacle system - emoji-based collidables
 // -------------------------
+// Cache for pre-rendered emoji sprites (Safari workaround)
+const emojiSpriteCache = new Map();
+
+// Pre-render emoji to offscreen canvas at specific size (forces Safari to scale)
+function getEmojiSprite(emoji, size) {
+    const key = `${emoji}_${size}`;
+    if (emojiSpriteCache.has(key)) {
+        return emojiSpriteCache.get(key);
+    }
+    
+    // Create offscreen canvas slightly larger than needed
+    const padding = Math.ceil(size * 0.2);
+    const canvasSize = size + padding * 2;
+    const offscreen = document.createElement('canvas');
+    offscreen.width = canvasSize;
+    offscreen.height = canvasSize;
+    const offCtx = offscreen.getContext('2d');
+    
+    // Draw emoji centered on offscreen canvas
+    offCtx.textAlign = 'center';
+    offCtx.textBaseline = 'middle';
+    offCtx.font = `${size}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+    offCtx.fillStyle = '#000';
+    offCtx.fillText(emoji, canvasSize / 2, canvasSize / 2);
+    
+    // Cache the sprite
+    const sprite = { canvas: offscreen, size: canvasSize };
+    emojiSpriteCache.set(key, sprite);
+    return sprite;
+}
+
 class Collidable {
     constructor(opts = {}) {
         this.x = Number(opts.x || 0);
@@ -459,9 +492,11 @@ class Collidable {
         this.id = opts.id || `c-${Math.random().toString(36).slice(2,9)}`;
         this.collidesWith = Object.assign({ dragon: true, pellets: true, enemies: false }, opts.collidesWith || {});
         this.active = true;
-        // Hitbox radius = emoji visual size + 2px buffer
-        // Base emoji renders at ~38px for scale 1, radius is half + buffer
-        this.radius = Number(opts.radius || (20 * this.scale + 2));
+        // Hitbox radius = 40% of visual size for tight, forgiving collisions
+        // Visual size: 32px * scale, so hitbox = 16 * scale * 0.4
+        // Cap at 30px to keep large obstacles fair
+        const visualRadius = 16 * this.scale;
+        this.radius = Number(opts.radius || Math.min(30, visualRadius * 0.4));
     }
 
     // Push-out vector for circle collision
@@ -489,17 +524,19 @@ class Collidable {
 
     draw(ctx) {
         if (!this.emoji) return;
-        ctx.save();
-        // Scale = 32px * obstacles.json scale value
         const scale = (this.scale > 0) ? this.scale : 1;
         const fontSize = Math.max(16, Math.floor(32 * scale));
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        // Safari needs explicit emoji font family to scale emojis properly
-        ctx.font = `${fontSize}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
-        ctx.fillStyle = '#000'; // Required for Safari to render
-        ctx.fillText(this.emoji, this.x, this.y);
-        ctx.restore();
+        
+        // Use pre-rendered sprite (Safari-safe scaling)
+        const sprite = getEmojiSprite(this.emoji, fontSize);
+        const drawSize = sprite.size;
+        ctx.drawImage(
+            sprite.canvas,
+            this.x - drawSize / 2,
+            this.y - drawSize / 2,
+            drawSize,
+            drawSize
+        );
     }
 
     clampToViewport(w, h) {
@@ -1003,24 +1040,26 @@ function resizeCanvas() {
     canvas.width = Math.round(cssWidth * dpr);
     canvas.height = Math.round(cssHeight * dpr);
 
-    // VIRTUAL CANVAS SYSTEM: Calculate scale to fit virtual canvas in viewport
-    // Maintain aspect ratio with letterboxing/pillarboxing as needed
-    const virtualAspect = VIRTUAL_WIDTH / VIRTUAL_HEIGHT;
+    // ADAPTIVE VIRTUAL CANVAS: Adjust dimensions to match viewport aspect ratio
+    // This eliminates letterboxing - the entire canvas is playable area
     const screenAspect = cssWidth / cssHeight;
     
-    if (screenAspect > virtualAspect) {
-        // Screen is wider than virtual - pillarbox (black bars on sides)
-        canvasScale = cssHeight / VIRTUAL_HEIGHT;
-        canvasOffsetX = (cssWidth - (VIRTUAL_WIDTH * canvasScale)) / 2;
-        canvasOffsetY = 0;
+    if (screenAspect >= 1) {
+        // Landscape/Desktop: height is base, width expands
+        VIRTUAL_HEIGHT = VIRTUAL_BASE;
+        VIRTUAL_WIDTH = Math.round(VIRTUAL_BASE * screenAspect);
     } else {
-        // Screen is taller than virtual - letterbox (black bars top/bottom)
-        canvasScale = cssWidth / VIRTUAL_WIDTH;
-        canvasOffsetX = 0;
-        canvasOffsetY = (cssHeight - (VIRTUAL_HEIGHT * canvasScale)) / 2;
+        // Portrait/Mobile: width is base, height expands
+        VIRTUAL_WIDTH = VIRTUAL_BASE;
+        VIRTUAL_HEIGHT = Math.round(VIRTUAL_BASE / screenAspect);
     }
     
-    // World size stays fixed at virtual dimensions for consistent gameplay
+    // Scale maps virtual coords to screen coords (no letterboxing needed)
+    canvasScale = cssWidth / VIRTUAL_WIDTH; // Same as cssHeight / VIRTUAL_HEIGHT
+    canvasOffsetX = 0;
+    canvasOffsetY = 0;
+    
+    // World size matches virtual dimensions
     WORLD_WIDTH = VIRTUAL_WIDTH;
     WORLD_HEIGHT = VIRTUAL_HEIGHT;
     camera.scale = canvasScale;
@@ -1251,92 +1290,97 @@ let smoothCursorX = VIRTUAL_WIDTH / 2;
 let smoothCursorY = VIRTUAL_HEIGHT / 2;
 const CURSOR_SMOOTHING = 0.08; // Lower = smoother/slower (0.05-0.15 range)
 
-function drawParallaxBackground() {
+// Draw background to fill ENTIRE canvas (including letterbox/pillarbox areas)
+// This is called BEFORE the virtual coordinate transform is applied
+// On mobile (<600px), scales 16:9 images to fill 9:16 canvas (crops sides)
+function drawParallaxBackgroundFullCanvas() {
     if (!currentBackgroundImage) {
-        // Fallback to solid color if no background loaded
-        ctx.fillStyle = 'rgba(13, 17, 23, 0.8)';
-        ctx.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-        return;
+        return; // Let the solid color fill from animate() show through
     }
     
     const img = currentBackgroundImage;
+    const _dpr = (camera && camera.dpr) ? camera.dpr : 1;
+    
+    // Get actual canvas dimensions in CSS pixels
+    const canvasW = canvas.width / _dpr;
+    const canvasH = canvas.height / _dpr;
     
     // Smooth cursor tracking - lerp toward actual cursor position
     smoothCursorX += (target.x - smoothCursorX) * CURSOR_SMOOTHING;
     smoothCursorY += (target.y - smoothCursorY) * CURSOR_SMOOTHING;
     
-    // Normalize smoothed cursor position to -1 to 1 range from center
-    const centerX = VIRTUAL_WIDTH / 2;
-    const centerY = VIRTUAL_HEIGHT / 2;
-    const cursorOffsetX = (smoothCursorX - centerX) / centerX; // -1 to 1
-    const cursorOffsetY = (smoothCursorY - centerY) / centerY; // -1 to 1
+    // Normalize smoothed cursor position to -1 to 1 range from center (in virtual coords)
+    const centerVirtualX = VIRTUAL_WIDTH / 2;
+    const centerVirtualY = VIRTUAL_HEIGHT / 2;
+    const cursorOffsetX = (smoothCursorX - centerVirtualX) / centerVirtualX; // -1 to 1
+    const cursorOffsetY = (smoothCursorY - centerVirtualY) / centerVirtualY; // -1 to 1
     
-    // === PARALLAX SHIFT ===
-    // Background moves TOWARD cursor direction for depth illusion
-    const maxShift = 15; // Maximum pixels the background can shift
-    const shiftX = cursorOffsetX * maxShift;
-    const shiftY = cursorOffsetY * maxShift;
+    // === PARALLAX SHIFT (scaled to canvas size) ===
+    const maxShiftRatio = 0.02; // 2% of canvas size max shift
+    const shiftX = cursorOffsetX * canvasW * maxShiftRatio;
+    const shiftY = cursorOffsetY * canvasH * maxShiftRatio;
     
     // === 3D TILT (Photoscopic Effect) ===
-    // Subtle perspective skew - tilts toward cursor like iOS Maps
-    const maxTilt = 0.015; // Maximum skew factor (keep subtle: 0.01-0.03)
-    const tiltX = cursorOffsetY * maxTilt; // Y cursor offset affects X-axis tilt
-    const tiltY = cursorOffsetX * maxTilt; // X cursor offset affects Y-axis tilt
+    const maxTilt = 0.015;
+    const tiltX = cursorOffsetY * maxTilt;
+    const tiltY = cursorOffsetX * maxTilt;
     
-    // Background covers full canvas with extra padding for parallax + tilt
-    const oversize = maxShift * 2 + 60; // Extra padding for tilt and edge coverage
-    const imgAspect = img.width / img.height;
-    const canvasAspect = VIRTUAL_WIDTH / VIRTUAL_HEIGHT;
+    // Calculate draw size to COVER entire canvas with oversize for parallax + tilt
+    const oversize = Math.max(canvasW, canvasH) * 0.1; // 10% extra
+    const imgAspect = img.width / img.height; // Use original image aspect ratio
+    const canvasAspect = canvasW / canvasH;
     
     let drawWidth, drawHeight;
     
-    // Always cover entire canvas - use max of both dimensions
+    // Cover entire canvas - scale to fill (crop overflow)
+    // For landscape image on portrait canvas: scale by height, crop width
+    // For portrait image on landscape canvas: scale by width, crop height
     if (imgAspect > canvasAspect) {
-        // Wide image: fit height, width will overflow
-        drawHeight = VIRTUAL_HEIGHT + oversize;
-        drawWidth = Math.max(VIRTUAL_WIDTH + oversize, drawHeight * imgAspect);
+        // Image is wider than canvas - fit to height, width will overflow/crop
+        drawHeight = canvasH + oversize;
+        drawWidth = drawHeight * imgAspect;
     } else {
-        // Tall image: fit width, height will overflow
-        drawWidth = VIRTUAL_WIDTH + oversize;
-        drawHeight = Math.max(VIRTUAL_HEIGHT + oversize, drawWidth / imgAspect);
+        // Image is taller than canvas - fit to width, height will overflow/crop
+        drawWidth = canvasW + oversize;
+        drawHeight = drawWidth / imgAspect;
     }
     
-    // Save context state before applying transforms
-    ctx.save();
+    // Center coordinates (in actual canvas space)
+    const centerX = canvasW / 2;
+    const centerY = canvasH / 2;
     
-    // Apply 3D-style transform from center of canvas
-    // setTransform(a, b, c, d, e, f) = matrix transformation
-    // a=scaleX, b=skewY, c=skewX, d=scaleY, e=translateX, f=translateY
-    const scaleBoost = 1.02; // Slight scale to hide edges during tilt
+    // Save and reset to screen coordinates for background
+    ctx.save();
+    ctx.setTransform(_dpr, 0, 0, _dpr, 0, 0); // Reset to 1:1 screen pixels
+    
+    // Apply 3D tilt transform from center
+    const scaleBoost = 1.02;
     ctx.translate(centerX, centerY);
-    ctx.transform(
-        scaleBoost,      // scaleX (slight zoom)
-        tiltX,           // skewY (vertical tilt based on cursor Y)
-        tiltY,           // skewX (horizontal tilt based on cursor X)
-        scaleBoost,      // scaleY (slight zoom)
-        0, 0
-    );
+    ctx.transform(scaleBoost, tiltX, tiltY, scaleBoost, 0, 0);
     ctx.translate(-centerX, -centerY);
     
-    // Center the oversized image with parallax shift
-    const drawX = (VIRTUAL_WIDTH - drawWidth) / 2 + shiftX;
-    const drawY = (VIRTUAL_HEIGHT - drawHeight) / 2 + shiftY;
-    
-    // Draw background with transform applied
+    // Draw centered with parallax shift - image scales to fill, excess is cropped
+    const drawX = (canvasW - drawWidth) / 2 + shiftX;
+    const drawY = (canvasH - drawHeight) / 2 + shiftY;
     ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
     
-    // Restore context (remove tilt transform)
-    ctx.restore();
-    
-    // Add a subtle vignette overlay for depth (drawn without tilt)
+    // Subtle vignette overlay
     const gradient = ctx.createRadialGradient(
-        centerX, centerY, VIRTUAL_WIDTH * 0.35,
-        centerX, centerY, VIRTUAL_WIDTH * 0.75
+        centerX, centerY, Math.min(canvasW, canvasH) * 0.35,
+        centerX, centerY, Math.max(canvasW, canvasH) * 0.6
     );
     gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.25)');
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+    ctx.fillRect(0, 0, canvasW, canvasH);
+    
+    ctx.restore();
+}
+
+// Legacy function kept for compatibility - now just a no-op since background is drawn separately
+function drawParallaxBackground() {
+    // Background is now drawn by drawParallaxBackgroundFullCanvas() before the virtual transform
+    // This function is kept for any code that calls it directly
 }
 
 function drawAvatar() {
@@ -2113,6 +2157,9 @@ function animate() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent';
+    
+    // Draw parallax background to fill ENTIRE canvas (before virtual transform)
+    drawParallaxBackgroundFullCanvas();
 
     // Set transform to map world -> screen using virtual canvas scale and DPR
     ctx.save();
@@ -2120,8 +2167,7 @@ function animate() {
     const _s = canvasScale * _dpr;
     ctx.setTransform(_s, 0, 0, _s, canvasOffsetX * _dpr, canvasOffsetY * _dpr);
     
-    // Draw parallax background first (behind everything)
-    drawParallaxBackground();
+    // Background already drawn above - no need to call drawParallaxBackground() here
     
     // Performance optimizations for mobile
     ctx.imageSmoothingEnabled = false; // Disable for better performance

@@ -3,36 +3,36 @@
     "name": "towers",
     "emoji": "🗼",
     "speed": 2,
-    "scale": 2
+    "scale": 5
   },
   {
     "name": "bats",
     "emoji": "🦇",
     "speed": 3,
-    "scale": 1
+    "scale": 1.5
   },
   {
     "name": "plane",
     "emoji": "🛩️",
     "speed": 4,
-    "scale": 2
+    "scale": 6
   },
   {
     "name": "tornado",
     "emoji": "🌪️",
-    "speed": 1,
-    "scale": 3
+    "speed": 5,
+    "scale": 10
   },
   {
     "name": "clouds",
     "emoji": "☁️",
-    "speed": 1,
+    "speed": 0.5,
     "scale": 3
   },
   {
     "name": "burg",
     "emoji": "🏔️",
     "speed": 1,
-    "scale": 2
+    "scale": 9
   }
 ]
