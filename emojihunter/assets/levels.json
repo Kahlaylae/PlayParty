@@ -1,7 +1,7 @@
 [
   {
     "level": 1,
-    "target": 25,
+    "target": 5,
     "emoji": "oni,virus",
     "aimSpeed": 1,
     "multiplier": 1,
@@ -13,7 +13,7 @@
   },
   {
     "level": 2,
-    "target": 50,
+    "target": 5,
     "emoji": "ghost,zombie,pig",
     "aimSpeed": 1,
     "multiplier": 3 ,
@@ -25,7 +25,7 @@
   },
   {
     "level": 3,
-    "target": 80,
+    "target": 5,
     "emoji": "oni,ghost,zombie,germ",
     "aimSpeed": 2,
     "multiplier": 3,
@@ -38,7 +38,7 @@
   },
   {
     "level": 4,
-    "target": 140,
+    "target": 5,
     "emoji": "pig,zombie,oni,sakura",
     "aimSpeed": 2,
     "multiplier": 4,
@@ -51,7 +51,7 @@
   },
   {
     "level": 5,
-    "target": 200,
+    "target": 5,
     "emoji": "alien,ghost,pig,",
     "aimSpeed": 3,
     "multiplier": 5,
@@ -67,7 +67,7 @@
     "emoji": "oni,ghost,alien,pig,zombie,virus,germ",
     "aimSpeed": 2,
     "multiplier": 12,
-    "spawnRate": 15,
+    "spawnRate": 55,
     "background": "assets/levelbackgrounds/finallevelbackground.png",
     "obstacles": [
       { "name": "clouds", "set": [".top", ".trailing", ".leading"] },

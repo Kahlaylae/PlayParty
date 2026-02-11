@@ -492,11 +492,11 @@ class Collidable {
         this.id = opts.id || `c-${Math.random().toString(36).slice(2,9)}`;
         this.collidesWith = Object.assign({ dragon: true, pellets: true, enemies: false }, opts.collidesWith || {});
         this.active = true;
-        // Hitbox radius = 40% of visual size for tight, forgiving collisions
-        // Visual size: 32px * scale, so hitbox = 16 * scale * 0.4
-        // Cap at 30px to keep large obstacles fair
-        const visualRadius = 16 * this.scale;
-        this.radius = Number(opts.radius || Math.min(30, visualRadius * 0.4));
+        // Hitbox radius = 25% of visual size for very tight collisions
+        // Visual size: 32px * scale, so hitbox = 16 * scale * 0.25
+        // Cap at 20px to keep large obstacles fair
+        const visualRadius = 26 * this.scale;
+        this.radius = Number(opts.radius || Math.min(20, visualRadius * 0.6));
     }
 
     // Push-out vector for circle collision
@@ -526,6 +526,17 @@ class Collidable {
         if (!this.emoji) return;
         const scale = (this.scale > 0) ? this.scale : 1;
         const fontSize = Math.max(16, Math.floor(32 * scale));
+        
+        // DEBUG: Draw hitbox circle (red with transparency)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
         
         // Use pre-rendered sprite (Safari-safe scaling)
         const sprite = getEmojiSprite(this.emoji, fontSize);
@@ -883,7 +894,8 @@ async function loadLevelsAndMonsters() {
                 if (!def) return;
                 
                 const scale = Math.max(1, Number(def.scale || 1));
-                const radius = 32 * scale; // hitbox radius
+                // Hitbox: fixed 20px max - easy to tune
+                const radius = 20;
                 const speed = Number(def.speed || 1);
 
                 set.forEach(position => {
