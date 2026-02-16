@@ -251,6 +251,14 @@ main {
     margin-bottom: 0.75rem;
 }
 
+.game-card .game-thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.75rem;
+}
+
 .game-card h3 {
     font-size: 1.1rem;
     font-weight: 700;
