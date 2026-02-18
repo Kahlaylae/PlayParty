@@ -1,0 +1,20 @@
+# robots.txt for playparty.online
+
+User-agent: *
+Allow: /
+
+# Block sensitive/non-content routes
+Disallow: /.git/
+Disallow: /.vscode/
+Disallow: /*.json$
+Disallow: /assets/*.json
+Disallow: /*/script/
+Disallow: /*/assets/*.json
+
+# Allow specific public assets
+Allow: /assets/*.png
+Allow: /assets/*.css
+Allow: /*/assets/*.png
+
+# Sitemap location
+Sitemap: https://playparty.online/sitemap.xml

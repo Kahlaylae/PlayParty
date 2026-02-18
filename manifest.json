@@ -1,6 +1,6 @@
 {
   "name": "Play Party Online",
-  "short_name": "PlayParty",
+  "short_name": "Play Party",
   "description": "Quality indie games for solo and multiplayer fun. Play free arcade games directly in your browser!",
   "start_url": "/",
   "display": "standalone",

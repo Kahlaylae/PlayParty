@@ -421,6 +421,15 @@ let __elapsedTime = 0;
 // --- BACKGROUND IMAGE SYSTEM ---
 let currentBackgroundImage = null;
 let backgroundImages = {}; // Cache loaded background images
+// Screen load images for desktop and mobile
+const SCREENLOAD_DESKTOP = 'assets/emojiscreenload.png';
+const SCREENLOAD_MOBILE = 'assets/emonjiscreenload-mobile.png';
+function isMobileViewport() {
+    return window.innerWidth < MINI_BREAKPOINT;
+}
+function getScreenLoadImage() {
+    return isMobileViewport() ? SCREENLOAD_MOBILE : SCREENLOAD_DESKTOP;
+}
 function loadBackgroundImage(src) {
     if (backgroundImages[src]) {
         currentBackgroundImage = backgroundImages[src];
@@ -937,7 +946,10 @@ async function loadLevelsAndMonsters() {
                 spawnRate: l.spawnRate || 1,
                 collidables: collidables,
                 multiplier: (l.multiplier !== undefined) ? Number(l.multiplier) : 2,
-                background: l.background || 'assets/levelbackgrounds/defaultbg.png'
+                // Use mobile background if viewport <600px
+                background: (typeof window !== 'undefined' && window.innerWidth < MINI_BREAKPOINT)
+                    ? l.background.replace('.png', '-mobile.png')
+                    : l.background || 'assets/levelbackgrounds/defaultbg.png'
             };
         });
     } catch (err) {
@@ -1884,6 +1896,13 @@ function updateScore() {
 }
 
 function showSplashScreen(title, message, prompt) {
+        // Always use the 16:9 image, gently stretched to fill the window (no bars)
+        if (title === '' && prompt === 'Click to begin') {
+            const bgUrl = 'assets/emojiscreenload.png';
+            splashScreen.style.background = `center/100% 100% no-repeat url('${bgUrl}')`;
+        } else {
+            splashScreen.style.background = '';
+        }
     // Hide chevron cursor and show pointer on splash screens
     hideChevronCursor();
     splashTitle.innerText = title;
@@ -1984,7 +2003,7 @@ function resumeGame() {
     if (pelletInterval) clearInterval(pelletInterval);
     // spawnRate multiplier: 1 = 1/sec, 2 = 2/sec, 0.5 = 1 every 2 sec
     gameLoopInterval = setInterval(spawnEnemy, 1000 / (levelConfig.spawnRate || 1));
-    pelletInterval = setInterval(shootPellet, 1000 / (levelConfig.aimSpeed || 1));
+    pelletInterval = setInterval(shootPellet, 1000 / levelConfig.aimSpeed);
     requestAnimationFrame(animate);
     // resume audio if it was paused by pause (but don't override visibility-paused state)
     try {
