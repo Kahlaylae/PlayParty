@@ -2,6 +2,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebas
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
 import { getFirestore, collection, getDocs, query as firestoreQuery, orderBy, limit as firestoreLimit, startAfter, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { createUI } from "./ui.js";
+import { initAudioControls, tryPlayAudio, playPop, pauseBackgroundForPause, pauseBackgroundForGameOver, resumeBackgroundAfterPause, handleVisibilityAudio } from "./audio.js";
+import { Collidable, CollidableManager } from "./world.js";
+import { loadLevelsAndMonsters, LevelWatcher, calculateObstaclePosition, MINI_BREAKPOINT } from "./levelconfig.js";
+import { drawParallaxBackgroundFullCanvas, drawParallaxBackground, drawAvatar, drawCollidables, drawPellets, drawEnemies } from "./objectdraw.js";
+import { screenToWorld, worldToScreen, loadAvatarSprites, getLottieSpriteCanvas } from "./utils.js";
+import { resizeCamera } from "./camera.js";
+import { createEngine } from "./engine.js";
+import { CONTROL_MODES, loadControlSettings, saveControlMode } from "./controls.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBeZMtBjXU06ebhdAPrDnOGxNFIheeutwU",
@@ -26,196 +35,12 @@ signInAnonymously(auth).catch(e => console.warn('Anonymous sign-in failed', e));
 // All original game logic retained; do not rename this file unless updating index.html.
 
 // UI variables will be initialized by createUI()
-let canvas, ctx, scoreElement, splashScreen, splashTitle, splashMessage, splashPrompt, shootInstructions;
+let canvas, ctx, scoreElement, splashScreen, splashTitle, splashMessage, splashPrompt;
 
 // Game container - all game elements append here instead of body
 const gameContainer = document.getElementById('game-container') || document.body;
 
-// Create control buttons dynamically so the entire UI is managed from JS
-function createControlButtons() {
-    const makeBtn = (id, text, aria, title) => {
-        const b = document.createElement('button');
-        b.id = id;
-        b.type = 'button';
-        b.setAttribute('aria-label', aria || '');
-        if (title) b.title = title;
-        b.textContent = text;
-        b.className = 'top-control';
-        return b;
-    };
-
-    const audioBtn = makeBtn('audio-toggle', '🔊', 'Toggle audio', 'Toggle audio');
-    const leaderboardBtn = makeBtn('leaderboard-toggle', '📊', 'Toggle leaderboard', 'Toggle leaderboard');
-    const pauseBtn = makeBtn('pause-toggle', '⏸', 'Pause game', 'Pause game');
-    const fullscreenBtn = makeBtn('fullscreen-toggle', '⛶', 'Toggle fullscreen', 'Toggle fullscreen');
-
-    gameContainer.appendChild(audioBtn);
-    gameContainer.appendChild(leaderboardBtn);
-    gameContainer.appendChild(pauseBtn);
-    gameContainer.appendChild(fullscreenBtn);
-
-    // Fullscreen toggle logic
-    fullscreenBtn.addEventListener('click', () => {
-        if (document.fullscreenElement) {
-            document.exitFullscreen();
-            fullscreenBtn.textContent = '⛶';
-        } else {
-            gameContainer.requestFullscreen().catch(err => {
-                console.warn('Fullscreen request failed:', err);
-            });
-            fullscreenBtn.textContent = '⛶';
-        }
-    });
-
-    // Update button on fullscreen change
-    document.addEventListener('fullscreenchange', () => {
-        fullscreenBtn.textContent = document.fullscreenElement ? '✕' : '⛶';
-    });
-
-    return { audioBtn, leaderboardBtn, pauseBtn, fullscreenBtn };
-}
-
-// create basic UI elements (score, instructions, canvas, splash, leaderboard)
-function createUI() {
-    // score
-    const scoreEl = document.createElement('div');
-    scoreEl.id = 'score';
-    gameContainer.appendChild(scoreEl);
-
-    // instructions
-    const instr = document.createElement('div');
-    instr.id = 'shoot-instructions';
-    instr.textContent = 'Tap to shoot faster';
-    gameContainer.appendChild(instr);
-
-    // canvas
-    const cvs = document.createElement('canvas');
-    cvs.id = 'gameCanvas';
-    gameContainer.appendChild(cvs);
-
-    // splash
-    const splash = document.createElement('div');
-    splash.id = 'splashScreen';
-    splash.style.cursor = 'pointer'; // Always show pointer cursor on splash
-    const inner = document.createElement('div');
-    inner.className = 'splash-inner';
-    inner.style.cursor = 'pointer'; // Ensure inner also has pointer
-    const h1 = document.createElement('h1'); h1.id = 'splashTitle';
-    const p = document.createElement('p'); p.id = 'splashMessage';
-    const prompt = document.createElement('p'); prompt.id = 'splashPrompt'; prompt.className = 'restart-prompt';
-    inner.appendChild(h1); inner.appendChild(p); inner.appendChild(prompt);
-    splash.appendChild(inner);
-    gameContainer.appendChild(splash);
-
-    // leaderboard (structure only; content is rendered by existing functions)
-    const lb = document.createElement('div'); lb.id = 'leaderboard';
-    const head = document.createElement('div'); head.className = 'leaderboard-head'; head.style.position='relative';
-    const title = document.createElement('h3'); title.textContent = 'Leaderboard'; title.style.margin='0';
-    const closeBtn = document.createElement('button'); closeBtn.id='leaderboard-close'; closeBtn.className='close-btn'; closeBtn.textContent='✖';
-    head.appendChild(title); head.appendChild(closeBtn); lb.appendChild(head);
-    const list = document.createElement('div'); list.id='leaderboard-list'; lb.appendChild(list);
-    // Tabs: Top 10 and All
-    const tabs = document.createElement('div');
-    tabs.className = 'lb-tabs';
-    tabs.style.display = 'flex';
-    tabs.style.gap = '6px';
-    tabs.style.margin = '8px 0 6px';
-    const tabTop = document.createElement('button');
-    tabTop.type = 'button';
-    tabTop.textContent = 'Top';
-    tabTop.className = 'tab-btn';
-    tabTop.style.padding = '6px 10px';
-    tabTop.style.border = '1px solid rgba(255,255,255,0.15)';
-    tabTop.style.background = 'transparent';
-    tabTop.style.color = '#fff';
-    tabTop.style.borderRadius = '6px';
-    tabTop.style.cursor = 'pointer';
-    const tabAll = document.createElement('button');
-    tabAll.type = 'button';
-    tabAll.textContent = 'All';
-    tabAll.className = 'tab-btn';
-    tabAll.style.padding = '6px 10px';
-    tabAll.style.border = '1px solid rgba(255,255,255,0.15)';
-    tabAll.style.background = 'transparent';
-    tabAll.style.color = '#9be7ff';
-    tabAll.style.borderRadius = '6px';
-    tabAll.style.cursor = 'pointer';
-    tabs.appendChild(tabTop); tabs.appendChild(tabAll);
-    lb.appendChild(tabs);
-    // All-list container (hidden by default); mirror list sizing/overflow
-    const listAll = document.createElement('div');
-    listAll.id = 'leaderboard-all-list';
-    listAll.style.display = 'none';
-    listAll.style.maxHeight = '280px';
-    listAll.style.overflow = 'auto';
-    listAll.style.marginBottom = '8px';
-    lb.appendChild(listAll);
-    const form = document.createElement('form'); form.id='leaderboard-form'; form.className='leaderboard-form';
-    const ni = document.createElement('input'); ni.id='player-name'; ni.placeholder='Name'; ni.maxLength=20; ni.className='lb-input';
-    const si = document.createElement('input'); si.id='player-score'; si.placeholder='Score'; si.type='number'; si.min='0'; si.className='lb-input';
-    // Score is provided by the game only; make this field readonly to prevent UI edits
-    si.readOnly = true;
-    form.appendChild(ni); form.appendChild(si); lb.appendChild(form);
-    const btnRow = document.createElement('div'); btnRow.className='btn-row';
-    const submit = document.createElement('button'); submit.id='submit-score'; submit.className='btn submit'; submit.textContent='Submit';
-    // Only allow submitting after a GAME OVER. Disable by default; enabled in endGame().
-    submit.disabled = true;
-    submit.title = 'Submit available only after GAME OVER';
-    const clear = document.createElement('button'); clear.id='clear-leaderboard'; clear.className='btn clear'; clear.textContent='Clear';
-    btnRow.appendChild(submit); btnRow.appendChild(clear); lb.appendChild(btnRow);
-    const personal = document.createElement('div'); personal.id='personal-hiscore'; lb.appendChild(personal);
-    gameContainer.appendChild(lb);
-
-    // persistent cursor element: subtle chevron that orbits the avatar and points toward target
-    const cursorEl = document.createElement('div');
-    cursorEl.id = 'game-cursor';
-    cursorEl.style.position = 'fixed';
-    cursorEl.style.left = '0px';
-    cursorEl.style.top = '0px';
-    cursorEl.style.width = '24px';
-    cursorEl.style.height = '24px';
-    cursorEl.style.pointerEvents = 'none';
-    cursorEl.style.zIndex = '9999';
-    cursorEl.style.display = 'none'; // hidden until we have a position
-    // Chevron SVG pointing upward (will be rotated via transform)
-    cursorEl.innerHTML = `
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 4px rgba(0,255,255,0.7));">
-            <path d="M12 6 L4 16 L8 16 L12 11 L16 16 L20 16 Z" fill="rgba(255,255,255,0.9)" stroke="rgba(0,220,255,0.8)" stroke-width="1"/>
-        </svg>
-    `;
-    gameContainer.appendChild(cursorEl);
-
-    // No CSS transitions - smoothing handled via JS lerping for better performance
-
-    // controls
-    const created = createControlButtons();
-    return {
-        canvasEl: cvs,
-        scoreEl,
-        instrEl: instr,
-        splashEl: splash,
-        splashTitleEl: h1,
-        splashMessageEl: p,
-        splashPromptEl: prompt,
-        leaderboardEl: lb,
-        leaderboardListEl: list,
-        leaderboardFormEl: form,
-        playerNameInputEl: ni,
-        playerScoreInputEl: si,
-        submitBtnEl: submit,
-        clearBtnEl: clear,
-        leaderboardCloseBtnEl: closeBtn,
-        leaderboardAllListEl: listAll,
-        leaderboardTabTopBtn: tabTop,
-        leaderboardTabAllBtn: tabAll,
-        audioBtn: created.audioBtn,
-        leaderboardBtn: created.leaderboardBtn,
-        pauseBtn: created.pauseBtn
-        ,cursorEl
-    };
-}
-
-const ui = createUI();
+const ui = createUI(gameContainer);
 // expose shorthand variables used elsewhere
     canvas = ui.canvasEl;
     ctx = canvas.getContext('2d');
@@ -224,7 +49,6 @@ const ui = createUI();
     splashTitle = ui.splashTitleEl;
     splashMessage = ui.splashMessageEl;
     splashPrompt = ui.splashPromptEl;
-    shootInstructions = ui.instrEl;
 const cursorEl = ui.cursorEl;
 let lastCursorAngle = 0; // Remember last cursor direction when movement stops
 let currentCursorAngle = 0; // Smoothly interpolated cursor angle for fluid orbit
@@ -258,6 +82,59 @@ function hideChevronCursor() {
     }
 }
 
+function updateControlUI() {
+    if (controlToggleBtn) {
+        const isKeyboard = controlMode === CONTROL_MODES.KEYBOARD;
+        controlToggleBtn.textContent = isKeyboard ? 'Controls: Keyboard' : 'Controls: Mobile';
+        controlToggleBtn.title = isKeyboard
+            ? 'Use arrow keys or WASD to steer; tap to boost'
+            : 'Move cursor or touch to steer; tap to boost';
+    }
+}
+
+function setControlMode(mode, { persist = false, source = 'manual' } = {}) {
+    controlMode = (mode === CONTROL_MODES.KEYBOARD) ? CONTROL_MODES.KEYBOARD : CONTROL_MODES.MOBILE;
+    keyboardDirection.x = 0;
+    keyboardDirection.y = 0;
+    if (controlMode === CONTROL_MODES.KEYBOARD) {
+        target.x = avatarPosition.x || WORLD_WIDTH / 2;
+        target.y = avatarPosition.y || WORLD_HEIGHT / 2;
+    }
+    if (persist) saveControlMode(controlMode, source);
+    updateControlUI();
+}
+
+let menuWasPaused = false;
+
+function showMenuSlide(which = 'main') {
+    if (!menuMain || !menuHowTo) return;
+    const showHow = which === 'howto';
+    menuMain.style.display = showHow ? 'none' : 'flex';
+    menuHowTo.style.display = showHow ? 'flex' : 'none';
+}
+
+function openMenu(which = 'main') {
+    if (!menuOverlay) return;
+    if (!isPaused && !isGameOver) {
+        pauseGame();
+        menuWasPaused = true;
+        if (splashScreen) splashScreen.style.display = 'none';
+    } else {
+        menuWasPaused = false;
+    }
+    showMenuSlide(which);
+    menuOverlay.style.display = 'flex';
+}
+
+function closeMenu() {
+    if (!menuOverlay) return;
+    menuOverlay.style.display = 'none';
+    if (menuWasPaused && isPaused && !isGameOver) {
+        resumeGame();
+    }
+    menuWasPaused = false;
+}
+
 const audioToggleBtn = ui.audioBtn;
 const leaderboardToggleBtn = ui.leaderboardBtn;
 const pauseToggleBtn = ui.pauseBtn;
@@ -272,119 +149,20 @@ const playerScoreInput = ui.playerScoreInputEl;
 const leaderboardCloseBtn = ui.leaderboardCloseBtnEl;
 const tabTopBtn = ui.leaderboardTabTopBtn;
 const tabAllBtn = ui.leaderboardTabAllBtn;
+const controlToggleBtn = ui.controlBtn;
+const hudLayer = ui.hudLayer;
+const menuToggleBtn = ui.menuBtn;
+const menuOverlay = ui.menuOverlay;
+const menuMain = ui.menuMain;
+const menuHowTo = ui.menuHowTo;
+const menuCloseBtn = ui.menuCloseBtn;
+const howToBtn = ui.howToBtn;
+const howToBackBtn = ui.howToBackBtn;
 
-// Background music setup (autoplay may be blocked by browser policies)
-const bgAudio = new Audio('assets/emojihunter.mp3');
-bgAudio.loop = true;
-bgAudio.preload = 'auto';
-bgAudio.volume = 0.45;
-
-// Pop sound for enemy death (cloned each play for overlap)
-const popSoundBase = new Audio('assets/pop.mp3');
-popSoundBase.preload = 'auto';
-
-// Batch pop sound for rapid kills (3+ in 0.88s)
-const popx3SoundBase = new Audio('assets/popx3.mp3');
-popx3SoundBase.preload = 'auto';
-popx3SoundBase.loop = true;
-
-// Kill tracking for batch sound switching
-let recentKillTimes = []; // timestamps of recent kills
-let popx3Playing = false;
-let popx3Instance = null;
-let popx3StopTimeout = null;
-
-function playPop() {
-    if (isMuted) return;
-    
-    const now = performance.now();
-    recentKillTimes.push(now);
-    
-    // Keep only kills within the last 880ms
-    recentKillTimes = recentKillTimes.filter(t => now - t < 880);
-    
-    // If 3+ kills in 880ms, switch to batch sound
-    if (recentKillTimes.length >= 3) {
-        // Start or continue popx3
-        if (!popx3Playing) {
-            popx3Instance = popx3SoundBase.cloneNode();
-            popx3Instance.loop = true;
-            popx3Instance.volume = 0.35;
-            popx3Instance.play().catch(() => {});
-            popx3Playing = true;
-        }
-        
-        // Reset the stop timer - keep playing until 1s gap
-        if (popx3StopTimeout) clearTimeout(popx3StopTimeout);
-        popx3StopTimeout = setTimeout(() => {
-            if (popx3Instance) {
-                popx3Instance.pause();
-                popx3Instance.currentTime = 0;
-                popx3Instance = null;
-            }
-            popx3Playing = false;
-            recentKillTimes = [];
-        }, 1000);
-    } else if (!popx3Playing) {
-        // Normal single pop for sparse kills
-        const pop = popSoundBase.cloneNode();
-        pop.volume = 0.3;
-        pop.play().catch(() => {});
-    }
-}
-
+// Initialize audio module with the toggle button reference
+initAudioControls(audioToggleBtn);
 // Await the first user gesture; the splash will be used to both enable audio and resume the game
 let awaitingFirstGesture = true;
-// Mute state persisted in localStorage
-const MUTE_KEY = 'emojihunter_muted';
-let isMuted = (localStorage.getItem(MUTE_KEY) === 'true');
-if (isMuted) {
-    bgAudio.muted = true;
-    if (audioToggleBtn) audioToggleBtn.innerText = '🔈';
-} else {
-    bgAudio.muted = false;
-    if (audioToggleBtn) audioToggleBtn.innerText = '🔊';
-}
-
-async function tryPlayAudio() {
-    try {
-        await bgAudio.play();
-        // played successfully
-        console.log('bgAudio playing');
-    } catch (err) {
-        // Autoplay was probably blocked; resume on first user gesture
-        const resume = async () => {
-                try {
-                    await bgAudio.play();
-                    console.log('bgAudio resumed after user gesture');
-                } catch (e) {
-                console.warn('bgAudio still blocked or failed to play', e);
-            }
-            window.removeEventListener('pointerdown', resume);
-            window.removeEventListener('keydown', resume);
-        };
-    // If we're awaiting the first gesture and using the splash prompt, don't show any separate overlay.
-        window.addEventListener('pointerdown', resume, { once: true });
-        window.addEventListener('keydown', resume, { once: true });
-    }
-}
-    // Audio pause/resume bookkeeping for visibility and pause behaviors
-    let bgPausedByVisibility = false;
-    let bgPausedByPause = false;
-    let pendingVisibilityGesture = false;
-
-if (audioToggleBtn) {
-    audioToggleBtn.addEventListener('click',    () => {
-        isMuted = !isMuted;
-        bgAudio.muted = isMuted;
-        localStorage.setItem(MUTE_KEY, isMuted ? 'true' : 'false');
-        audioToggleBtn.innerText = isMuted ? '🔈' : '🔊';
-        if (!isMuted) {
-            // try to play immediately when unmuted
-            tryPlayAudio();
-        }
-    });
-}
 
 // Sizes are expressed in world units
 const AVATAR_SIZE = 12;
@@ -402,7 +180,9 @@ let levels = {};
 // --- VIRTUAL CANVAS / WORLD / CAMERA / TIMING ---
 // Virtual canvas adapts to viewport aspect ratio while maintaining consistent gameplay area
 // Desktop (16:9): wider playfield | Mobile (9:16): taller playfield
-const VIRTUAL_BASE = 600; // Base dimension - shortest side is always 600
+// Use two base sizes for clarity in tutorial-style docs
+const VIRTUAL_BASE_DESKTOP = 640;
+const VIRTUAL_BASE_MOBILE = 560;
 let VIRTUAL_WIDTH = 800;  // Will adapt to viewport
 let VIRTUAL_HEIGHT = 600; // Will adapt to viewport
 let canvasScale = 1; // Scale factor from virtual to screen coords
@@ -415,8 +195,15 @@ let WORLD_HEIGHT = VIRTUAL_HEIGHT;
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 2.0;
 let camera = { x: 0, y: 0, scale: 1, mode: 'zoom-fill' };
-let __lastTimestamp = null;
 let __elapsedTime = 0;
+
+// Performance optimization variables
+const TARGET_FPS = 60;
+let frameCount = 0;
+let lastFPSCheck = 0;
+
+// Engine handles timing / frame gating
+const engine = createEngine({ targetFps: TARGET_FPS, maxDt: 0.05, onFrame: animate });
 
 // --- BACKGROUND IMAGE SYSTEM ---
 let currentBackgroundImage = null;
@@ -450,8 +237,6 @@ function loadBackgroundImage(src) {
         img.src = src;
     });
 }
-// UI breakpoint used by both CSS and JS. Keep in sync with `@media (min-width: 600px)` in index.html
-const MINI_BREAKPOINT = 600;
 // debounce interval for resize handling (ms)
 const RESIZE_DEBOUNCE_MS = 100;
 let __resizeTimer = null;
@@ -461,559 +246,12 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 // -------------------------
 // Obstacle system - emoji-based collidables
 // -------------------------
-// Cache for pre-rendered emoji sprites (Safari workaround)
-const emojiSpriteCache = new Map();
-
-// Pre-render emoji to offscreen canvas at specific size (forces Safari to scale)
-function getEmojiSprite(emoji, size) {
-    const key = `${emoji}_${size}`;
-    if (emojiSpriteCache.has(key)) {
-        return emojiSpriteCache.get(key);
-    }
-    
-    // Create offscreen canvas slightly larger than needed
-    const padding = Math.ceil(size * 0.2);
-    const canvasSize = size + padding * 2;
-    const offscreen = document.createElement('canvas');
-    offscreen.width = canvasSize;
-    offscreen.height = canvasSize;
-    const offCtx = offscreen.getContext('2d');
-    
-    // Draw emoji centered on offscreen canvas
-    offCtx.textAlign = 'center';
-    offCtx.textBaseline = 'middle';
-    offCtx.font = `${size}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
-    offCtx.fillStyle = '#000';
-    offCtx.fillText(emoji, canvasSize / 2, canvasSize / 2);
-    
-    // Cache the sprite
-    const sprite = { canvas: offscreen, size: canvasSize };
-    emojiSpriteCache.set(key, sprite);
-    return sprite;
-}
-
-class Collidable {
-    constructor(opts = {}) {
-        this.x = Number(opts.x || 0);
-        this.y = Number(opts.y || 0);
-        this.emoji = opts.emoji || null;
-        this.scale = Number(opts.scale || 1);
-        this.id = opts.id || `c-${Math.random().toString(36).slice(2,9)}`;
-        this.collidesWith = Object.assign({ dragon: true, pellets: true, enemies: false }, opts.collidesWith || {});
-        this.active = true;
-        // Hitbox radius = 25% of visual size for very tight collisions
-        // Visual size: 32px * scale, so hitbox = 16 * scale * 0.25
-        // Cap at 20px to keep large obstacles fair
-        const visualRadius = 26 * this.scale;
-        this.radius = Number(opts.radius || Math.min(20, visualRadius * 0.6));
-    }
-
-    // Push-out vector for circle collision
-    getPushOutVector(cx, cy, r) {
-        const dx = cx - this.x;
-        const dy = cy - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const overlap = (r + this.radius) - dist;
-        if (overlap > 0) {
-            return { dx: (dx / dist) * (overlap + 1), dy: (dy / dist) * (overlap + 1) };
-        }
-        return { dx: 0, dy: 0 };
-    }
-
-    getBounds() {
-        return { x: this.x - this.radius, y: this.y - this.radius, w: this.radius * 2, h: this.radius * 2 };
-    }
-
-    intersectsCircle(cx, cy, r) {
-        if (!this.active) return false;
-        const dx = cx - this.x;
-        const dy = cy - this.y;
-        return (dx * dx + dy * dy) <= ((r + this.radius) * (r + this.radius));
-    }
-
-    draw(ctx) {
-        if (!this.emoji) return;
-        const scale = (this.scale > 0) ? this.scale : 1;
-        const fontSize = Math.max(16, Math.floor(32 * scale));
-        
-        // DEBUG: Draw hitbox circle (red with transparency)
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.restore();
-        
-        // Use pre-rendered sprite (Safari-safe scaling)
-        const sprite = getEmojiSprite(this.emoji, fontSize);
-        const drawSize = sprite.size;
-        ctx.drawImage(
-            sprite.canvas,
-            this.x - drawSize / 2,
-            this.y - drawSize / 2,
-            drawSize,
-            drawSize
-        );
-    }
-
-    clampToViewport(w, h) {
-        if (this.x + this.radius < 0 || this.x - this.radius > w || this.y + this.radius < 0 || this.y - this.radius > h) return false;
-        this.x = Math.max(this.radius, Math.min(this.x, w - this.radius));
-        this.y = Math.max(this.radius, Math.min(this.y, h - this.radius));
-        return true;
-    }
-}
-
-class CollidableManager {
-    constructor() {
-        this.list = [];
-        this.grid = new Map();
-        this.cellSize = 128;
-        this._pfCache = null;
-        this._pfDirty = true;
-    }
-    clear() { this.list.length = 0; }
-    set(arr) { this.list = arr.slice(); this._pfDirty = true; }
-    add(c) { this.list.push(c); this._pfDirty = true; }
-    getAll() { return this.list.slice(); }
-    draw(ctx) { this.list.forEach(c => c.draw(ctx)); }
-
-    // sanitize: deactivate collidables fully outside viewport
-    sanitize(viewW, viewH) {
-        this.list.forEach(c => {
-            const b = c.getBounds();
-            if (b.x + b.w < 0 || b.x > viewW || b.y + b.h < 0 || b.y > viewH) {
-                c.active = false;
-            } else {
-                c.active = true;
-            }
-        });
-    }
-
-    // broadphase AABB then exact intersectsCircle
-    queryCircle(cx, cy, r, { groups = null } = {}) {
-        // Use spatial grid to reduce candidates
-        const bx = Math.floor((cx - r) / this.cellSize);
-        const by = Math.floor((cy - r) / this.cellSize);
-        const ex = Math.floor((cx + r) / this.cellSize);
-        const ey = Math.floor((cy + r) / this.cellSize);
-        const seen = new Set();
-        const candidates = [];
-        for (let gx = bx; gx <= ex; gx++) {
-            for (let gy = by; gy <= ey; gy++) {
-                const key = gx + ',' + gy;
-                const cell = this.grid.get(key);
-                if (!cell) continue;
-                for (let i = 0; i < cell.length; i++) {
-                    const c = cell[i];
-                    if (!c || !c.active) continue;
-                    if (seen.has(c.id)) continue;
-                    seen.add(c.id);
-                    candidates.push(c);
-                }
-            }
-        }
-        // fallback: if grid empty, use list
-        const listToTest = (candidates.length > 0) ? candidates : this.list;
-        const out = [];
-        for (let i = 0; i < listToTest.length; i++) {
-            const c = listToTest[i];
-            if (!c || !c.active) continue;
-            if (groups) {
-                let ok = false;
-                for (const k in groups) { if (groups[k] && c.collidesWith[k]) { ok = true; break; } }
-                if (!ok) continue;
-            }
-            if (c.intersectsCircle(cx, cy, r)) out.push(c);
-        }
-        return out;
-    }
-
-    // Build spatial grid covering current world; call after set() or on resize
-    buildGrid(cellSize = 128, viewW = WORLD_WIDTH, viewH = WORLD_HEIGHT) {
-        this.cellSize = Math.max(32, Number(cellSize) || 128);
-        this.grid.clear();
-        this.gridCols = Math.ceil(viewW / this.cellSize);
-        this.gridRows = Math.ceil(viewH / this.cellSize);
-        for (let i = 0; i < this.list.length; i++) {
-            const c = this.list[i];
-            if (!c) continue;
-            const b = c.getBounds();
-            const sx = Math.floor(b.x / this.cellSize);
-            const sy = Math.floor(b.y / this.cellSize);
-            const ex = Math.floor((b.x + b.w) / this.cellSize);
-            const ey = Math.floor((b.y + b.h) / this.cellSize);
-            for (let gx = sx; gx <= ex; gx++) {
-                for (let gy = sy; gy <= ey; gy++) {
-                    const key = gx + ',' + gy;
-                    if (!this.grid.has(key)) this.grid.set(key, []);
-                    this.grid.get(key).push(c);
-                }
-            }
-        }
-    }
-
-    // Step any moving collidables according to elapsed time (seconds). Returns true if any moved.
-    stepMovers(elapsedTime) {
-        if (!this.list || !this.list.length) return false;
-        let moved = false;
-        for (let i = 0; i < this.list.length; i++) {
-            const c = this.list[i];
-            if (!c || !c.moving || !c.motion) continue;
-            const m = c.motion;
-            const offset = Math.sin(elapsedTime * m.speed + m.phase) * m.amplitude;
-            if (m.dir === 'horizontal') {
-                const nx = (c.baseX || 0) + offset;
-                if (Math.abs(nx - c.x) > 0.001) { c.x = nx; moved = true; }
-            } else {
-                const ny = (c.baseY || 0) + offset;
-                if (Math.abs(ny - c.y) > 0.001) { c.y = ny; moved = true; }
-            }
-        }
-        return moved;
-    }
-
-    // Build a boolean occupancy grid for pathfinding. Cells marked true are blocked for given radius.
-    // This method caches the last-built grid and will reuse it when possible. It defaults to world
-    // dimensions so pathfinding is stable across resizes.
-    buildPathfindingGrid(cellSize = 32, padding = 0, viewW = WORLD_WIDTH, viewH = WORLD_HEIGHT) {
-        const cs = Math.max(8, Number(cellSize) || 32);
-        // if cached and matches cellSize & padding and not dirty, return it
-        if (this._pfCache && !this._pfDirty && this._pfCache.cs === cs && this._pfCache.padding === padding && this._pfCache.viewW === viewW && this._pfCache.viewH === viewH) {
-            return this._pfCache;
-        }
-        const cols = Math.ceil(viewW / cs);
-        const rows = Math.ceil(viewH / cs);
-        const grid = new Array(cols * rows).fill(false);
-        for (let i = 0; i < this.list.length; i++) {
-            const c = this.list[i];
-            if (!c || !c.active) continue;
-            const b = c.getBounds();
-            const sx = Math.max(0, Math.floor((b.x - padding) / cs));
-            const sy = Math.max(0, Math.floor((b.y - padding) / cs));
-            const ex = Math.min(cols - 1, Math.floor((b.x + b.w + padding) / cs));
-            const ey = Math.min(rows - 1, Math.floor((b.y + b.h + padding) / cs));
-            for (let gx = sx; gx <= ex; gx++) {
-                for (let gy = sy; gy <= ey; gy++) {
-                    grid[gy * cols + gx] = true; // blocked
-                }
-            }
-        }
-        const out = { grid, cols, rows, cs, padding, viewW, viewH };
-        this._pfCache = out;
-        this._pfDirty = false;
-        return out;
-    }
-
-    // Simple A* on the occupancy grid; returns array of world-space points or null
-    findPath(startX, startY, targetX, targetY, radius = 0, cellSize = 32) {
-        // Build or reuse occupancy grid in world coordinates
-        const pf = this.buildPathfindingGrid(cellSize, radius, WORLD_WIDTH, WORLD_HEIGHT);
-        const { grid, cols, rows, cs } = pf;
-        const toIndex = (x, y) => y * cols + x;
-        const sx = Math.max(0, Math.min(cols - 1, Math.floor(startX / cs)));
-        const sy = Math.max(0, Math.min(rows - 1, Math.floor(startY / cs)));
-        const tx = Math.max(0, Math.min(cols - 1, Math.floor(targetX / cs)));
-        const ty = Math.max(0, Math.min(rows - 1, Math.floor(targetY / cs)));
-        if (grid[toIndex(tx, ty)]) return null; // target blocked
-
-        const open = new Map();
-        const closed = new Set();
-        const cameFrom = new Map();
-        const gScore = new Map();
-        const fScore = new Map();
-        const key = (x, y) => x + ',' + y;
-        const heuristic = (x, y) => Math.hypot(tx - x, ty - y);
-        const startKey = key(sx, sy);
-        open.set(startKey, { x: sx, y: sy });
-        gScore.set(startKey, 0);
-        fScore.set(startKey, heuristic(sx, sy));
-
-        const neighbors = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
-
-        while (open.size) {
-            // pick node in open with lowest fScore
-            let currentKey = null; let currentF = Infinity; let current = null;
-            for (const [k, v] of open) {
-                const f = fScore.get(k) || Infinity;
-                if (f < currentF) { currentF = f; currentKey = k; current = v; }
-            }
-            if (!current) break;
-            if (current.x === tx && current.y === ty) {
-                // reconstruct path
-                const path = [];
-                let k = currentKey;
-                while (k) {
-                    const [px, py] = k.split(',').map(Number);
-                    path.push({ x: px * cs + cs/2, y: py * cs + cs/2 });
-                    k = cameFrom.get(k);
-                }
-                path.reverse();
-                return path;
-            }
-            open.delete(currentKey);
-            closed.add(currentKey);
-
-            for (let ni = 0; ni < neighbors.length; ni++) {
-                const nx = current.x + neighbors[ni][0];
-                const ny = current.y + neighbors[ni][1];
-                if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
-                const nKey = key(nx, ny);
-                if (closed.has(nKey)) continue;
-                if (grid[ny * cols + nx]) continue; // blocked
-                const tentativeG = (gScore.get(currentKey) || Infinity) + ((neighbors[ni][0] && neighbors[ni][1]) ? 1.414 : 1);
-                if (!open.has(nKey)) open.set(nKey, { x: nx, y: ny });
-                if (tentativeG >= (gScore.get(nKey) || Infinity)) continue;
-                cameFrom.set(nKey, currentKey);
-                gScore.set(nKey, tentativeG);
-                fScore.set(nKey, tentativeG + heuristic(nx, ny));
-            }
-        }
-        return null; // no path
-    }
-}
-
 // manager instance (current level)
 let collidableManager = new CollidableManager();
 
 // monsterMap: monsterId -> monsterData (from monsters.json)
 let monsterMap = {};
 
-// 6-point positioning system for obstacles
-function calculateObstaclePosition(position, radiusWorld, w = 0, h = 0) {
-    const marginPx = 32; // spacing from viewport edge
-    let x, y, movementPath = null;
-    
-    switch (position) {
-        case '.topLeading': // Legacy - redirect to .leading
-        case '.bottomLeading': // Legacy - redirect to .leading  
-        case '.leading': // Consolidated left-side vertical mover
-            x = marginPx + radiusWorld;
-            y = WORLD_HEIGHT / 2; // Center vertically
-            // Vertical movement staying within viewport bounds
-            movementPath = {
-                direction: 'vertical',
-                amplitude: Math.min(
-                    (WORLD_HEIGHT / 2) - marginPx - radiusWorld, // Distance to top
-                    (WORLD_HEIGHT / 2) - marginPx - radiusWorld  // Distance to bottom
-                )
-            };
-            break;
-        case '.top': // 1
-            x = WORLD_WIDTH / 2;
-            y = marginPx + radiusWorld;
-            // Horizontal movement reaching both edges
-            movementPath = {
-                direction: 'horizontal',
-                amplitude: (WORLD_WIDTH / 2) - marginPx - radiusWorld
-            };
-            break;
-        case '.topTrailing': // Legacy - redirect to .trailing
-        case '.bottomTrailing': // Legacy - redirect to .trailing
-        case '.trailing': // Consolidated right-side vertical mover
-            x = WORLD_WIDTH - marginPx - radiusWorld;
-            y = WORLD_HEIGHT / 2; // Center vertically
-            // Vertical movement staying within viewport bounds
-            movementPath = {
-                direction: 'vertical',
-                amplitude: Math.min(
-                    (WORLD_HEIGHT / 2) - marginPx - radiusWorld, // Distance to top
-                    (WORLD_HEIGHT / 2) - marginPx - radiusWorld  // Distance to bottom
-                )
-            };
-            break;
-        case '.center': // 0
-            x = WORLD_WIDTH / 2;
-            y = WORLD_HEIGHT / 2;
-            // Horizontal movement reaching both edges
-            movementPath = {
-                direction: 'horizontal',
-                amplitude: (WORLD_WIDTH / 2) - marginPx - radiusWorld
-            };
-            break;
-        case '.centerVertical': // Vertical counterpart to .center
-            x = WORLD_WIDTH / 2;
-            y = WORLD_HEIGHT / 2;
-            // Vertical movement reaching top and bottom edges
-            movementPath = {
-                direction: 'vertical',
-                amplitude: (WORLD_HEIGHT / 2) - marginPx - radiusWorld
-            };
-            break;
-        case '.bottom': // 2
-            x = WORLD_WIDTH / 2;
-            y = WORLD_HEIGHT - marginPx - radiusWorld;
-            // Horizontal movement reaching both edges
-            movementPath = {
-                direction: 'horizontal',
-                amplitude: (WORLD_WIDTH / 2) - marginPx - radiusWorld
-            };
-            break;
-        default:
-            return null;
-    }
-    
-    return { x, y, movementPath };
-}
-
-async function loadLevelsAndMonsters() {
-    // load monsters
-    try {
-        const mResp = await fetch('assets/monsters.json');
-        const monstersArr = await mResp.json();
-        monstersArr.forEach(m => { monsterMap[m.monster] = m; });
-    } catch (err) {
-        console.error('Failed to load monsters.json', err);
-    }
-
-    // load levels
-    try {
-        const lResp = await fetch('assets/levels.json');
-        const levelsArr = await lResp.json();
-        // load reusable obstacle definitions (emoji, positions, scale, direction)
-        let obstaclesArr = [];
-        try {
-            const oResp = await fetch('assets/obstacles.json');
-            obstaclesArr = await oResp.json();
-        } catch (e) {
-            console.warn('Failed to load obstacles.json; continuing without obstacle presets', e);
-        }
-        // map by name (support either `name` or legacy `obstacles` key)
-        const obstaclesMap = new Map();
-        obstaclesArr.forEach(o => {
-            const key = (o.name || o.obstacles || '').toString().trim();
-            if (key) obstaclesMap.set(key, o);
-        });
-        // Store globally for endless mode obstacle generation
-        window.__obstaclesMap = obstaclesMap;
-        levelsArr.forEach(l => {
-            const monsterIds = String(l.emoji || '').split(',').map(s => s.trim()).filter(Boolean);
-            const monsters = monsterIds.map(id => monsterMap[id]).filter(Boolean);
-            
-            // Build obstacles from level config
-            const obstacleSpec = l.obstacles || [];
-            const collidables = [];
-
-            obstacleSpec.forEach(obstacleEntry => {
-                const { name, set } = obstacleEntry;
-                const def = obstaclesMap.get(name);
-                if (!def) return;
-                
-                const scale = Math.max(1, Number(def.scale || 1));
-                // Hitbox: fixed 20px max - easy to tune
-                const radius = 20;
-                const speed = Number(def.speed || 1);
-
-                set.forEach(position => {
-                    const positionData = calculateObstaclePosition(position, radius, 0, 0);
-                    if (!positionData) return;
-
-                    const { x, y, movementPath } = positionData;
-                    
-                    const collidable = new Collidable({
-                        x, y, radius,
-                        emoji: def.emoji,
-                        scale,
-                        collidesWith: { dragon: true, pellets: true, enemies: true }
-                    });
-                    
-                    collidable.positionToken = position;
-                    
-                    if (movementPath) {
-                        collidable.moving = true;
-                        collidable.baseX = x;
-                        collidable.baseY = y;
-                        collidable.motion = {
-                            dir: movementPath.direction,
-                            speed: speed * 0.5,
-                            amplitude: movementPath.amplitude,
-                            phase: Math.random() * Math.PI * 2
-                        };
-                    }
-                    
-                    collidables.push(collidable);
-                });
-            });
-
-            levels[l.level] = {
-                level: l.level, // Include level key for LevelWatcher parsing
-                target: l.target || 50,
-                monsters: monsters.length ? monsters : [{ monster: 'oni', emoji: '👹', normalHp: 1, bossHp: 2, enemySpeed: 0.5 }],
-                aimSpeed: l.aimSpeed || 1,
-                spawnRate: l.spawnRate || 1,
-                collidables: collidables,
-                multiplier: (l.multiplier !== undefined) ? Number(l.multiplier) : 2,
-                // Use mobile background if viewport <600px
-                background: (typeof window !== 'undefined' && window.innerWidth < MINI_BREAKPOINT)
-                    ? l.background.replace('.png', '-mobile.png')
-                    : l.background || 'assets/levelbackgrounds/defaultbg.png'
-            };
-        });
-    } catch (err) {
-        console.error('Failed to load levels.json', err);
-    }
-}
-        
-// LevelWatcher class to manage the game's level progression.
-class LevelWatcher {
-    constructor(levels) {
-        // Separate numbered levels from postgame
-        this.postgameConfig = null;
-        this.levels = {};
-        
-        // Parse levels - separate postgame from numbered levels
-        Object.values(levels).forEach(level => {
-            if (level.level === 'postgame') {
-                this.postgameConfig = level;
-            } else {
-                this.levels[level.level] = level;
-            }
-        });
-        
-        this.currentLevel = 1;
-        this.maxLevel = Math.max(...Object.keys(this.levels).map(Number));
-        this.isEndlessMode = false;
-    }
-
-    nextLevel() {
-        if (this.currentLevel < this.maxLevel) {
-            this.currentLevel++;
-            return true;
-        } else {
-            // Enter postgame/endless mode after final level
-            this.isEndlessMode = true;
-            return true;
-        }
-    }
-
-    reset() {
-        this.currentLevel = 1;
-        this.isEndlessMode = false;
-    }
-
-    getLevelConfig() {
-        if (this.isEndlessMode && this.postgameConfig) {
-            return { ...this.postgameConfig, target: Infinity };
-        }
-        return this.levels[this.currentLevel];
-    }
-
-    isLastLevel() {
-        return !this.isEndlessMode && this.currentLevel === this.maxLevel;
-    }
-
-    isInEndlessMode() {
-        return this.isEndlessMode;
-    }
-
-    getDisplayLevel() {
-        return this.isEndlessMode ? 'Endless' : this.currentLevel;
-    }
-}
-        
 let levelWatcher = null; // will be created after loading levels
 
 let gameLoopInterval;
@@ -1032,6 +270,7 @@ let enemiesDestroyed = 0;
 let isPaused = false;
 let isGameOver = false;
 let isBoosting = false;
+let controlMode = CONTROL_MODES.MOBILE;
 let boostTimeout = null;
 const BOOST_DURATION = 500 ; // ms (boost lasts 1 second - shows activated sprite)
 // Cooldown removed - boost is now freely available but shorter and less powerful
@@ -1039,118 +278,33 @@ const BOOST_DURATION = 500 ; // ms (boost lasts 1 second - shows activated sprit
 // gameLoopInterval = setInterval(spawnEnemy, 1000); // Always 1 enemy per second Session-wide kill counter (persists across levels during a single play session)
 let sessionKills = 0;
 
-// Performance optimization variables
-let lastFrameTime = 0;
-const TARGET_FPS = 60;
-const FRAME_TIME = 1000 / TARGET_FPS;
-let frameCount = 0;
-let lastFPSCheck = 0;
+// Pick a base virtual size depending on breakpoint (keeps tutorial-friendly constants)
+function getVirtualBase() {
+    return window.innerWidth <= MINI_BREAKPOINT ? VIRTUAL_BASE_MOBILE : VIRTUAL_BASE_DESKTOP;
+}
 
 function resizeCanvas() {
-    // Use game container size instead of window to account for nav bar
-    const containerRect = gameContainer.getBoundingClientRect();
-    const cssWidth = Math.floor(containerRect.width) || window.innerWidth;
-    const cssHeight = Math.floor(containerRect.height) || window.innerHeight;
-    let dpr = Math.max(1, window.devicePixelRatio || 1);
-    
-    // Reduce DPR on mobile devices for better performance
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    if (isMobile) {
-        dpr = Math.min(dpr, 1.5); // Cap DPR at 1.5 for mobile
-    }
-    
-    // Don't set CSS size - let CSS handle layout via 100% width/height
-    // Just set the drawing buffer to match container size * DPR
-    canvas.width = Math.round(cssWidth * dpr);
-    canvas.height = Math.round(cssHeight * dpr);
+    const state = resizeCamera({
+        canvas,
+        gameContainer,
+        camera,
+        virtualBase: getVirtualBase(),
+        miniBreakpoint: MINI_BREAKPOINT,
+        target,
+        collidableManager,
+        levelWatcher,
+        calculateObstaclePosition
+    });
 
-    // ADAPTIVE VIRTUAL CANVAS: Adjust dimensions to match viewport aspect ratio
-    // This eliminates letterboxing - the entire canvas is playable area
-    const screenAspect = cssWidth / cssHeight;
-    
-    if (screenAspect >= 1) {
-        // Landscape/Desktop: height is base, width expands
-        VIRTUAL_HEIGHT = VIRTUAL_BASE;
-        VIRTUAL_WIDTH = Math.round(VIRTUAL_BASE * screenAspect);
-    } else {
-        // Portrait/Mobile: width is base, height expands
-        VIRTUAL_WIDTH = VIRTUAL_BASE;
-        VIRTUAL_HEIGHT = Math.round(VIRTUAL_BASE / screenAspect);
-    }
-    
-    // Scale maps virtual coords to screen coords (no letterboxing needed)
-    canvasScale = cssWidth / VIRTUAL_WIDTH; // Same as cssHeight / VIRTUAL_HEIGHT
-    canvasOffsetX = 0;
-    canvasOffsetY = 0;
-    
-    // World size matches virtual dimensions
-    WORLD_WIDTH = VIRTUAL_WIDTH;
-    WORLD_HEIGHT = VIRTUAL_HEIGHT;
-    camera.scale = canvasScale;
-    camera.offsetX = canvasOffsetX;
-    camera.offsetY = canvasOffsetY;
-    // store DPR for use when setting canvas transforms in rendering
-    camera.dpr = dpr;
-    // center target in world coordinates
-    target.x = WORLD_WIDTH / 2;
-    target.y = WORLD_HEIGHT / 2;
-    // Apply responsive class for narrow or short screens
-    try {
-    // Use a single width-based breakpoint: treat widths <= MINI_BREAKPOINT as 'mini' layout
-    const shouldMini = (window.innerWidth <= MINI_BREAKPOINT);
-        document.body.classList.toggle('miniScreen', shouldMini);
-    } catch (e) {}
+    // Sync derived values back into local state
+    VIRTUAL_WIDTH = state.virtualWidth;
+    VIRTUAL_HEIGHT = state.virtualHeight;
+    WORLD_WIDTH = state.worldWidth;
+    WORLD_HEIGHT = state.worldHeight;
+    canvasScale = state.canvasScale;
+    canvasOffsetX = state.canvasOffsetX;
+    canvasOffsetY = state.canvasOffsetY;
     if (!avatarPosition.x) initializeAvatar();
-    // rebuild spatial grid in world units and sanitize collidables against world bounds
-    try {
-        if (collidableManager) {
-            collidableManager.buildGrid(collidableManager.cellSize || 128, WORLD_WIDTH, WORLD_HEIGHT);
-            collidableManager.sanitize(WORLD_WIDTH, WORLD_HEIGHT);
-            // Reposition all obstacles based on their position tokens for responsive layout
-            try {
-                if (levelWatcher) {
-                    const levelConfig = levelWatcher.getLevelConfig();
-                    (levelConfig.collidables || []).forEach(c => {
-                        if (c && c.positionToken) {
-                            // Recalculate position using the stored token and current viewport
-                            const positionData = calculateObstaclePosition(c.positionToken, c.originalRadius || c.radius);
-                            if (positionData) {
-                                c.x = positionData.x;
-                                c.y = positionData.y;
-                                c.baseX = positionData.x;
-                                c.baseY = positionData.y;
-                                
-                                // Update movement path for new viewport size
-                                if (c.moving && positionData.movementPath) {
-                                    c.motion.amplitude = positionData.movementPath.amplitude;
-                                }
-                            }
-                        }
-                    });
-                    // rebuild grid after repositioning
-                    collidableManager.buildGrid(collidableManager.cellSize || 128, WORLD_WIDTH, WORLD_HEIGHT);
-                }
-            } catch (e) {
-                console.warn('Error repositioning obstacles on resize:', e);
-            }
-        }
-    } catch (e) {}
-}
-
-// Coordinate helpers: convert between screen/client pixels and world units
-function screenToWorld(clientX, clientY) {
-    const rect = canvas.getBoundingClientRect();
-    const cx = clientX - rect.left;
-    const cy = clientY - rect.top;
-    const wx = (cx - (camera.offsetX || 0)) / (camera.scale || 1);
-    const wy = (cy - (camera.offsetY || 0)) / (camera.scale || 1);
-    return { x: wx, y: wy };
-}
-
-function worldToScreen(wx, wy) {
-    const sx = (wx * (camera.scale || 1)) + (camera.offsetX || 0);
-    const sy = (wy * (camera.scale || 1)) + (camera.offsetY || 0);
-    return { x: sx, y: sy };
 }
 
 function initializeAvatar() {
@@ -1159,6 +313,8 @@ function initializeAvatar() {
         y: WORLD_HEIGHT / 2,
         angle: 0
     };
+    target.x = avatarPosition.x;
+    target.y = avatarPosition.y;
 }
 
 function updateAvatar(dt = 0) {
@@ -1179,8 +335,8 @@ function updateAvatar(dt = 0) {
             const containerRect = gameContainer.getBoundingClientRect();
             
             // Convert avatar world position to screen coordinates
-            const avatarScr = worldToScreen(avatarPosition.x, avatarPosition.y);
-            const targetScr = worldToScreen(target.x, target.y);
+            const avatarScr = worldToScreen(avatarPosition.x, avatarPosition.y, camera);
+            const targetScr = worldToScreen(target.x, target.y, camera);
             
             // Add container offset since cursor uses fixed positioning
             const avatarScreenX = avatarScr.x + containerRect.left;
@@ -1235,231 +391,6 @@ function updateAvatar(dt = 0) {
     }
 }
 
-// Avatar sprite assets - Lottie animations rendered to offscreen canvases
-let avatarSprites = {
-    default: { anim: null, canvas: null, ctx: null, ready: false },
-    activated: { anim: null, canvas: null, ctx: null, ready: false }
-};
-
-const SPRITE_SIZE = 200; // Size of the offscreen canvas for Lottie rendering
-
-// Load avatar sprites using Lottie
-function loadAvatarSprites() {
-    const sprites = [
-        { name: 'default', src: 'assets/spritedefault.json' },
-        { name: 'activated', src: 'assets/spriteactivated.json' }
-    ];
-
-    const promises = sprites.map(({ name, src }) => {
-        return new Promise((resolve) => {
-            // Create offscreen canvas for this sprite
-            const offCanvas = document.createElement('canvas');
-            offCanvas.width = SPRITE_SIZE;
-            offCanvas.height = SPRITE_SIZE;
-            const offCtx = offCanvas.getContext('2d');
-            
-            // Create hidden container for Lottie to render into
-            const container = document.createElement('div');
-            container.style.cssText = `position:absolute;left:-9999px;top:-9999px;width:${SPRITE_SIZE}px;height:${SPRITE_SIZE}px;`;
-            document.body.appendChild(container);
-            
-            // Load Lottie animation
-            const anim = lottie.loadAnimation({
-                container: container,
-                renderer: 'canvas',
-                loop: true,
-                autoplay: true,
-                path: src
-            });
-            
-            anim.addEventListener('DOMLoaded', () => {
-                avatarSprites[name] = {
-                    anim: anim,
-                    container: container,
-                    canvas: offCanvas,
-                    ctx: offCtx,
-                    ready: true
-                };
-                resolve();
-            });
-            
-            anim.addEventListener('error', () => {
-                console.warn(`Failed to load Lottie sprite: ${src}`);
-                resolve();
-            });
-        });
-    });
-    
-    return Promise.all(promises);
-}
-
-// Get current frame from Lottie animation as drawable canvas
-function getLottieSpriteCanvas(spriteName) {
-    const sprite = avatarSprites[spriteName];
-    if (!sprite || !sprite.ready || !sprite.anim) return null;
-    
-    // Get the internal canvas from Lottie's canvas renderer
-    const lottieCanvas = sprite.container.querySelector('canvas');
-    if (lottieCanvas) {
-        return lottieCanvas;
-    }
-    return null;
-}
-
-// --- PARALLAX BACKGROUND RENDERING ---
-// Draw the level background with subtle 3D parallax + tilt effect based on cursor position
-// Creates an iOS Maps-style photoscopic effect where the background shifts AND tilts toward cursor
-// Smoothed cursor tracking for fluid movement
-let smoothCursorX = VIRTUAL_WIDTH / 2;
-let smoothCursorY = VIRTUAL_HEIGHT / 2;
-const CURSOR_SMOOTHING = 0.08; // Lower = smoother/slower (0.05-0.15 range)
-
-// Draw background to fill ENTIRE canvas (including letterbox/pillarbox areas)
-// This is called BEFORE the virtual coordinate transform is applied
-// On mobile (<600px), scales 16:9 images to fill 9:16 canvas (crops sides)
-function drawParallaxBackgroundFullCanvas() {
-    if (!currentBackgroundImage) {
-        return; // Let the solid color fill from animate() show through
-    }
-    
-    const img = currentBackgroundImage;
-    const _dpr = (camera && camera.dpr) ? camera.dpr : 1;
-    
-    // Get actual canvas dimensions in CSS pixels
-    const canvasW = canvas.width / _dpr;
-    const canvasH = canvas.height / _dpr;
-    
-    // Smooth cursor tracking - lerp toward actual cursor position
-    smoothCursorX += (target.x - smoothCursorX) * CURSOR_SMOOTHING;
-    smoothCursorY += (target.y - smoothCursorY) * CURSOR_SMOOTHING;
-    
-    // Normalize smoothed cursor position to -1 to 1 range from center (in virtual coords)
-    const centerVirtualX = VIRTUAL_WIDTH / 2;
-    const centerVirtualY = VIRTUAL_HEIGHT / 2;
-    const cursorOffsetX = (smoothCursorX - centerVirtualX) / centerVirtualX; // -1 to 1
-    const cursorOffsetY = (smoothCursorY - centerVirtualY) / centerVirtualY; // -1 to 1
-    
-    // === PARALLAX SHIFT (scaled to canvas size) ===
-    const maxShiftRatio = 0.02; // 2% of canvas size max shift
-    const shiftX = cursorOffsetX * canvasW * maxShiftRatio;
-    const shiftY = cursorOffsetY * canvasH * maxShiftRatio;
-    
-    // === 3D TILT (Photoscopic Effect) ===
-    const maxTilt = 0.015;
-    const tiltX = cursorOffsetY * maxTilt;
-    const tiltY = cursorOffsetX * maxTilt;
-    
-    // Calculate draw size to COVER entire canvas with oversize for parallax + tilt
-    const oversize = Math.max(canvasW, canvasH) * 0.1; // 10% extra
-    const imgAspect = img.width / img.height; // Use original image aspect ratio
-    const canvasAspect = canvasW / canvasH;
-    
-    let drawWidth, drawHeight;
-    
-    // Cover entire canvas - scale to fill (crop overflow)
-    // For landscape image on portrait canvas: scale by height, crop width
-    // For portrait image on landscape canvas: scale by width, crop height
-    if (imgAspect > canvasAspect) {
-        // Image is wider than canvas - fit to height, width will overflow/crop
-        drawHeight = canvasH + oversize;
-        drawWidth = drawHeight * imgAspect;
-    } else {
-        // Image is taller than canvas - fit to width, height will overflow/crop
-        drawWidth = canvasW + oversize;
-        drawHeight = drawWidth / imgAspect;
-    }
-    
-    // Center coordinates (in actual canvas space)
-    const centerX = canvasW / 2;
-    const centerY = canvasH / 2;
-    
-    // Save and reset to screen coordinates for background
-    ctx.save();
-    ctx.setTransform(_dpr, 0, 0, _dpr, 0, 0); // Reset to 1:1 screen pixels
-    
-    // Apply 3D tilt transform from center
-    const scaleBoost = 1.02;
-    ctx.translate(centerX, centerY);
-    ctx.transform(scaleBoost, tiltX, tiltY, scaleBoost, 0, 0);
-    ctx.translate(-centerX, -centerY);
-    
-    // Draw centered with parallax shift - image scales to fill, excess is cropped
-    const drawX = (canvasW - drawWidth) / 2 + shiftX;
-    const drawY = (canvasH - drawHeight) / 2 + shiftY;
-    ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-    
-    // Subtle vignette overlay
-    const gradient = ctx.createRadialGradient(
-        centerX, centerY, Math.min(canvasW, canvasH) * 0.35,
-        centerX, centerY, Math.max(canvasW, canvasH) * 0.6
-    );
-    gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.25)');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvasW, canvasH);
-    
-    ctx.restore();
-}
-
-// Legacy function kept for compatibility - now just a no-op since background is drawn separately
-function drawParallaxBackground() {
-    // Background is now drawn by drawParallaxBackgroundFullCanvas() before the virtual transform
-    // This function is kept for any code that calls it directly
-}
-
-function drawAvatar() {
-    // If Lottie sprite isn't loaded yet, skip drawing
-    const spriteKey = isBoosting ? 'activated' : 'default';
-    const lottieCanvas = getLottieSpriteCanvas(spriteKey);
-    if (!lottieCanvas) return;
-
-    // Direction logic - determine if avatar should face left
-    const dx = target.x - avatarPosition.x;
-    const dy = target.y - avatarPosition.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const isMovingLeft = distance > 5 ? dx < 0 : target.x < avatarPosition.x;
-
-    ctx.save();
-    
-    // Size the avatar
-    const avatarSize = AVATAR_SIZE * 8;
-    const imgWidth = avatarSize;
-    const imgHeight = avatarSize;
-    const verticalOffset = -2;
-    
-    // Draw the avatar (outline effects removed for Safari compatibility)
-    ctx.drawImage(
-        lottieCanvas,
-        avatarPosition.x - imgWidth / 2,
-        avatarPosition.y - imgHeight / 2 + verticalOffset,
-        imgWidth,
-        imgHeight
-    );
-    
-    // Add hit effect overlay
-    if (avatarHit) {
-        ctx.globalCompositeOperation = 'source-atop';
-        ctx.fillStyle = 'rgba(138, 43, 226, 0.5)';
-        ctx.fillRect(
-            avatarPosition.x - imgWidth / 2,
-            avatarPosition.y - imgHeight / 2 + verticalOffset,
-            imgWidth,
-            imgHeight
-        );
-    }
-    
-    ctx.restore();
-}
-
-function drawCollidables() {
-    // Use the collidable manager to draw all obstacles
-    try {
-        if (collidableManager && typeof collidableManager.draw === 'function') {
-            collidableManager.draw(ctx);
-        }
-    } catch (e) {}
-}
-
 function updatePellets(dt = 0) {
     projectiles = projectiles.filter(p => {
         // Update pellet age
@@ -1495,40 +426,6 @@ function updatePellets(dt = 0) {
     });
 }
 
-function drawPellets() {
-    projectiles.forEach(p => {
-        ctx.save();
-        
-        // Draw outer glow
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = p.color.replace('100%', '30%').replace('50%', '20%'); // dimmer outer glow
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 25;
-        ctx.globalAlpha = 0.3;
-        ctx.fill();
-        
-        // Draw main pellet with enhanced glow
-        ctx.globalAlpha = 1;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 20;
-        ctx.fill();
-        
-        // Draw bright inner core
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 0.6, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.8)';
-        ctx.shadowColor = 'rgba(255,255,255,0.9)';
-        ctx.shadowBlur = 8;
-        ctx.fill();
-        
-        ctx.restore();
-    });
-}
-        
 function spawnEnemy() {
     if (isPaused) return;
     // Cap enemies to prevent lag in endless mode
@@ -1712,32 +609,6 @@ function updateEnemies(dt = 0) {
         enemy.vy = desiredVy;
         enemy.x += enemy.vx * dt;
         enemy.y += enemy.vy * dt;
-    });
-}
-
-function drawEnemies() {
-    const now = performance.now();
-    
-    enemies.forEach(enemy => {
-        // Initialize spawn time for breathing animation
-        if (!enemy.spawnTime) enemy.spawnTime = now;
-        
-        // Breathing animation: 0.5s cycle (2Hz), subtle 8% size variation
-        const breathCycle = 500; // 0.5 seconds in ms
-        const breathPhase = ((now - enemy.spawnTime) % breathCycle) / breathCycle; // 0 to 1
-        const breathScale = 1 + Math.sin(breathPhase * Math.PI * 2) * 0.08; // 0.92 to 1.08
-        
-        // Use consistent sizing across all devices - no DPR scaling for uniform appearance
-        const baseSize = Math.max(16, Math.floor(enemy.size * 0.8)); // Direct pixel-based sizing
-        const fontSize = Math.floor(baseSize * breathScale);
-        
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = `${fontSize + 20}px sans-serif`;
-        ctx.fillStyle = '#000'; // Required for Safari
-        ctx.fillText(enemy.emoji, enemy.x, enemy.y);
-        ctx.restore();
     });
 }
 
@@ -1979,14 +850,7 @@ function pauseGame() {
     // show a paused splash with no extra message (title + prompt only)
     showSplashScreen('PAUSED', '', 'Click to continue');
     // pause background audio when the game is paused by user
-    try {
-        if (!bgAudio.paused) {
-            bgAudio.pause();
-            bgPausedByPause = true;
-        } else {
-            bgPausedByPause = false;
-        }
-    } catch (e) {}
+    pauseBackgroundForPause();
 }
 
 function resumeGame() {
@@ -2004,25 +868,9 @@ function resumeGame() {
     // spawnRate multiplier: 1 = 1/sec, 2 = 2/sec, 0.5 = 1 every 2 sec
     gameLoopInterval = setInterval(spawnEnemy, 1000 / (levelConfig.spawnRate || 1));
     pelletInterval = setInterval(shootPellet, 1000 / levelConfig.aimSpeed);
-    requestAnimationFrame(animate);
+    engine.start();
     // resume audio if it was paused by pause (but don't override visibility-paused state)
-    try {
-        if (!isMuted) {
-            if (bgPausedByVisibility) {
-                // if we were paused due to visibility, wait for a user gesture to resume audio
-                // unless a pending visibility gesture was already received
-                if (pendingVisibilityGesture) {
-                    tryPlayAudio();
-                    bgPausedByVisibility = false;
-                    pendingVisibilityGesture = false;
-                }
-            } else {
-                // resume audio when unpausing from user-initiated pause
-                tryPlayAudio();
-                bgPausedByPause = false;
-            }
-        }
-    } catch (e) {}
+    resumeBackgroundAfterPause();
 }
 
 function endGame() {
@@ -2051,12 +899,7 @@ function endGame() {
         if (sb) { sb.disabled = false; sb.title = 'Submit your score'; }
     } catch (e) {}
     // pause music on game over
-    try {
-        if (!bgAudio.paused) {
-            bgAudio.pause();
-            bgPausedByPause = true;
-        }
-    } catch (e) {}
+    pauseBackgroundForGameOver();
 }
 
 function startNextLevel() {
@@ -2104,8 +947,8 @@ function startNextLevel() {
     gameLoopInterval = setInterval(spawnEnemy, 1000 / (levelConfig2.spawnRate || 1));
     if (pelletInterval) clearInterval(pelletInterval);
     pelletInterval = setInterval(shootPellet, 1000 / levelConfig2.aimSpeed);
-    requestAnimationFrame(animate);
-    if (shootInstructions) shootInstructions.innerText = getBoostStatusText();
+    engine.start();
+    updateControlUI();
 }
 
 function restartGame() {
@@ -2145,8 +988,8 @@ function restartGame() {
     gameLoopInterval = setInterval(spawnEnemy, 1000 / (levelConfig2.spawnRate || 1));
     if (pelletInterval) clearInterval(pelletInterval);
     pelletInterval = setInterval(shootPellet, 1000 / levelConfig2.aimSpeed);
-    requestAnimationFrame(animate);
-    if (shootInstructions) shootInstructions.innerText = getBoostStatusText();
+    engine.start();
+    updateControlUI();
     // Restore leaderboard visibility after restarting
     try {
         const prev = document.body.dataset._prevLeaderboardVisible;
@@ -2159,26 +1002,11 @@ function restartGame() {
     } catch (e) {}
 }
 
-function animate() {
-    // Frame rate limiting for mobile performance
-    const currentTime = performance.now();
-    if (currentTime - lastFrameTime < FRAME_TIME) {
-        requestAnimationFrame(animate);
-        return;
-    }
-    lastFrameTime = currentTime;
-    
-    // timestamp-driven loop: use requestAnimationFrame timestamp to compute dt
-    const now = performance.now();
-    if (__lastTimestamp == null) __lastTimestamp = now;
-    const rawDt = (now - __lastTimestamp) / 1000;
-    // clamp dt to avoid huge jumps when the tab was backgrounded
-    const dt = Math.min(0.05, rawDt);
-    __lastTimestamp = now;
+function animate(dt = 0) {
+    // Engine provides dt; clamp defensively
+    const step = Math.min(0.05, dt || 0);
 
     if (isPaused) {
-        // still update timestamp but don't advance simulation
-        requestAnimationFrame(animate);
         return;
     }
 
@@ -2190,7 +1018,15 @@ function animate() {
     ctx.shadowColor = 'transparent';
     
     // Draw parallax background to fill ENTIRE canvas (before virtual transform)
-    drawParallaxBackgroundFullCanvas();
+    drawParallaxBackgroundFullCanvas({
+        ctx,
+        canvas,
+        camera,
+        currentBackgroundImage,
+        virtualWidth: VIRTUAL_WIDTH,
+        virtualHeight: VIRTUAL_HEIGHT,
+        target
+    });
 
     // Set transform to map world -> screen using virtual canvas scale and DPR
     ctx.save();
@@ -2205,7 +1041,7 @@ function animate() {
 
     // Update simulation using dt (seconds)
     // advance world time and movers before physics
-    __elapsedTime += dt;
+    __elapsedTime += step;
     try {
         // step moving collidables and rebuild spatial grid when they move
         if (collidableManager && typeof collidableManager.stepMovers === 'function') {
@@ -2217,20 +1053,20 @@ function animate() {
         }
     } catch (e) {}
 
-    updateAvatar(dt);
-    updatePellets(dt);
+    updateAvatar(step);
+    updatePellets(step);
     try { checkPelletCollidableCollision(); } catch (e) {}
-    updateEnemies(dt);
+    updateEnemies(step);
 
     checkAvatarCollidableCollision();
     checkAvatarEnemyCollision();
     checkPelletEnemyCollision();
 
     // Draw scene in world coordinates
-    drawCollidables();
-    drawAvatar();
-    drawPellets();
-    drawEnemies();
+    drawCollidables({ ctx, collidableManager });
+    drawAvatar({ ctx, avatarPosition, target, isBoosting, AVATAR_SIZE, avatarHit, getSpriteCanvas: getLottieSpriteCanvas });
+    drawPellets({ ctx, projectiles });
+    drawEnemies({ ctx, enemies });
 
     ctx.restore();
 
@@ -2253,7 +1089,6 @@ function animate() {
         }
     }
 
-    requestAnimationFrame(animate);
 }
 
 function shootPellet() {
@@ -2292,7 +1127,10 @@ function shootPellet() {
 
 function getBoostStatusText() {
     if (isBoosting) return 'Boosted!';
-    return 'Tap to boost';
+    const movementHint = controlMode === CONTROL_MODES.KEYBOARD
+        ? 'Move with arrows/WASD'
+        : 'Move cursor or touch to steer';
+    return `${movementHint}. Tap to boost.`;
 }
 
 function startBoost() {
@@ -2303,9 +1141,6 @@ function startBoost() {
     if (!levelConfig) return;
 
     isBoosting = true;
-    
-    // update UI
-    if (shootInstructions) shootInstructions.innerText = 'Boosted!';
     
     // Fire one immediately for responsiveness
     shootPellet();
@@ -2320,7 +1155,6 @@ function startBoost() {
         const currentLevel = levelWatcher.getLevelConfig();
         pelletInterval = setInterval(shootPellet, 1000 / (currentLevel.aimSpeed || 1));
         boostTimeout = null;
-        if (shootInstructions) shootInstructions.innerText = getBoostStatusText();
     }, BOOST_DURATION);
 }
 
@@ -2361,6 +1195,7 @@ function onDown(e) {
 }
 
 function onMove(e) {
+    if (controlMode !== CONTROL_MODES.MOBILE) return;
     let x, y;
     if (e.type.startsWith('touch')) {
         const touch = e.touches[0];
@@ -2372,7 +1207,7 @@ function onMove(e) {
     }
     // Convert screen/client coordinates into world coordinates for the in-game target
     // screenToWorld handles container offset internally via canvas.getBoundingClientRect()
-    const worldPos = screenToWorld(x, y);
+    const worldPos = screenToWorld(x, y, canvas, camera);
     target.x = Math.max(0, Math.min(WORLD_WIDTH, worldPos.x));
     target.y = Math.max(0, Math.min(WORLD_HEIGHT, worldPos.y));
     // Cursor position is handled by game loop (orbit around avatar), just ensure it's visible
@@ -2409,6 +1244,8 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         return;
     }
+    if (controlMode !== CONTROL_MODES.KEYBOARD) return;
+    e.preventDefault();
     switch (e.key.toLowerCase()) {
         case 'w':
         case 'arrowup':
@@ -2431,6 +1268,7 @@ document.addEventListener('keydown', (e) => {
 
 document.addEventListener('keyup', (e) => {
     if (isPaused) return;
+    if (controlMode !== CONTROL_MODES.KEYBOARD) return;
     switch (e.key.toLowerCase()) {
         case 'w':
         case 'arrowup':
@@ -2464,9 +1302,12 @@ window.onload = async function() {
     await new Promise(r => requestAnimationFrame(r));
     // Ensure the canvas and camera are sized before we compute viewport-aligned placements
     resizeCanvas();
-    await loadLevelsAndMonsters();
     await loadAvatarSprites(); // Load avatar sprite images
-    // create a LevelWatcher now that `levels` is populated
+    // Load levels/monsters and create a LevelWatcher now that `levels` is populated
+    const useMobileBackground = (typeof window !== 'undefined' && window.innerWidth < MINI_BREAKPOINT);
+    const loaded = await loadLevelsAndMonsters({ worldWidth: WORLD_WIDTH, worldHeight: WORLD_HEIGHT, useMobileBackground });
+    levels = loaded.levels || {};
+    monsterMap = loaded.monsterMap || {};
     levelWatcher = new LevelWatcher(levels);
     
     // Preload all level background images
@@ -2484,6 +1325,12 @@ window.onload = async function() {
     }
     
     restartGame();
+    try {
+        const stored = loadControlSettings();
+        setControlMode(stored && stored.mode ? stored.mode : CONTROL_MODES.MOBILE, { persist: false, source: 'init-load' });
+    } catch (e) {
+        setControlMode(CONTROL_MODES.MOBILE, { persist: false, source: 'init-fallback' });
+    }
     // Start paused with a single 'Click to begin' prompt
     isPaused = true;
     showSplashScreen('', '', 'Click to begin');
@@ -2500,6 +1347,10 @@ window.onload = async function() {
             resumeGame();
             // ensure click handlers don't linger
             splashScreen.removeEventListener('pointerdown', onInit);
+            try {
+                const mb = document.getElementById('menu-toggle');
+                if (mb) mb.style.display = 'block';
+            } catch (e) {}
         };
         // wire the whole splash to accept the first gesture
         splashScreen.addEventListener('pointerdown', onInit, { once: true });
@@ -2516,7 +1367,7 @@ window.onload = async function() {
         console.warn('Failed to setup initial splash gesture', e);
     }
     document.body.focus();
-    if (shootInstructions) shootInstructions.innerText = 'Tap to shoot faster';
+    updateControlUI();
     // try to autoplay background audio
     tryPlayAudio();
 };
@@ -2822,10 +1673,9 @@ function cryptoRandomId() {
 const lbToggleBtn = (typeof leaderboardToggleBtn !== 'undefined') ? leaderboardToggleBtn : document.getElementById('leaderboard-toggle');
 if (lbToggleBtn) {
     lbToggleBtn.addEventListener('click', () => {
-        const newState = !leaderboardVisible;
-        setLeaderboardVisibility(newState, true);
-        // if opening the leaderboard while playing, pause the game
-        if (newState && !isPaused && !isGameOver) {
+        closeMenu();
+        setLeaderboardVisibility(true, true);
+        if (!isPaused && !isGameOver) {
             pauseGame();
         }
     });
@@ -2844,12 +1694,39 @@ const pauseBtn = (typeof pauseToggleBtn !== 'undefined') ? pauseToggleBtn : docu
 if (pauseBtn) {
     pauseBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (isPaused && !isGameOver) {
-            resumeGame();
+        closeMenu();
+    });
+}
+
+// Control mode toggle button
+const ctrlBtn = (typeof controlToggleBtn !== 'undefined') ? controlToggleBtn : document.getElementById('control-toggle');
+if (ctrlBtn) {
+    ctrlBtn.addEventListener('click', () => {
+        const nextMode = controlMode === CONTROL_MODES.KEYBOARD ? CONTROL_MODES.MOBILE : CONTROL_MODES.KEYBOARD;
+        setControlMode(nextMode, { persist: true, source: 'ui-toggle' });
+    });
+}
+
+// Menu toggle buttons
+const menuBtn = (typeof menuToggleBtn !== 'undefined') ? menuToggleBtn : document.getElementById('menu-toggle');
+if (menuBtn) {
+    menuBtn.addEventListener('click', () => {
+        if (menuOverlay && menuOverlay.style.display === 'flex') {
+            closeMenu();
         } else {
-            pauseGame();
+            openMenu('main');
         }
     });
+}
+const menuClose = (typeof menuCloseBtn !== 'undefined') ? menuCloseBtn : document.getElementById('menu-close');
+if (menuClose) {
+    menuClose.addEventListener('click', () => closeMenu());
+}
+if (howToBtn) {
+    howToBtn.addEventListener('click', () => openMenu('howto'));
+}
+if (howToBackBtn) {
+    howToBackBtn.addEventListener('click', () => showMenuSlide('main'));
 }
 
 // When the document visibility changes, pause if not visible. When returning, show the resume prompt.
@@ -2862,32 +1739,7 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 // Enhance visibility handling to pause audio and allow resuming on click when visible
-window.addEventListener('visibilitychange', () => {
-    try {
-        if (document.hidden) {
-            // pause music when tab/window is not active
-            if (!bgAudio.paused) {
-                bgAudio.pause();
-                bgPausedByVisibility = true;
-            }
-        } else {
-            // When tab becomes visible again, wait for a user gesture to resume audio (autoplay rules)
-            if (bgPausedByVisibility) {
-                const resumeOnGesture = () => {
-                    pendingVisibilityGesture = true;
-                    // If the game is already unpaused, we can try to play immediately
-                    if (!isPaused && !isMuted) {
-                        tryPlayAudio();
-                        bgPausedByVisibility = false;
-                        pendingVisibilityGesture = false;
-                    }
-                    window.removeEventListener('pointerdown', resumeOnGesture);
-                };
-                window.addEventListener('pointerdown', resumeOnGesture, { once: true });
-            }
-        }
-    } catch (e) {}
-});
+window.addEventListener('visibilitychange', () => handleVisibilityAudio(isPaused));
 if (submitBtn) {
     submitBtn.addEventListener('click', async (evt) => {
         evt.preventDefault();

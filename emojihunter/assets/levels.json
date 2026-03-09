@@ -1,11 +1,11 @@
 [
   {
     "level": 1,
-    "target": 5,
+    "target": 45,
     "emoji": "oni,virus",
-    "aimSpeed": 1,
-    "multiplier": 1,
-    "spawnRate": 2,
+    "aimSpeed": 3,
+    "multiplier": 2,
+    "spawnRate": 5,
     "background": "assets/levelbackgrounds/defaultbg.png",
     "obstacles": [
       { "name": "towers", "set": [".center"] }
@@ -13,11 +13,11 @@
   },
   {
     "level": 2,
-    "target": 5,
+    "target": 75,
     "emoji": "ghost,zombie,pig",
-    "aimSpeed": 1,
+    "aimSpeed": 3,
     "multiplier": 3 ,
-    "spawnRate": 2,
+    "spawnRate": 8,
     "background": "assets/levelbackgrounds/level2bg.png",
     "obstacles": [
       { "name": "bats", "set": [".top", ".trailing", ".leading"] }
@@ -25,11 +25,11 @@
   },
   {
     "level": 3,
-    "target": 5,
+    "target": 100,
     "emoji": "oni,ghost,zombie,germ",
-    "aimSpeed": 2,
+    "aimSpeed": 3,
     "multiplier": 3,
-    "spawnRate": 3,
+    "spawnRate": 10,
     "background": "assets/levelbackgrounds/level3bg.png",
     "obstacles": [
       { "name": "towers", "set": [".trailing", ".leading"] },
@@ -38,11 +38,11 @@
   },
   {
     "level": 4,
-    "target": 5,
+    "target": 150,
     "emoji": "pig,zombie,oni,sakura",
-    "aimSpeed": 2,
-    "multiplier": 4,
-    "spawnRate": 3,
+    "aimSpeed": 3,
+    "multiplier": 5,
+    "spawnRate": 15,
     "background": "assets/levelbackgrounds/level4bg.png",
     "obstacles": [
       { "name": "clouds", "set": [".trailing", ".leading"] },
@@ -51,11 +51,11 @@
   },
   {
     "level": 5,
-    "target": 5,
+    "target": 200,
     "emoji": "alien,ghost,pig,",
     "aimSpeed": 3,
     "multiplier": 5,
-    "spawnRate": 4,
+    "spawnRate": 15,
     "background": "assets/levelbackgrounds/level5bg.png",
     "obstacles": [
       { "name": "bats", "set": [".top", ".trailing", ".leading"] }
@@ -67,7 +67,7 @@
     "emoji": "oni,ghost,alien,pig,zombie,virus,germ",
     "aimSpeed": 2,
     "multiplier": 12,
-    "spawnRate": 55,
+    "spawnRate": 150,
     "background": "assets/levelbackgrounds/finallevelbackground.png",
     "obstacles": [
       { "name": "clouds", "set": [".top", ".trailing", ".leading"] },
