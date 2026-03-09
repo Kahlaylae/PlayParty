@@ -39,7 +39,7 @@
     "emoji": "👾",
     "normalHp": 1,
     "bossHp": 2.5,
-    "enemySpeed": 0.7
+    "enemySpeed": 1
   },
   {
     "monster": "germ",
@@ -53,7 +53,7 @@
     "emoji": "🌸",
     "normalHp": 1,
     "bossHp": 2.5,
-    "enemySpeed": 0.7
+    "enemySpeed": 2
   }
 
 ]
