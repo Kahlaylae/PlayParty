@@ -254,9 +254,8 @@ main {
 .game-card .game-thumbnail {
     width: 100%;
     aspect-ratio: 16 / 9;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
-    background: var(--color-bg);
     border-radius: var(--radius-sm);
     margin-bottom: 0.75rem;
 }
