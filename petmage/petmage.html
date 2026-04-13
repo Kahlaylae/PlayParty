@@ -3,8 +3,10 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
-		<title>bluigi</title>
+<title>Pet Mage: No Hands | Play Party Online</title>
 		<style>
+		:root { --nav-height: 56px; }
+		
 html, body, #canvas {
 	margin: 0;
 	padding: 0;
@@ -18,11 +20,33 @@ body {
 	touch-action: none;
 }
 
-#canvas {
-	display: block;
-}
-
-#canvas:focus {
+		nav {
+			position: fixed;
+			top: 0; left: 0; right: 0;
+			height: var(--nav-height);
+			background: rgba(26,26,26,0.92);
+			backdrop-filter: blur(8px);
+			border-bottom: 1px solid rgba(255,255,255,0.1);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0 1rem;
+			z-index: 9999;
+			font-family: system-ui, -apple-system, sans-serif;
+		}
+		nav a.logo {
+			display: flex; align-items: center; gap: 0.75rem;
+			text-decoration: none; color: #fff;
+			font-size: 1.1rem; font-weight: 700;
+		}
+		nav a.logo img { width: 32px; height: 32px; border-radius: 8px; }
+		nav .nav-links { display: flex; gap: 0.5rem; }
+		nav .nav-links a {
+			color: rgba(255,255,255,0.7); text-decoration: none;
+			font-size: 0.9rem; padding: 0.4rem 0.75rem;
+			border-radius: 8px;
+		}
+		nav .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.08); }
 	outline: none;
 }
 
@@ -96,6 +120,19 @@ body {
 
 	</head>
 	<body>
+		<nav>
+			<a href="../index.html" class="logo">
+				<img src="../assets/favicon.png" alt="Play Party">
+				<span>Play Party</span>
+			</a>
+			<div class="nav-links">
+				<a href="../index.html">Home</a>
+				<a href="../arcade/">Arcade</a>
+				<a href="../houseparty/">House Party</a>
+				<a href="../mobile/">Mobile</a>
+			</div>
+		</nav>
+
 		<canvas id="canvas">
 			Your browser does not support the canvas tag.
 		</canvas>
