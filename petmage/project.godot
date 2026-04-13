@@ -13,6 +13,8 @@ config_version=5
 config/name="bluigi"
 run/main_scene="uid://g3epx7qmt721"
 config/features=PackedStringArray("4.6", "Mobile")
+boot_splash/bg_color=Color(0.93182266, 0.55515873, 0.8006742, 1)
+boot_splash/image="uid://bg7dfvmjmeb4r"
 
 [display]
 
