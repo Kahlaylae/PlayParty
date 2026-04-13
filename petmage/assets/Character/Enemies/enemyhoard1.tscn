@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://dy07okr25ie8o"]
+
+[ext_resource type="PackedScene" uid="uid://bmfxlbe77mngi" path="res://scenes/enemies/golem.tscn" id="1_s5u5n"]
+[ext_resource type="AudioStream" uid="uid://bcdhry0vyxcep" path="res://assets/Character/SoundFX/deathWraith.wav" id="2_d8ded"]
+[ext_resource type="PackedScene" uid="uid://dniej6p4q6gdb" path="res://scenes/enemies/trollboss1.tscn" id="2_iphih"]
+[ext_resource type="PackedScene" uid="uid://lbja5vufwoqy" path="res://scenes/enemies/wraith.tscn" id="3_iphih"]
+
+[node name="Hoard1" type="Node2D" unique_id=1090219558]
+
+[node name="golem" parent="." unique_id=1236065138 instance=ExtResource("1_s5u5n")]
+z_index = -3
+position = Vector2(-168, -4.7683716e-07)
+speed = 750.0
+death_sound = ExtResource("2_d8ded")
+
+[node name="golem2" parent="." unique_id=1975911613 instance=ExtResource("1_s5u5n")]
+z_index = -1
+position = Vector2(408.00003, -1)
+speed = 750.0
+idle_sound = ExtResource("2_d8ded")
+
+[node name="TrollBoss1" parent="." unique_id=164773777 instance=ExtResource("2_iphih")]
+z_index = -2
+position = Vector2(67, 6)
+speed = 750.0
+
+[node name="wraith" parent="." unique_id=1690666234 instance=ExtResource("3_iphih")]
+z_index = -3
+position = Vector2(509, -414)

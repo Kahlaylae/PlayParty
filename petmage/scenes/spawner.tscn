@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://b88q15ovhsinb"]
+
+[ext_resource type="Script" uid="uid://cxd0c15qjho2h" path="res://script/spawner.gd" id="1_2vbf6"]
+[ext_resource type="PackedScene" uid="uid://b71wwy0guwvkf" path="res://scenes/spawneranimation.tscn" id="2_ik2nu"]
+
+[node name="Spawner" type="Marker2D" unique_id=483053821]
+script = ExtResource("1_2vbf6")
+
+[node name="spawneranimation" parent="." unique_id=772637678 instance=ExtResource("2_ik2nu")]
+z_index = -4
+position = Vector2(-3.0000153, -9.000008)
+scale = Vector2(43.59958, 24.34375)
+frame_progress = 0.71947914

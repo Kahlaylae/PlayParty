@@ -1,0 +1,165 @@
+[gd_scene format=3 uid="uid://dniej6p4q6gdb"]
+
+[ext_resource type="Texture2D" uid="uid://dpisda1dgoao7" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_ATTACK_000.png" id="1_hi7hd"]
+[ext_resource type="Script" uid="uid://bt010o3qcejxp" path="res://script/enemy.gd" id="1_p8tsm"]
+[ext_resource type="AudioStream" uid="uid://bqu47hujmof75" path="res://assets/Character/SoundFX/deathBoss.wav" id="2_0pgul"]
+[ext_resource type="Texture2D" uid="uid://6cgi1kjsstoo" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_ATTACK_001.png" id="2_p8tsm"]
+[ext_resource type="AudioStream" uid="uid://dxtbll4udabow" path="res://assets/Character/SoundFX/orge.wav" id="2_uxt6w"]
+[ext_resource type="Texture2D" uid="uid://b4aywgt2gd6bh" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_ATTACK_002.png" id="3_0pgul"]
+[ext_resource type="Texture2D" uid="uid://1murdme8tg4x" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_ATTACK_003.png" id="4_uxt6w"]
+[ext_resource type="Texture2D" uid="uid://bumn72l1dlwc" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_ATTACK_004.png" id="5_f21mv"]
+[ext_resource type="Texture2D" uid="uid://cvp8yhlo7kakx" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_ATTACK_005.png" id="6_nsx3v"]
+[ext_resource type="Texture2D" uid="uid://b1me54bfqs76m" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_ATTACK_006.png" id="7_x410f"]
+[ext_resource type="Texture2D" uid="uid://dfmvjboc56npo" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_ATTACK_007.png" id="8_cy8tv"]
+[ext_resource type="Texture2D" uid="uid://cwm7w0noamef1" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_ATTACK_008.png" id="9_5p8fa"]
+[ext_resource type="Texture2D" uid="uid://cmqhjgi668u8y" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_ATTACK_009.png" id="10_ccqsf"]
+[ext_resource type="Texture2D" uid="uid://bu4wey7uhxyeh" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_IDLE_001.png" id="11_5f4we"]
+[ext_resource type="Texture2D" uid="uid://iqois2puqq5q" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_IDLE_002.png" id="12_dkv4b"]
+[ext_resource type="Texture2D" uid="uid://cqps0ev0641cb" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_IDLE_003.png" id="13_m5if7"]
+[ext_resource type="Texture2D" uid="uid://b2h1h0btyqbfe" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_IDLE_004.png" id="14_mlgcq"]
+[ext_resource type="Texture2D" uid="uid://dwjonbjwfgubm" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_IDLE_005.png" id="15_726m6"]
+[ext_resource type="Texture2D" uid="uid://cqg3lbjcpxxs" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_IDLE_006.png" id="16_thxeh"]
+[ext_resource type="Texture2D" uid="uid://b0riac08t28uv" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_IDLE_007.png" id="17_latnu"]
+[ext_resource type="Texture2D" uid="uid://dqwrcki2d05f2" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_IDLE_008.png" id="18_8agqa"]
+[ext_resource type="Texture2D" uid="uid://ivwop4jwbcpn" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_IDLE_009.png" id="19_qhuy6"]
+[ext_resource type="Texture2D" uid="uid://bbd320weopxbi" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_RUN_000.png" id="20_4ybig"]
+[ext_resource type="Texture2D" uid="uid://b2gu4aeeicper" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_RUN_001.png" id="21_3lei6"]
+[ext_resource type="Texture2D" uid="uid://bbr1ugxwelcjp" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_RUN_002.png" id="22_dppye"]
+[ext_resource type="Texture2D" uid="uid://d3rknoyloqsds" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_RUN_003.png" id="23_mgtcn"]
+[ext_resource type="Texture2D" uid="uid://c62bc2v3dbp0m" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_RUN_004.png" id="24_wcuei"]
+[ext_resource type="Texture2D" uid="uid://13h51j16p57" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_RUN_005.png" id="25_pf07v"]
+[ext_resource type="Texture2D" uid="uid://y3h45h6le4cl" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_RUN_006.png" id="26_t6att"]
+[ext_resource type="Texture2D" uid="uid://dc5k2on36kher" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_RUN_007.png" id="27_8nyr8"]
+[ext_resource type="Texture2D" uid="uid://b1073i25vxq7a" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_RUN_008.png" id="28_b7qck"]
+[ext_resource type="Texture2D" uid="uid://dy01ec6u0gchf" path="res://assets/Character/Enemies/Level1Boss/Troll_01_1_RUN_009.png" id="29_nmk12"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ult6m"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_hi7hd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_p8tsm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_0pgul")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_uxt6w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_f21mv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_nsx3v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_x410f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_cy8tv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_5p8fa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_ccqsf")
+}],
+"loop": true,
+"name": &"attack",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_5f4we")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_dkv4b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_m5if7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_mlgcq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_726m6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_thxeh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_latnu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_8agqa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_qhuy6")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("20_4ybig")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_3lei6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_dppye")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_mgtcn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_wcuei")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_pf07v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_t6att")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_8nyr8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_b7qck")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_nmk12")
+}],
+"loop": true,
+"name": &"run",
+"speed": 10.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kve0q"]
+size = Vector2(985, 715)
+
+[node name="TrollBoss1" type="CharacterBody2D" unique_id=164773777]
+script = ExtResource("1_p8tsm")
+speed = 600.0
+hp = 40
+is_boss = true
+melee_range = 700.0
+detection_range = 2000.0
+knockback_strength = 1000.0
+idle_sound = ExtResource("2_uxt6w")
+death_sound = ExtResource("2_0pgul")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1179900079]
+position = Vector2(1, -555)
+scale = Vector2(1.5, 1.5)
+sprite_frames = SubResource("SpriteFrames_ult6m")
+animation = &"run"
+autoplay = "idle"
+frame_progress = 0.20002456
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1900873937]
+position = Vector2(201.5, -360.5)
+shape = SubResource("RectangleShape2D_kve0q")

@@ -1,0 +1,87 @@
+[gd_scene format=3 uid="uid://b68cd8pngvqk7"]
+
+[ext_resource type="Texture2D" uid="uid://bbta8b6esbt8s" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e1.png" id="1_xvtcd"]
+[ext_resource type="Texture2D" uid="uid://cxwl8k1jaf3cf" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e2.png" id="2_be52i"]
+[ext_resource type="Texture2D" uid="uid://dmq0uimtbodo7" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e3.png" id="3_3ce1e"]
+[ext_resource type="Texture2D" uid="uid://bbqfv7tc868ts" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e4.png" id="4_ohodt"]
+[ext_resource type="Texture2D" uid="uid://cqeet1227tx42" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e5.png" id="5_lwhxr"]
+[ext_resource type="Texture2D" uid="uid://busng11lsi8mm" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e6.png" id="6_aiq6s"]
+[ext_resource type="Texture2D" uid="uid://ut4cg8lonypu" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e7.png" id="7_amrfg"]
+[ext_resource type="Texture2D" uid="uid://cy3jphesq4v60" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e8.png" id="8_taa70"]
+[ext_resource type="Texture2D" uid="uid://bliaelbae0el" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e9.png" id="9_2m73o"]
+[ext_resource type="Texture2D" uid="uid://bh72p8xrbrwfc" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e10.png" id="10_uh7hr"]
+[ext_resource type="Texture2D" uid="uid://b1lkeecpgcwjw" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e11.png" id="11_lm0w1"]
+[ext_resource type="Texture2D" uid="uid://6dx8dbnhcfc6" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e12.png" id="12_3pmek"]
+[ext_resource type="Texture2D" uid="uid://ripeoorexhy7" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e13.png" id="13_nqd4i"]
+[ext_resource type="Texture2D" uid="uid://lrurle8cw72c" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e14.png" id="14_1lln1"]
+[ext_resource type="Texture2D" uid="uid://f8puktxuqrdd" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e20.png" id="15_5ebf7"]
+[ext_resource type="Texture2D" uid="uid://biwd5njvqe1pm" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e21.png" id="16_fyu2f"]
+[ext_resource type="Texture2D" uid="uid://bc87f1b6ovqu1" path="res://assets/Character/Effects/Explosion1/Explosion3/explosion-e22.png" id="17_1avog"]
+[ext_resource type="Script" uid="uid://i1sdooo2aax2" path="res://script/explosionAnimation.gd" id="18_be52i"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pbm8u"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_xvtcd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_be52i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_3ce1e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_ohodt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_lwhxr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_aiq6s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_amrfg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_taa70")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_2m73o")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_uh7hr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_lm0w1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_3pmek")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_nqd4i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_1lln1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_5ebf7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_fyu2f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_1avog")
+}],
+"loop": true,
+"name": &"explode",
+"speed": 15.0
+}]
+
+[node name="bossExplosion2" type="AnimatedSprite2D" unique_id=2053709340]
+sprite_frames = SubResource("SpriteFrames_pbm8u")
+animation = &"explode"
+autoplay = "explode"
+frame_progress = 0.79704744
+speed_scale = 2.0
+script = ExtResource("18_be52i")

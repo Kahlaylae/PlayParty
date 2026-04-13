@@ -36,6 +36,13 @@
       "description": "Launch Emoji Hunter game",
       "url": "/emojihunter/index.html",
       "icons": [{"src": "assets/favicon.png", "sizes": "48x48"}]
+    },
+    {
+      "name": "Play Pet Mage",
+      "short_name": "Pet Mage",
+      "description": "Launch Pet Mage game",
+      "url": "/petmage/index.html",
+      "icons": [{"src": "petmage/petmage.icon.png", "sizes": "48x48"}]
     }
   ]
 }

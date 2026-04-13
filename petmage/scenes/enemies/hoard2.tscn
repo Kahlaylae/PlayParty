@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://dlks7tpt528vb"]
+
+[ext_resource type="PackedScene" uid="uid://h6r5fbi7hfka" path="res://scenes/enemies/orcboss2.tscn" id="1_wydwy"]
+[ext_resource type="PackedScene" uid="uid://gol1ytduic0q" path="res://scenes/enemies/skeleton.tscn" id="2_dsk7e"]
+[ext_resource type="PackedScene" uid="uid://lbja5vufwoqy" path="res://scenes/enemies/wraith.tscn" id="3_iw0t1"]
+[ext_resource type="PackedScene" uid="uid://b6wto0r412yfe" path="res://scenes/enemies/guard.tscn" id="4_xnqas"]
+
+[node name="Node2D" type="Node2D" unique_id=742793142]
+
+[node name="CharacterBody2D" parent="." unique_id=1140904464 instance=ExtResource("1_wydwy")]
+position = Vector2(11, 0)
+
+[node name="skeleton" parent="." unique_id=317277703 instance=ExtResource("2_dsk7e")]
+position = Vector2(227, -3)
+
+[node name="wraith" parent="." unique_id=1690666234 instance=ExtResource("3_iw0t1")]
+position = Vector2(-238, -361)
+
+[node name="guard" parent="." unique_id=105521898 instance=ExtResource("4_xnqas")]
+position = Vector2(-305, 5)
+
+[node name="guard2" parent="." unique_id=765613063 instance=ExtResource("4_xnqas")]
+position = Vector2(521, 0)

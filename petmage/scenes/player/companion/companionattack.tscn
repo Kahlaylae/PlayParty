@@ -1,0 +1,103 @@
+[gd_scene format=3 uid="uid://colflpmkmhhm3"]
+
+[ext_resource type="Texture2D" uid="uid://cn74b3uggch22" path="res://assets/Spells/WaterPowerLaunch/Water Arrow_Frame_01.png" id="1_jes4f"]
+[ext_resource type="Texture2D" uid="uid://cawo031lgythj" path="res://assets/Spells/WaterNormal/Water Spell_Frame_01.png" id="1_pw761"]
+[ext_resource type="Texture2D" uid="uid://bclp1io4l8u0b" path="res://assets/Spells/WaterPowerLaunch/Water Arrow_Frame_02.png" id="2_0i0hk"]
+[ext_resource type="Texture2D" uid="uid://jr71o0f3i18m" path="res://assets/Spells/WaterNormal/Water Spell_Frame_02.png" id="2_qpieq"]
+[ext_resource type="Texture2D" uid="uid://y36p02fiqqf8" path="res://assets/Spells/WaterNormal/Water Spell_Frame_03.png" id="3_odljv"]
+[ext_resource type="Texture2D" uid="uid://duu3qehuwlbfv" path="res://assets/Spells/WaterPowerLaunch/Water Arrow_Frame_03.png" id="3_touqi"]
+[ext_resource type="Texture2D" uid="uid://kesdnjtd112a" path="res://assets/Spells/WaterPowerLaunch/Water Arrow_Frame_04.png" id="4_423ur"]
+[ext_resource type="Texture2D" uid="uid://dtexku6yfeqxb" path="res://assets/Spells/WaterNormal/Water Spell_Frame_04.png" id="4_uvgd6"]
+[ext_resource type="Texture2D" uid="uid://c3qes43oujdyk" path="res://assets/Spells/WaterNormal/Water Spell_Frame_05.png" id="5_7b1vw"]
+[ext_resource type="Texture2D" uid="uid://hhw0dnvb4tam" path="res://assets/Spells/WaterPowerLaunch/Water Arrow_Frame_05.png" id="5_xfybn"]
+[ext_resource type="Texture2D" uid="uid://rxpvyd5kd30n" path="res://assets/Spells/WaterNormal/Water Spell_Frame_06.png" id="6_f1qpy"]
+[ext_resource type="Texture2D" uid="uid://bwgl8k083xqah" path="res://assets/Spells/WaterPowerLaunch/Water Arrow_Frame_06.png" id="6_pot3y"]
+[ext_resource type="Texture2D" uid="uid://6va4laucxoay" path="res://assets/Spells/WaterPowerLaunch/Water Arrow_Frame_07.png" id="7_gi8wb"]
+[ext_resource type="Texture2D" uid="uid://bjboom2gefyk2" path="res://assets/Spells/WaterNormal/Water Spell_Frame_07.png" id="7_t52c3"]
+[ext_resource type="Texture2D" uid="uid://bdvybxqqgm2n1" path="res://assets/Spells/WaterNormal/Water Spell_Frame_08.png" id="8_i2hlr"]
+[ext_resource type="Texture2D" uid="uid://bs1encnehimqe" path="res://assets/Spells/WaterPowerLaunch/Water Arrow_Frame_08.png" id="8_m6mtk"]
+[ext_resource type="Script" uid="uid://diawtdd7gu1i5" path="res://script/companionattack.gd" id="20_cmpgd"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_odljv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_jes4f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_0i0hk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_touqi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_423ur")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_xfybn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_pot3y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_gi8wb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_m6mtk")
+}],
+"loop": true,
+"name": &"attack",
+"speed": 15.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_pw761")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_qpieq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_odljv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_uvgd6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_7b1vw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_f1qpy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_t52c3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_i2hlr")
+}],
+"loop": true,
+"name": &"default",
+"speed": 15.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_uvgd6"]
+radius = 51.613953
+
+[node name="CompanionAttack" type="CharacterBody2D" unique_id=1271659555]
+z_index = 1
+motion_mode = 1
+script = ExtResource("20_cmpgd")
+speed = 1500.0
+damage = 3
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=143327840]
+position = Vector2(4.7683716e-07, 2.3841858e-07)
+scale = Vector2(0.25, 0.25)
+sprite_frames = SubResource("SpriteFrames_odljv")
+autoplay = "default"
+frame_progress = 0.1708989
+offset = Vector2(-124, 0)
+flip_h = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=64074563]
+scale = Vector2(0.5, 0.5)
+shape = SubResource("CircleShape2D_uvgd6")

@@ -1,0 +1,123 @@
+[gd_scene format=3 uid="uid://g4cuwbjfnmkj"]
+
+[ext_resource type="Texture2D" uid="uid://dl13crnvixen4" path="res://assets/Character/Companions/Fairys.png" id="1_1hsps"]
+[ext_resource type="Script" uid="uid://bsp766rtjwxf3" path="res://script/fairyunlock.gd" id="1_oyae4"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oyae4"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y701n"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s6214"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y4p7j"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(192, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ak3j3"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(256, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_41v73"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(320, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x4yx1"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mbja4"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bwn6f"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_abis3"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(224, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r882d"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(288, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fdn2l"]
+atlas = ExtResource("1_1hsps")
+region = Rect2(352, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_a4gcx"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oyae4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y701n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s6214")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y4p7j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ak3j3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_41v73")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 20.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x4yx1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mbja4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bwn6f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_abis3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r882d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fdn2l")
+}],
+"loop": true,
+"name": &"run",
+"speed": 15.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_282cu"]
+radius = 41.484936
+
+[node name="FairyUnlock" type="CharacterBody2D" unique_id=101145573]
+script = ExtResource("1_oyae4")
+orbit_speed = 2.0
+orbit_height_offset = -300.0
+fire_cooldown = 0.5
+tracker = 1000.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=894178458]
+position = Vector2(-5.9999995, -72)
+scale = Vector2(4.5, 4.5)
+sprite_frames = SubResource("SpriteFrames_a4gcx")
+animation = &"idle"
+autoplay = "idle"
+flip_h = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2028016843]
+position = Vector2(-2, -59)
+shape = SubResource("CircleShape2D_282cu")
