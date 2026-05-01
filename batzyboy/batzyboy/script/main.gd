@@ -252,16 +252,12 @@ func _spawn_fruit() -> void:
 
 
 func _build_monster_pool() -> void:
-	var dir := DirAccess.open("res://scenes/mobs/")
-	if dir == null:
-		push_error("batzyboy: could not open res://scenes/mobs/")
-		return
-	for fname in dir.get_files():
-		if not fname.ends_with(".tscn"):
-			continue
-		var scene: PackedScene = load("res://scenes/mobs/" + fname)
-		if scene == null:
-			continue
+	var scenes: Array[PackedScene] = [
+		preload("res://scenes/mobs/monster1.tscn"),
+		preload("res://scenes/mobs/monster2.tscn"),
+		preload("res://scenes/mobs/monster3.tscn"),
+	]
+	for scene in scenes:
 		var probe := scene.instantiate()
 		_monster_pool.append({
 			scene     = scene,
@@ -274,16 +270,15 @@ func _build_monster_pool() -> void:
 
 
 func _build_fruit_pool() -> void:
-	var dir := DirAccess.open("res://scenes/fruits/")
-	if dir == null:
-		push_error("batzyboy: could not open res://scenes/fruits/")
-		return
-	for fname in dir.get_files():
-		if not fname.ends_with(".tscn"):
-			continue
-		var scene: PackedScene = load("res://scenes/fruits/" + fname)
-		if scene == null:
-			continue
+	var scenes: Array[PackedScene] = [
+		preload("res://scenes/fruits/berry.tscn"),
+		preload("res://scenes/fruits/bgrape.tscn"),
+		preload("res://scenes/fruits/cherry.tscn"),
+		preload("res://scenes/fruits/grape.tscn"),
+		preload("res://scenes/fruits/plum.tscn"),
+		preload("res://scenes/fruits/strawberry.tscn"),
+	]
+	for scene in scenes:
 		var probe := scene.instantiate()
 		_fruit_pool.append({
 			scene     = scene,
