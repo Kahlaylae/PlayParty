@@ -6,10 +6,10 @@ enum MenuState { MAIN, HOW_TO_PLAY, SETTINGS }
 var _state: MenuState = MenuState.MAIN
 
 const HTP_CARDS: Array = [
-	{ "icon": "👆", "title": "Tap to Hop",     "body": "Tap to flap. Hold longer\nfor a bigger jump." },
-	{ "icon": "💀", "title": "Dodge Monsters", "body": "Monsters hurt. You have\n3 hearts — don't waste them." },
-	{ "icon": "🍒", "title": "Collect Fruit",  "body": "Grab fruit for points.\nSome fruit heals you too." },
-	{ "icon": "🌟", "title": "Level Up",       "body": "Earn points AND fly far\nto unlock the next level." },
+	{ "icon": "▲", "title": "Tap to Hop",     "body": "Tap to flap. Hold longer\nfor a bigger jump." },
+	{ "icon": "!", "title": "Dodge Monsters", "body": "Monsters hurt. You have\n3 hearts — don't waste them." },
+	{ "icon": "♦", "title": "Collect Fruit",  "body": "Grab fruit for points.\nSome fruit heals you too." },
+	{ "icon": "★", "title": "Level Up",       "body": "Earn points AND fly far\nto unlock the next level." },
 ]
 var _htp_card_idx: int = 0
 

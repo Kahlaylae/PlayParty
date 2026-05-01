@@ -509,7 +509,7 @@ func _build_death_screen() -> void:
 	var died_lbl := _make_label_centered(_death_panel, -200.0, 52, "YOU DIED")
 	died_lbl.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
 
-	_new_best_label = _make_label_centered(_death_panel, -135.0, 26, "✨ NEW BEST!")
+	_new_best_label = _make_label_centered(_death_panel, -135.0, 26, "★ NEW BEST! ★")
 	_new_best_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
 	_new_best_label.hide()
 

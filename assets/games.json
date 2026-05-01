@@ -21,6 +21,16 @@
       "status": "live"
     },
     {
+      "id": "batzyboy",
+      "title": "Batzy Boy",
+      "thumbnail": "batzyboy/maingame/batboy.512x512.png",
+      "shortDescription": "Tap to flap a bat through endless skies. Dodge monsters, collect fruit, and level up.",
+      "longDescription": "Batzy Boy is a one-tap casual arcade game where you flap a bat through an endless side-scrolling world, dodging monsters and collecting fruit to score points and level up.",
+      "gameType": "Endless runner",
+      "path": "batzyboy/index.html",
+      "status": "live"
+    },
+    {
       "id": "coming-soon",
       "title": "Coming Soon",
       "thumbnail": "assets/comingsoon.png",
