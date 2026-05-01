@@ -353,7 +353,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_y4r1p"]
-size = Vector2(1244.9998, 1500.7014)
+size = Vector2(590, 789.44086)
 
 [node name="Player" type="CharacterBody2D" unique_id=819611664]
 scale = Vector2(1, 0.9916602)
@@ -361,14 +361,15 @@ collision_layer = 2
 script = ExtResource("1_u2ulf")
 speed = 500.0
 double_jump_velocity = -850.0
-tracker = 3000.0
-attack_offset = Vector2(10, -25)
+aimDistance = 3000.0
+attack_offset = Vector2(100, -150)
 companion_scenes = Array[PackedScene]([ExtResource("2_21yht"), ExtResource("3_trum3")])
+chat_bubble_offset = Vector2(-85, 0)
+chat_bubble_font_size = 15
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1939264708]
 texture_filter = 1
-position = Vector2(-10, -280.33798)
-scale = Vector2(2, 2)
+position = Vector2(0, -145.34717)
 sprite_frames = SubResource("SpriteFrames_qtqh7")
 animation = &"idle"
 autoplay = "idle"
@@ -376,6 +377,9 @@ offset = Vector2(-2, 0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=391301200]
 texture_filter = 1
-position = Vector2(-15.5, -262.75882)
+position = Vector2(-6.9999995, -133.24623)
 scale = Vector2(0.2, 0.35)
 shape = SubResource("RectangleShape2D_y4r1p")
+
+[node name="FairyUnlock" parent="." unique_id=101145573 instance=ExtResource("3_trum3")]
+position = Vector2(72, -212.7745)

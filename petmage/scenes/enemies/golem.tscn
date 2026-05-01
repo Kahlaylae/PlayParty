@@ -191,11 +191,10 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_i0grc"]
-size = Vector2(700.9265, 523.54584)
+size = Vector2(840.463, 157.10626)
 
 [node name="golem" type="CharacterBody2D" unique_id=1236065138]
 z_index = -2
-scale = Vector2(0.27962992, 0.27962992)
 script = ExtResource("1_i0grc")
 speed = 700.0
 detection_range = 3000.0
@@ -204,14 +203,13 @@ idle_sound = ExtResource("2_sv21f")
 death_sound = ExtResource("3_l2wry")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1668361180]
-position = Vector2(7.1523094, -879.7342)
-scale = Vector2(3, 3)
+position = Vector2(-6, -295)
 sprite_frames = SubResource("SpriteFrames_gsbq2")
 animation = &"idle"
 autoplay = "idle"
 frame_progress = 0.11165287
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1623293698]
-position = Vector2(0, -784.6135)
+position = Vector2(-11.930536, -241.34064)
 scale = Vector2(0.3, 3)
 shape = SubResource("RectangleShape2D_i0grc")

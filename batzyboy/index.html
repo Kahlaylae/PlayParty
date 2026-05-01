@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Batzy Boy | Play Party Online</title>
+    <meta name="description" content="Batzy Boy — tap to flap a bat through endless skies, dodge monsters, collect fruit, and level up. Free casual mobile game by KxHStudios.">
+    <meta name="keywords" content="Batzy Boy, bat game, tap to fly, endless runner, casual mobile game, arcade game, free browser game, KxHStudios, Play Party Online">
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+    <link rel="apple-touch-icon" href="maingame/batboy.apple-touch-icon.png">
+    <link rel="manifest" href="maingame/batboy.manifest.json">
+    <link rel="canonical" href="https://playparty.online/batzyboy/">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Batzy Boy | Play Party Online">
+    <meta property="og:description" content="Tap to flap a bat through endless skies. Dodge monsters, collect fruit, and level up. Free casual mobile game.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://playparty.online/batzyboy/">
+    <meta property="og:image" content="https://playparty.online/batzyboy/maingame/batboy.512x512.png">
+    <meta property="og:site_name" content="Play Party Online">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Batzy Boy | Play Party Online">
+    <meta name="twitter:description" content="Tap to flap a bat through endless skies. Dodge monsters, collect fruit, level up. Free browser game.">
+    <meta name="twitter:image" content="https://playparty.online/batzyboy/maingame/batboy.512x512.png">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Batzy Boy",
+        "description": "Batzy Boy is a one-tap casual arcade game where you flap a bat through an endless side-scrolling world, dodging monsters and collecting fruit to score points and level up.",
+        "genre": ["Casual", "Arcade", "Endless Runner", "Mobile"],
+        "gamePlatform": "Web Browser",
+        "playMode": "SinglePlayer",
+        "applicationCategory": "Game",
+        "operatingSystem": "Any",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock" },
+        "author": { "@type": "Organization", "name": "KxHStudios" },
+        "url": "https://playparty.online/batzyboy/"
+    }
+    </script>
+
+    <meta name="google-adsense-account" content="ca-pub-3098807263908139">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3098807263908139" crossorigin="anonymous"></script>
+
+    <link href="../assets/design.css" rel="stylesheet">
+
+    <style>
+        /* Portrait 9:16 — centered tall column on desktop */
+        @media (min-width: 601px) {
+            main {
+                padding: 1rem;
+                justify-content: center;
+                align-items: center;
+            }
+            .game-window {
+                aspect-ratio: 9 / 16;
+                height: min(calc(100vh - var(--nav-height) - 2rem), 720px);
+                width: auto;
+                flex-shrink: 0;
+            }
+        }
+
+        /* Mobile: fill entire screen below nav */
+        @media (max-width: 600px) {
+            main { padding: 0 !important; }
+            .game-window {
+                position: relative !important;
+                top: auto !important; left: auto !important;
+                right: auto !important; bottom: auto !important;
+                width: 100vw !important;
+                height: calc(100vh - var(--nav-height)) !important;
+                max-width: none !important;
+                border-radius: 0 !important;
+                aspect-ratio: auto !important;
+            }
+        }
+
+        .game-window {
+            position: relative;
+            background: #0d0d1a;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        #canvas {
+            display: block;
+            position: absolute;
+            inset: 0;
+            width: 100% !important;
+            height: 100% !important;
+            outline: none;
+            touch-action: none;
+        }
+
+        #status {
+            position: absolute;
+            inset: 0;
+            background: #0d0d1a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            z-index: 10;
+        }
+
+        #status-splash {
+            position: absolute;
+            inset: 0;
+            max-height: 100%; max-width: 100%;
+            margin: auto;
+            object-fit: contain;
+        }
+        #status-splash.show-image--false { display: none; }
+        #status-splash.fullsize--true { height: 100%; width: 100%; }
+        #status-splash.use-filter--false { image-rendering: pixelated; }
+
+        #status-progress {
+            position: absolute;
+            bottom: 10%; width: 50%; left: 0; right: 0;
+            margin: 0 auto; display: none;
+        }
+
+        #status-notice {
+            position: absolute;
+            display: none;
+            background: #2a1a3a;
+            border-radius: 0.5rem;
+            border: 1px solid #6a2a8a;
+            color: #e0e0e0;
+            font-family: 'Noto Sans', Arial, sans-serif;
+            line-height: 1.3;
+            margin: 0 2rem;
+            padding: 1rem;
+            text-align: center;
+            z-index: 11;
+        }
+
+        .seo-only {
+            position: absolute;
+            width: 1px; height: 1px;
+            padding: 0; margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">
+            <img src="../assets/favicon.png" alt="Play Party">
+            <span>Play Party</span>
+        </a>
+        <div class="nav-links">
+            <a href="../index.html">Home</a>
+            <a href="../arcade/">Arcade</a>
+            <a href="../houseparty/">House Party</a>
+            <a href="../mobile/">Mobile</a>
+        </div>
+    </nav>
+
+    <main>
+        <div class="game-window" id="game-container">
+            <canvas id="canvas">Your browser does not support the canvas tag.</canvas>
+            <noscript>Your browser does not support JavaScript.</noscript>
+            <div id="status">
+                <img id="status-splash" class="show-image--true fullsize--true use-filter--true"
+                     src="maingame/batboy.png" alt="Batzy Boy loading">
+                <progress id="status-progress"></progress>
+                <div id="status-notice"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="maingame/batboy.js"></script>
+    <script>
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":1,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"maingame/batboy","experimentalVK":false,"fileSizes":{"maingame/batboy.pck":111652,"maingame/batboy.wasm":1605674},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"maingame/batboy.service.worker.js"};
+const GODOT_THREADS_ENABLED = true;
+const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+    const statusOverlay = document.getElementById('status');
+    const statusProgress = document.getElementById('status-progress');
+    const statusNotice = document.getElementById('status-notice');
+    let initializing = true;
+    let statusMode = '';
+
+    function setStatusMode(mode) {
+        if (statusMode === mode || !initializing) return;
+        if (mode === 'hidden') { statusOverlay.remove(); initializing = false; return; }
+        statusOverlay.style.visibility = 'visible';
+        statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+        statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+        statusMode = mode;
+    }
+
+    function setStatusNotice(text) {
+        while (statusNotice.lastChild) statusNotice.removeChild(statusNotice.lastChild);
+        text.split('\n').forEach((line) => {
+            statusNotice.appendChild(document.createTextNode(line));
+            statusNotice.appendChild(document.createElement('br'));
+        });
+    }
+
+    function displayFailureNotice(err) {
+        console.error(err);
+        if (err instanceof Error) setStatusNotice(err.message);
+        else if (typeof err === 'string') setStatusNotice(err);
+        else setStatusNotice('An unknown error occurred.');
+        setStatusMode('notice');
+        initializing = false;
+    }
+
+    const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
+    if (missing.length !== 0) {
+        if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+            let swPromise;
+            try { swPromise = navigator.serviceWorker.getRegistration(); }
+            catch (err) { swPromise = Promise.reject(new Error('Service worker registration failed.')); }
+            Promise.race([
+                swPromise.then((reg) => {
+                    if (reg != null) return Promise.reject(new Error('Service worker already exists.'));
+                    return reg;
+                }).then(() => engine.installServiceWorker()),
+                new Promise((resolve) => { setTimeout(() => resolve(), 2000); }),
+            ]).then(() => { window.location.reload(); })
+              .catch((err) => { console.error('Error while registering service worker:', err); });
+        } else {
+            displayFailureNotice('Error\nThe following features required to run Godot projects on the Web are missing:\n' + missing.join('\n'));
+        }
+    } else {
+        setStatusMode('progress');
+        engine.startGame({
+            'onProgress': function (current, total) {
+                if (current > 0 && total > 0) {
+                    statusProgress.value = current;
+                    statusProgress.max = total;
+                } else {
+                    statusProgress.removeAttribute('value');
+                    statusProgress.removeAttribute('max');
+                }
+            },
+        }).then(() => { setStatusMode('hidden'); }, displayFailureNotice);
+    }
+}());
+    </script>
+
+    <section class="seo-only" aria-hidden="true">
+        <h1>Batzy Boy — Free Mobile Browser Game</h1>
+        <p>Play Batzy Boy free in your browser — no download required. Optimized for mobile portrait screens.</p>
+        <h2>About Batzy Boy</h2>
+        <p>Batzy Boy is a one-tap casual arcade game. Tap to flap your bat through an endless side-scrolling world, dodging monsters and collecting fruit. Earn points and fly far enough to level up — 20 levels of escalating speed and challenge.</p>
+        <h2>Game Features</h2>
+        <ul>
+            <li>One-tap controls — tap or click to flap</li>
+            <li>Endless side-scroller with 20 difficulty levels</li>
+            <li>Monsters to dodge and fruit to collect</li>
+            <li>High score tracking between sessions</li>
+            <li>Optimized for mobile portrait screens</li>
+            <li>Free to play — runs entirely in your browser</li>
+        </ul>
+        <h2>More Games at Play Party Online</h2>
+        <p>Also try <a href="../petmage/">Pet Mage: No Hands</a> and <a href="../emojihunter/">Emoji Hunter</a>.</p>
+    </section>
+</body>
+</html>

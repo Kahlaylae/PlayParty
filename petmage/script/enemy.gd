@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const HpBar = preload("res://script/hpbar.gd")
+
 @export var speed: float = 1.0
 @export var hp: int = 10
 @export var level: int = 1
@@ -17,6 +19,10 @@ extends CharacterBody2D
 @export var bounce_damage_multiplier: float = 0.02
 @export var idle_sound: AudioStream
 @export var death_sound: AudioStream
+@export var drop_scene: PackedScene = null
+@export var hp_bar_offset: Vector2 = Vector2(0.0, -90.0)
+
+signal died
 
 var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 var player: Node2D = null
@@ -28,6 +34,10 @@ var attack_timer: float = 0.0
 var knockback_velocity: Vector2 = Vector2.ZERO
 var _idle_sound_node: AudioStreamPlayer = null
 var _idle_sound_timer: float = 0.0
+var _max_hp: int = 0
+var _hp_bar: Node2D = null
+var _base_hp: int = 0
+var _base_speed: float = 0.0
 
 
 func _ready() -> void:
@@ -43,7 +53,34 @@ func _ready() -> void:
 			sprite = child
 			sprite_base_y = sprite.position.y
 			break
+	_base_hp = hp
+	_base_speed = speed
+	_max_hp = hp
+	_setup_hp_bar()
 	_start_idle_sound()
+	_register_with_game()
+
+
+func _setup_hp_bar() -> void:
+	_hp_bar = HpBar.new()
+	_hp_bar.position = hp_bar_offset
+	_hp_bar.z_index = 10
+	_hp_bar.scale = Vector2(5.0, 5.0)
+	_hp_bar.max_value = float(_max_hp)
+	_hp_bar.value = float(_max_hp)
+	add_child(_hp_bar)
+
+
+func _update_hp_bar() -> void:
+	if _hp_bar == null:
+		return
+	_hp_bar.update_bar(float(hp), float(_max_hp))
+
+
+func _register_with_game() -> void:
+	var scene := get_tree().current_scene
+	if scene != null and scene.has_method("register_enemy"):
+		scene.register_enemy(self)
 
 
 func _start_idle_sound() -> void:
@@ -141,6 +178,17 @@ func _physics_process(delta: float) -> void:
 			player.knockback(away_dir, knockback_strength, knockback_arc)
 
 
+func set_level(l: int) -> void:
+	level = l
+	var hp_mult := (1.0 + 0.4 * (l - 1)) if not is_boss else (1.0 + 2.0 * (l - 1))
+	var spd_mult := 1.0 + 0.2 * (l - 1)
+	hp = int(_base_hp * hp_mult)
+	speed = _base_speed * spd_mult
+	_max_hp = hp
+	if _hp_bar != null:
+		_hp_bar.update_bar(float(hp), float(_max_hp))
+
+
 func _play_anim(anim_name: String) -> void:
 	if sprite == null or sprite.sprite_frames == null:
 		return
@@ -151,8 +199,11 @@ func _play_anim(anim_name: String) -> void:
 # Called by attack.gd on hit. Returns true if enemy died.
 func take_damage(amount: int) -> bool:
 	hp -= amount
+	_update_hp_bar()
 	if hp <= 0:
 		_play_death_sound()
+		_spawn_drop()
+		emit_signal("died")
 		queue_free()
 		return true
 	# Flash white on hit
@@ -160,6 +211,14 @@ func take_damage(amount: int) -> bool:
 		sprite.modulate = Color(1.0, 0.5, 0.5)
 		get_tree().create_timer(0.1).timeout.connect(_reset_modulate)
 	return false
+
+
+func _spawn_drop() -> void:
+	if drop_scene == null:
+		return
+	var drop = drop_scene.instantiate()
+	get_tree().current_scene.add_child(drop)
+	drop.global_position = global_position
 
 
 func _play_death_sound() -> void:

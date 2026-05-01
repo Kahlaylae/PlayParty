@@ -5,6 +5,7 @@
 [ext_resource type="AudioStream" uid="uid://bcdhry0vyxcep" path="res://assets/Character/SoundFX/deathWraith.wav" id="2_lqnnh"]
 [ext_resource type="AudioStream" uid="uid://dtuuxcx56vnkj" path="res://assets/Character/SoundFX/wraithidl.wav" id="2_r214c"]
 [ext_resource type="Texture2D" uid="uid://bgi3xmpdgg3b4" path="res://assets/Character/Enemies/Level2FloatingEnemy/Wraith_01_Attack_001.png" id="3_lqnnh"]
+[ext_resource type="PackedScene" uid="uid://cxghb0dl3jocl" path="res://scenes/powerup.tscn" id="4_6ncnc"]
 [ext_resource type="Texture2D" uid="uid://cs4dmx7owd5at" path="res://assets/Character/Enemies/Level2FloatingEnemy/Wraith_01_Attack_002.png" id="4_r214c"]
 [ext_resource type="Texture2D" uid="uid://dreld34nbl26v" path="res://assets/Character/Enemies/Level2FloatingEnemy/Wraith_01_Attack_003.png" id="5_6ncnc"]
 [ext_resource type="Texture2D" uid="uid://bg7lgb6cdke5i" path="res://assets/Character/Enemies/Level2FloatingEnemy/Wraith_01_Attack_004.png" id="6_s3nl5"]
@@ -161,13 +162,14 @@ size = Vector2(867.5, 32.739586)
 z_index = -2
 script = ExtResource("1_4a35y")
 speed = 300.0
-hp = 50
+hp = 15
 is_flying = true
 melee_range = 250.0
-detection_range = 3000.0
+detection_range = 7000.0
 knockback_strength = 500.0
 idle_sound = ExtResource("2_r214c")
 death_sound = ExtResource("2_lqnnh")
+drop_scene = ExtResource("4_6ncnc")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1626423439]
 position = Vector2(18, -207)

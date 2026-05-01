@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://bq77rhqs6fj4c"]
+
+[ext_resource type="Texture2D" uid="uid://ctyrf3jxe42n" path="res://assets/Character/MossyTexturesTextures/Mossy - Decorations&Hazards.png" id="1_5ltox"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uwl68"]
+size = Vector2(53.763954, 5.5577345)
+
+[node name="branch" type="AnimatableBody2D" unique_id=1704156886]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1606276943]
+z_index = -3
+position = Vector2(-1391, -24)
+rotation = -1.5707964
+scale = Vector2(6.747104, 6.747104)
+texture = ExtResource("1_5ltox")
+region_enabled = true
+region_rect = Rect2(120, 3576, 272, 496)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=44146397]
+position = Vector2(-338, 77)
+rotation = 0.034906585
+scale = Vector2(20, 29)
+shape = SubResource("RectangleShape2D_uwl68")
+one_way_collision = true
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="." unique_id=1726619827]
+position = Vector2(-1382, -119.000015)
+rotation = 0.33161256
+scale = Vector2(20, 29)
+shape = SubResource("RectangleShape2D_uwl68")
+one_way_collision = true
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="." unique_id=1776824145]
+position = Vector2(-2401, -289)
+scale = Vector2(20, 29)
+shape = SubResource("RectangleShape2D_uwl68")
+one_way_collision = true

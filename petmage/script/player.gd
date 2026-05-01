@@ -1,21 +1,45 @@
 extends CharacterBody2D
 
 @export var speed: float = 300.0
-@export var jump_velocity: float = -400.0
+@export var jumpSpeed: float = -400.0
 @export var double_jump_velocity: float = -350.0
+@export var aimDistance: float = 300.0
+@export var hp: int = 25
+@export var ultimateCooldown: int = 3
+@export var firespeed: float = 0.25
+
 @export var max_air_jumps: int = 4
 @export var air_jump_cooldown: float = 2.0
 @export var air_jump_diminish: float = 0.75
-@export var level1_scene: PackedScene = preload("res://scenes/player/attacks/level1.tscn")
-@export var level2_scene: PackedScene = preload("res://scenes/player/attacks/level2.tscn")
-@export var tracker: float = 300.0
+
+@export var basicAttack: PackedScene = preload("res://scenes/player/attacks/level1.tscn")
+@export var ultimateAttack: PackedScene = preload("res://scenes/player/attacks/level2.tscn")
+
 @export var attack_offset: Vector2 = Vector2(40, -20)
-@export var fire_cooldown: float = 0.25
-@export var hp: int = 100
+
+
+@export var dash_speed: float = 200.0
+@export var dash_cooldown: float = 1.0
+@export var dash_duration: float = 0.15
 @export var bounce_damping: float = 0.7
 @export var bounce_damage_threshold: float = 300.0
 @export var bounce_damage_multiplier: float = 0.02
+@export var hit_sound_medium: AudioStream
+@export var hit_sound_heavy: AudioStream
 @export var companion_scenes: Array[PackedScene] = []
+@export var chat_bubble_offset: Vector2 = Vector2(-50.0, -140.0)
+@export var chat_bubble_font_size: int = 13
+
+signal died
+signal hp_changed(new_hp: int)
+
+var _dialogue: Dictionary = {}
+var _idle_timer: float = 0.0
+var _idle_quip_interval: float = 6.0
+var _low_hp_quipped: bool = false
+var _global_quip_cooldown: float = 0.0
+const _GLOBAL_QUIP_COOLDOWN: float = 15.0
+
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
@@ -23,10 +47,21 @@ var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 var facing: int = 1
 var cooldown_left: float = 0.0
 var knockback_velocity: Vector2 = Vector2.ZERO
+var _fireball_count: int = 0
 var air_jumps_used: int = 0
 var air_jump_timer: float = 0.0
 var jump_anim_played: bool = false
 var dash_anim_played: bool = false
+var _dash_cooldown_left: float = 0.0
+var _dash_time_left: float = 0.0
+var _dash_dir: int = 0
+var _last_dir_press: int = 0
+var _double_tap_timer: float = 0.0
+var _is_dashing: bool = false
+var max_hp: int = 0
+var _quip_label: Label = null
+var _quip_timer: float = 0.0
+const _DOUBLE_TAP_WINDOW: float = 0.25
 
 
 func _ready() -> void:
@@ -35,7 +70,60 @@ func _ready() -> void:
 	set_collision_layer_value(2, true)
 	collision_mask = 0
 	set_collision_mask_value(1, true)
+	max_hp = hp
+	_load_dialogue()
+	_setup_quip_label()
 	_spawn_companions()
+
+
+func _load_dialogue() -> void:
+	var f := FileAccess.open("res://json/dialogue.json", FileAccess.READ)
+	if f == null:
+		return
+	var result: Variant = JSON.parse_string(f.get_as_text())
+	if result is Dictionary:
+		_dialogue = result
+	_idle_quip_interval = randf_range(5.0, 8.0)
+
+
+func _setup_quip_label() -> void:
+	_quip_label = Label.new()
+	_quip_label.position = chat_bubble_offset
+	_quip_label.size = Vector2(200.0, 60.0)
+	_quip_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_quip_label.add_theme_font_size_override("font_size", chat_bubble_font_size)
+	_quip_label.add_theme_color_override("font_color", Color.WHITE)
+	_quip_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	_quip_label.add_theme_constant_override("shadow_offset_x", 1)
+	_quip_label.add_theme_constant_override("shadow_offset_y", 1)
+	_quip_label.visible = false
+	add_child(_quip_label)
+
+
+func show_quip(text: String) -> void:
+	if _quip_label == null:
+		return
+	if _global_quip_cooldown > 0.0:
+		return
+	_quip_label.text = text
+	_quip_label.visible = true
+	_quip_timer = 2.5
+	_global_quip_cooldown = _GLOBAL_QUIP_COOLDOWN
+	# Reset idle clock so it doesn't stack on top of triggered lines
+	_idle_timer = 0.0
+	_idle_quip_interval = randf_range(5.0, 8.0)
+
+
+func _quip_from(category: String) -> String:
+	if _dialogue.has(category) and _dialogue[category].size() > 0:
+		return _dialogue[category].pick_random()
+	return ""
+
+
+func show_quip_from(category: String) -> void:
+	var line := _quip_from(category)
+	if line != "":
+		show_quip(line)
 
 
 func _spawn_companions() -> void:
@@ -49,6 +137,32 @@ func _spawn_companions() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Quip timer
+	if _quip_timer > 0.0:
+		_quip_timer -= delta
+		if _quip_timer <= 0.0 and _quip_label != null:
+			_quip_label.visible = false
+
+	# Global dialogue cooldown
+	if _global_quip_cooldown > 0.0:
+		_global_quip_cooldown -= delta
+
+	# Idle dialogue — tick only when grounded and barely moving
+	if is_on_floor() and abs(velocity.x) < 5.0 and _quip_timer <= 0.0:
+		_idle_timer += delta
+		if _idle_timer >= _idle_quip_interval:
+			_idle_timer = 0.0
+			_idle_quip_interval = randf_range(5.0, 8.0)
+			# Mix idle + meta + attack + witch into one pool
+			var pool: Array[String] = []
+			for cat in ["idle", "meta", "attack", "witch"]:
+				if _dialogue.has(cat):
+					pool.append_array(_dialogue[cat])
+			if pool.size() > 0:
+				show_quip(pool.pick_random())
+	else:
+		_idle_timer = 0.0
+
 	# Default gravity
 	if not is_on_floor():
 		velocity.y += gravity * delta
@@ -62,6 +176,14 @@ func _physics_process(delta: float) -> void:
 		_check_bounce()
 		_update_animation()
 		return
+
+	# Active dash — override velocity for dash_duration seconds
+	if _dash_time_left > 0.0:
+		_dash_time_left -= delta
+		velocity.x = (dash_speed / dash_duration) * _dash_dir
+		move_and_slide()
+		_update_animation()
+		return
 	else:
 		knockback_velocity = Vector2.ZERO
 		velocity.x = dir * speed
@@ -72,13 +194,36 @@ func _physics_process(delta: float) -> void:
 		facing = -1
 		sprite.flip_h = true
 
+	# Dash cooldown tick
+	if _dash_cooldown_left > 0.0:
+		_dash_cooldown_left -= delta
+
+	# Double-tap dash detection
+	if _double_tap_timer > 0.0:
+		_double_tap_timer -= delta
+	var tapped_right := Input.is_action_just_pressed("Right")
+	var tapped_left  := Input.is_action_just_pressed("Left")
+	if tapped_right or tapped_left:
+		var tapped_dir := 1 if tapped_right else -1
+		if tapped_dir == _last_dir_press and _double_tap_timer > 0.0 and _dash_cooldown_left <= 0.0:
+			# Execute dash — travel dash_speed pixels over dash_duration seconds
+			_dash_time_left = dash_duration
+			_dash_dir = tapped_dir
+			_dash_cooldown_left = dash_cooldown
+			_double_tap_timer = 0.0
+			_last_dir_press = 0
+			_is_dashing = true
+		else:
+			_last_dir_press = tapped_dir
+			_double_tap_timer = _DOUBLE_TAP_WINDOW
+
 	# Jump
 	if air_jump_timer > 0.0:
 		air_jump_timer -= delta
 
 	if Input.is_action_just_pressed("Jump"):
 		if is_on_floor():
-			velocity.y = jump_velocity
+			velocity.y = jumpSpeed
 			air_jumps_used = 0
 			air_jump_timer = 0.0
 			jump_anim_played = false
@@ -89,6 +234,7 @@ func _physics_process(delta: float) -> void:
 			air_jumps_used += 1
 			air_jump_timer = air_jump_cooldown
 			dash_anim_played = false
+			show_quip_from("jump")
 
 	# Reset air jumps on landing
 	if is_on_floor():
@@ -101,7 +247,7 @@ func _physics_process(delta: float) -> void:
 	if cooldown_left > 0.0:
 		cooldown_left -= delta
 
-	# Auto-attack: find closest enemy within tracker range and fire
+	# Auto-attack: find closest enemy within aimDistance range and fire
 	if cooldown_left <= 0.0:
 		var target := _find_closest_enemy()
 		if target != null:
@@ -124,7 +270,7 @@ func _find_closest_enemy() -> Node2D:
 	var on_platform := _is_on_platform()
 	var enemies := get_tree().get_nodes_in_group("enemies")
 	var closest: Node2D = null
-	var closest_dist: float = tracker
+	var closest_dist: float = aimDistance
 	for enemy in enemies:
 		if not is_instance_valid(enemy):
 			continue
@@ -139,10 +285,13 @@ func _find_closest_enemy() -> Node2D:
 
 
 func _auto_attack(target: Node2D) -> void:
-	# Randomly pick level1 (fireball) or level2 (firelaunch)
-	var use_level2 := randi() % 2 == 0
-	var scene: PackedScene = level2_scene if use_level2 else level1_scene
+	# Fire level1 (fireball) ultimateCooldown times, then fire level2 (firelaunch) once
+	var use_level2 := _fireball_count >= ultimateCooldown
+	var scene: PackedScene = ultimateAttack if use_level2 else basicAttack
 	var kind := "firelaunch" if use_level2 else "fireball"
+	_fireball_count = 0 if use_level2 else _fireball_count + 1
+	if use_level2:
+		show_quip_from("special")
 
 	if scene == null:
 		return
@@ -162,11 +311,18 @@ func _auto_attack(target: Node2D) -> void:
 	var needs_vertical_aim: bool = target_flying or height_gap > 80.0
 	proj.setup_projectile(kind, facing, target.global_position, needs_vertical_aim)
 
-	cooldown_left = fire_cooldown
+	cooldown_left = firespeed
 
 
 func _update_animation() -> void:
 	if sprite == null:
+		return
+	# Ground dash
+	if _is_dashing:
+		if sprite.animation != "dash":
+			sprite.play("dash")
+		if not sprite.is_playing() or sprite.animation != "dash":
+			_is_dashing = false
 		return
 	# Airborne: first jump plays "jump", any air jump plays "dash"
 	if not is_on_floor():
@@ -192,7 +348,23 @@ func _update_animation() -> void:
 
 func knockback(dir: int, strength: float = 200.0, arc: float = -150.0) -> void:
 	knockback_velocity = Vector2(strength * dir, arc)
+	_play_hit_sound(strength)
 	_flash_hit()
+
+
+func _play_hit_sound(strength: float) -> void:
+	var stream: AudioStream = null
+	if strength >= 1000.0 and hit_sound_heavy != null:
+		stream = hit_sound_heavy
+	elif strength >= 400.0 and hit_sound_medium != null:
+		stream = hit_sound_medium
+	if stream == null:
+		return
+	var snd := AudioStreamPlayer.new()
+	snd.stream = stream
+	get_tree().current_scene.add_child(snd)
+	snd.play()
+	snd.finished.connect(snd.queue_free)
 
 
 func _flash_hit() -> void:
@@ -220,5 +392,19 @@ func _check_bounce() -> void:
 				hp -= dmg
 				if hp <= 0:
 					hp = 0
+					emit_signal("hp_changed", hp)
+					emit_signal("died")
+					set_physics_process(false)
+				else:
+					emit_signal("hp_changed", hp)
+				# Low HP quip fires once per dip below threshold
+				if hp <= int(max_hp * 0.3) and not _low_hp_quipped:
+					_low_hp_quipped = true
+					show_quip_from("lowhp")
+				else:
+					show_quip_from("hit")
+				# Reset low-hp flag if healed back above threshold
+				if hp > int(max_hp * 0.3):
+					_low_hp_quipped = false
 				_flash_hit()
 		break

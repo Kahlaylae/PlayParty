@@ -48,8 +48,7 @@ func _physics_process(delta: float) -> void:
 	var instance = enemy_scene.instantiate()
 	get_tree().current_scene.add_child(instance)
 	instance.global_position = global_position
-	if instance.has_method("set_level"):
-		instance.set_level(level)
+	_apply_level_recursive(instance, level)
 
 	# Track all enemies in the spawned instance
 	if instance is CharacterBody2D or instance is Node2D:
@@ -59,3 +58,10 @@ func _physics_process(delta: float) -> void:
 			for child in instance.get_children():
 				if is_instance_valid(child) and child.is_in_group("enemies"):
 					_tracked.append(child)
+
+
+func _apply_level_recursive(node: Node, l: int) -> void:
+	if node.has_method("set_level"):
+		node.set_level(l)
+	for child in node.get_children():
+		_apply_level_recursive(child, l)

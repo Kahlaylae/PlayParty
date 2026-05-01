@@ -17,21 +17,21 @@
 [ext_resource type="Texture2D" uid="uid://dim0113kps3sk" path="res://assets/Spells/meteor_side_medium/imgs/img_11.png" id="15_kb1au"]
 [ext_resource type="Texture2D" uid="uid://dlkp51qx4yv10" path="res://assets/Spells/meteor_side_medium/imgs/img_12.png" id="16_c7x2d"]
 [ext_resource type="Texture2D" uid="uid://nkme271kjr12" path="res://assets/Spells/meteor_side_medium/imgs/img_13.png" id="17_4v68p"]
-[ext_resource type="Texture2D" uid="uid://dycy4yv8c74sa" path="res://assets/Spells/FirePowerLaunch/Fire Arrow_Frame_01.png" id="18_0tspe"]
+[ext_resource type="Texture2D" uid="uid://dycy4yv8c74sa" path="res://assets/Spells/fire_ball_blue_side_small/imgs/img_0.png" id="18_0tspe"]
 [ext_resource type="Texture2D" uid="uid://c15b55pnfofbp" path="res://assets/Spells/meteor_side_medium/imgs/img_14.png" id="18_qfejp"]
-[ext_resource type="Texture2D" uid="uid://0fxj3yuwfbwg" path="res://assets/Spells/FirePowerLaunch/Fire Arrow_Frame_02.png" id="19_65ywn"]
+[ext_resource type="Texture2D" uid="uid://0fxj3yuwfbwg" path="res://assets/Spells/fire_ball_blue_side_small/imgs/img_1.png" id="19_65ywn"]
 [ext_resource type="Texture2D" uid="uid://cv78a6lf6vlea" path="res://assets/Spells/meteor_side_medium/imgs/img_15.png" id="19_jfsmt"]
-[ext_resource type="Texture2D" uid="uid://c3a7el88essaf" path="res://assets/Spells/FirePowerLaunch/Fire Arrow_Frame_03.png" id="20_7s0o8"]
+[ext_resource type="Texture2D" uid="uid://c3a7el88essaf" path="res://assets/Spells/fire_ball_blue_side_small/imgs/img_2.png" id="20_7s0o8"]
 [ext_resource type="Texture2D" uid="uid://bp4aqvaka63m8" path="res://assets/Spells/meteor_side_medium/imgs/img_16.png" id="20_tqgdx"]
 [ext_resource type="Texture2D" uid="uid://dtonntmjtnxpo" path="res://assets/Spells/meteor_side_medium/imgs/img_17.png" id="21_6tln5"]
-[ext_resource type="Texture2D" uid="uid://bapbbb6o6h67x" path="res://assets/Spells/FirePowerLaunch/Fire Arrow_Frame_04.png" id="21_wortb"]
-[ext_resource type="Texture2D" uid="uid://8mhp65u6q2lu" path="res://assets/Spells/FirePowerLaunch/Fire Arrow_Frame_05.png" id="22_57wi2"]
+[ext_resource type="Texture2D" uid="uid://bapbbb6o6h67x" path="res://assets/Spells/fire_ball_blue_side_small/imgs/img_3.png" id="21_wortb"]
+[ext_resource type="Texture2D" uid="uid://8mhp65u6q2lu" path="res://assets/Spells/fire_ball_blue_side_small/imgs/img_4.png" id="22_57wi2"]
 [ext_resource type="Texture2D" uid="uid://6claqxltv4ln" path="res://assets/Spells/meteor_side_medium/imgs/img_18.png" id="22_n7ilc"]
-[ext_resource type="Texture2D" uid="uid://sqvxw62wsgj" path="res://assets/Spells/FirePowerLaunch/Fire Arrow_Frame_06.png" id="23_60gjb"]
+[ext_resource type="Texture2D" uid="uid://sqvxw62wsgj" path="res://assets/Spells/fire_ball_blue_side_small/imgs/img_5.png" id="23_60gjb"]
 [ext_resource type="Texture2D" uid="uid://ccncljafntng6" path="res://assets/Spells/meteor_side_medium/imgs/img_19.png" id="23_baftw"]
 [ext_resource type="Texture2D" uid="uid://bxmb5m0nadpmr" path="res://assets/Spells/meteor_side_medium/imgs/img_20.png" id="24_guyge"]
-[ext_resource type="Texture2D" uid="uid://2gtxdnncnl24" path="res://assets/Spells/FirePowerLaunch/Fire Arrow_Frame_07.png" id="24_x5g1i"]
-[ext_resource type="Texture2D" uid="uid://b5icff6a3gr2k" path="res://assets/Spells/FirePowerLaunch/Fire Arrow_Frame_08.png" id="25_b2wmp"]
+[ext_resource type="Texture2D" uid="uid://2gtxdnncnl24" path="res://assets/Spells/fire_ball_blue_side_small/imgs/img_6.png" id="24_x5g1i"]
+[ext_resource type="Texture2D" uid="uid://b5icff6a3gr2k" path="res://assets/Spells/fire_ball_blue_side_small/imgs/img_7.png" id="25_b2wmp"]
 [ext_resource type="Texture2D" uid="uid://dhub6s1q7erhy" path="res://assets/Spells/meteor_side_medium/imgs/img_21.png" id="25_of48m"]
 [ext_resource type="Texture2D" uid="uid://c0e2jk24cyltu" path="res://assets/Spells/meteor_side_medium/imgs/img_22.png" id="26_jr8qe"]
 [ext_resource type="Texture2D" uid="uid://2hg2yogrwej6" path="res://assets/Spells/meteor_side_medium/imgs/img_23.png" id="27_1ef27"]
@@ -172,11 +172,12 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_j1vrv"]
 
 [node name="attack2" type="CharacterBody2D" unique_id=1149564908]
+texture_filter = 1
 motion_mode = 1
 up_direction = Vector2(0, 1)
 script = ExtResource("1_xmuoy")
 speed = 2000.0
-damage = 10
+damage = 25
 explosion_scene = ExtResource("2_q5i28")
 explosion_scale = 4.0
 knockback_strength = 100.0

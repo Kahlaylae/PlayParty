@@ -2,6 +2,50 @@
 
 [ext_resource type="Texture2D" uid="uid://dl13crnvixen4" path="res://assets/Character/Companions/Fairys.png" id="1_1hsps"]
 [ext_resource type="Script" uid="uid://bsp766rtjwxf3" path="res://script/fairyunlock.gd" id="1_oyae4"]
+[ext_resource type="Texture2D" uid="uid://56u5w04tjr7x" path="res://assets/Character/Effects/ShinyItem.png" id="2_nbkvi"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n1gv0"]
+atlas = ExtResource("2_nbkvi")
+region = Rect2(0, 0, 64, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_opnnp"]
+atlas = ExtResource("2_nbkvi")
+region = Rect2(64, 0, 64, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oskb8"]
+atlas = ExtResource("2_nbkvi")
+region = Rect2(128, 0, 64, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_87k16"]
+atlas = ExtResource("2_nbkvi")
+region = Rect2(192, 0, 64, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a1435"]
+atlas = ExtResource("2_nbkvi")
+region = Rect2(256, 0, 64, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_n3g82"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n1gv0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_opnnp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oskb8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_87k16")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a1435")
+}],
+"loop": true,
+"name": &"default",
+"speed": 10.0
+}]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_oyae4"]
 atlas = ExtResource("1_1hsps")
@@ -74,7 +118,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"idle",
-"speed": 20.0
+"speed": 19.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -101,23 +145,33 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_282cu"]
-radius = 41.484936
+radius = 13.341664
 
 [node name="FairyUnlock" type="CharacterBody2D" unique_id=101145573]
 script = ExtResource("1_oyae4")
+orbit_radius = 50.0
 orbit_speed = 2.0
-orbit_height_offset = -300.0
+orbit_height_offset = -100.0
 fire_cooldown = 0.5
 tracker = 1000.0
 
+[node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="." unique_id=112290142]
+z_index = -5
+position = Vector2(3.999999, -5)
+scale = Vector2(0.69317293, 0.69317293)
+sprite_frames = SubResource("SpriteFrames_n3g82")
+autoplay = "default"
+frame_progress = 0.15322009
+flip_h = true
+
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=894178458]
-position = Vector2(-5.9999995, -72)
-scale = Vector2(4.5, 4.5)
+position = Vector2(4.7683716e-07, -3.9999924)
 sprite_frames = SubResource("SpriteFrames_a4gcx")
 animation = &"idle"
 autoplay = "idle"
+frame_progress = 0.6559911
 flip_h = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2028016843]
-position = Vector2(-2, -59)
+position = Vector2(-1, -5.9999924)
 shape = SubResource("CircleShape2D_282cu")

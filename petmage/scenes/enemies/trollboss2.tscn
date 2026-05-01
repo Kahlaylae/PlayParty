@@ -2,7 +2,9 @@
 
 [ext_resource type="Texture2D" uid="uid://kako41642gid" path="res://assets/Character/Enemies/Level2Boss/Troll_02_1_ATTACK_000.png" id="1_of6v1"]
 [ext_resource type="Texture2D" uid="uid://ctyt0ds0cevn6" path="res://assets/Character/Enemies/Level2Boss/Troll_02_1_ATTACK_001.png" id="2_6k2o1"]
+[ext_resource type="AudioStream" uid="uid://dxtbll4udabow" path="res://assets/Character/SoundFX/orge.wav" id="2_t2i4l"]
 [ext_resource type="Texture2D" uid="uid://blpog68gtr25i" path="res://assets/Character/Enemies/Level2Boss/Troll_02_1_ATTACK_002.png" id="3_m2o5c"]
+[ext_resource type="AudioStream" uid="uid://bqu47hujmof75" path="res://assets/Character/SoundFX/deathBoss.wav" id="3_mdmdv"]
 [ext_resource type="Texture2D" uid="uid://cwn2yxvj65d8h" path="res://assets/Character/Enemies/Level2Boss/Troll_02_1_ATTACK_003.png" id="4_t2i4l"]
 [ext_resource type="Texture2D" uid="uid://d4ils4hcq835n" path="res://assets/Character/Enemies/Level2Boss/Troll_02_1_ATTACK_004.png" id="5_mdmdv"]
 [ext_resource type="Texture2D" uid="uid://ddrjoa6supk1g" path="res://assets/Character/Enemies/Level2Boss/Troll_02_1_ATTACK_005.png" id="6_8giwy"]
@@ -146,13 +148,14 @@ size = Vector2(969, 777.25)
 [node name="TrollBoss2" type="CharacterBody2D" unique_id=744717735]
 script = ExtResource("31_6k2o1")
 speed = 400.0
-hp = 150
 level = 2
 is_boss = true
 melee_range = 250.0
 detection_range = 5000.0
 knockback_strength = 1000.0
 bounce_damage_threshold = 1000.0
+idle_sound = ExtResource("2_t2i4l")
+death_sound = ExtResource("3_mdmdv")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1793416213]
 position = Vector2(-8, -557)

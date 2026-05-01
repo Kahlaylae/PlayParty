@@ -191,7 +191,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0rhj5"]
-size = Vector2(1938.1447, 22.999905)
+size = Vector2(1938.1447, 17.597923)
 
 [node name="guard" type="CharacterBody2D" unique_id=317277703]
 z_index = -1
@@ -199,15 +199,14 @@ scale = Vector2(0.91324455, 0.91324455)
 script = ExtResource("1_kv7na")
 speed = 700.0
 hp = 40
-detection_range = 2500.0
+detection_range = 7000.0
 knockback_strength = 500.0
 knockback_arc = -15000.0
 idle_sound = ExtResource("2_6bno0")
 death_sound = ExtResource("3_jrm0n")
 
 [node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="." unique_id=411695558]
-position = Vector2(-8.759975, -203.66943)
-scale = Vector2(1.2, 1.2)
+position = Vector2(-8.759975, -169.72453)
 sprite_frames = SubResource("SpriteFrames_chgph")
 animation = &"idle"
 autoplay = "idle"
@@ -215,6 +214,6 @@ autoplay = "idle"
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="." unique_id=201183628]
 texture_filter = 1
 texture_repeat = 1
-position = Vector2(-16.972445, -177.89972)
+position = Vector2(-13.139963, -135.77962)
 scale = Vector2(0.1, 15)
 shape = SubResource("RectangleShape2D_0rhj5")

@@ -135,12 +135,14 @@ animations = [{
 radius = 3.077237
 
 [node name="attack" type="CharacterBody2D" unique_id=1149564908]
+texture_filter = 1
+texture_repeat = 3
 motion_mode = 1
 up_direction = Vector2(0, 1)
 safe_margin = 6.186
 script = ExtResource("1_tjs2h")
 speed = 1500.0
-damage = 2
+damage = 5
 explosion_scale = 6.0
 has_knockback = false
 knockback_strength = 4000.0

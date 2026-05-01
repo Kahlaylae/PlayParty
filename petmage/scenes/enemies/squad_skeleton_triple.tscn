@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://squad_skeleton_triple"]
+
+[ext_resource type="PackedScene" uid="uid://gol1ytduic0q" path="res://scenes/enemies/skeleton.tscn" id="1_skeleton"]
+
+[node name="squad_skeleton_triple" type="Node2D"]
+
+[node name="skeleton1" parent="." instance=ExtResource("1_skeleton")]
+position = Vector2(-300, 0)
+
+[node name="skeleton2" parent="." instance=ExtResource("1_skeleton")]
+position = Vector2(0, 0)
+
+[node name="skeleton3" parent="." instance=ExtResource("1_skeleton")]
+position = Vector2(300, 0)

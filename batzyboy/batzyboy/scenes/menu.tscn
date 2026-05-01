@@ -1,0 +1,140 @@
+[gd_scene format=3 uid="uid://0egrdlvl1o87"]
+
+[ext_resource type="Script" uid="uid://deupfugd15nrs" path="res://script/menu.gd" id="1_menu"]
+[ext_resource type="Script" uid="uid://lfy722wnikqp" path="res://script/parallax.gd" id="2_i6lef"]
+[ext_resource type="Texture2D" uid="uid://0qta1lwxs6hj" path="res://assetsRaw/map/6.png" id="3_70i5f"]
+[ext_resource type="Texture2D" uid="uid://dm3bx0df8hjot" path="res://assetsRaw/map/paralax/plx-1.png" id="4_mj5lg"]
+[ext_resource type="Texture2D" uid="uid://bicqoc2xapdmh" path="res://assetsRaw/map/paralax/plx-2.png" id="5_ufwb2"]
+[ext_resource type="Texture2D" uid="uid://cikcix40k0yji" path="res://assetsRaw/map/paralax/plx-3.png" id="6_6cdou"]
+[ext_resource type="Texture2D" uid="uid://dgynqgoc37ife" path="res://assetsRaw/map/paralax/plx-4.png" id="7_i42df"]
+[ext_resource type="Texture2D" uid="uid://wca034udmhij" path="res://assetsRaw/map/paralax/plx-5.png" id="8_7jp70"]
+[ext_resource type="Texture2D" uid="uid://07cv1hag4wfy" path="res://assetsRaw/map/8.png" id="9_mxgkd"]
+[ext_resource type="PackedScene" uid="uid://csk83uitp27qj" path="res://scenes/batMain.tscn" id="10_70i5f"]
+
+[node name="Menu" type="Node2D" unique_id=1909842331]
+script = ExtResource("1_menu")
+
+[node name="parallaxBackground" type="Parallax2D" parent="." unique_id=2047107240]
+scale = Vector2(3, 3)
+scroll_offset = Vector2(400, 992.00006)
+ignore_camera_scroll = true
+script = ExtResource("2_i6lef")
+base_speed = 500.0
+
+[node name="ground" type="Sprite2D" parent="parallaxBackground" unique_id=55093467]
+position = Vector2(-12.500016, 2.6666565)
+scale = Vector2(1.2352151, 1.0216049)
+texture = ExtResource("3_70i5f")
+region_enabled = true
+region_rect = Rect2(0, 0, 248, 216)
+
+[node name="background4" type="Sprite2D" parent="parallaxBackground" unique_id=946426286]
+position = Vector2(-12.5, -177.33334)
+scale = Vector2(0.849074, 1.5108025)
+texture = ExtResource("4_mj5lg")
+region_enabled = true
+region_rect = Rect2(0, 0, 360, 216)
+
+[node name="background3" type="Sprite2D" parent="parallaxBackground" unique_id=230106247]
+position = Vector2(-12.500015, -167.33334)
+scale = Vector2(1.5283333, 1.4290123)
+texture = ExtResource("5_ufwb2")
+region_enabled = true
+region_rect = Rect2(0, 0, 200, 216)
+
+[node name="background2" type="Sprite2D" parent="parallaxBackground" unique_id=1495759232]
+position = Vector2(-12.999996, -179)
+scale = Vector2(1.8253969, 1.5339508)
+texture = ExtResource("6_6cdou")
+region_enabled = true
+region_rect = Rect2(0, 0, 168, 216)
+
+[node name="background1" type="Sprite2D" parent="parallaxBackground" unique_id=14667916]
+position = Vector2(-13.0000105, -178.52435)
+scale = Vector2(1.6666666, 1.5198363)
+texture = ExtResource("7_i42df")
+region_enabled = true
+region_rect = Rect2(0, 0, 184, 216)
+
+[node name="foreground" type="Sprite2D" parent="parallaxBackground" unique_id=1709965175]
+position = Vector2(-12.561485, -178.86497)
+scale = Vector2(1.4937091, 1.4937091)
+texture = ExtResource("8_7jp70")
+region_enabled = true
+region_rect = Rect2(0, 0, 205, 222.70328)
+
+[node name="water" type="Sprite2D" parent="parallaxBackground" unique_id=1176291677]
+position = Vector2(-12.333334, 2.666669)
+scale = Vector2(1.275, 1.0416666)
+texture = ExtResource("9_mxgkd")
+region_enabled = true
+region_rect = Rect2(0, 0, 240, 216)
+
+[node name="batMain" parent="." unique_id=39988283 instance=ExtResource("10_70i5f")]
+position = Vector2(368, 416)
+hop_strength = -300.0
+gravity = 1500.0
+max_fall_speed = 1500.0
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=190323549]
+
+[node name="title" type="RichTextLabel" parent="UI" unique_id=855156664]
+offset_left = 48.0
+offset_top = 104.0
+offset_right = 648.0
+offset_bottom = 219.0
+bbcode_enabled = true
+text = "[center]BATZY BOY[/center]"
+fit_content = true
+scroll_active = false
+
+[node name="points" type="RichTextLabel" parent="UI" unique_id=2077840069]
+offset_left = 48.0
+offset_top = 531.0
+offset_right = 648.0
+offset_bottom = 581.0
+bbcode_enabled = true
+text = "[center]Best: 0 pts[/center]"
+scroll_active = false
+
+[node name="linebreak" type="ColorRect" parent="UI" unique_id=1627730958]
+offset_left = 98.0
+offset_top = 595.0
+offset_right = 598.0
+offset_bottom = 598.0
+color = Color(0.862182, 0.948163, 0, 0.55)
+
+[node name="newGame" type="Button" parent="UI" unique_id=797704834]
+offset_left = 148.0
+offset_top = 643.0
+offset_right = 548.0
+offset_bottom = 708.0
+text = "New Game"
+
+[node name="continue" type="Button" parent="UI" unique_id=1702845098]
+offset_left = 148.0
+offset_top = 728.0
+offset_right = 548.0
+offset_bottom = 793.0
+text = "Continue"
+
+[node name="howTo" type="Button" parent="UI" unique_id=1168936817]
+offset_left = 148.0
+offset_top = 833.0
+offset_right = 548.0
+offset_bottom = 898.0
+text = "How To Play"
+
+[node name="settings" type="Button" parent="UI" unique_id=920308471]
+offset_left = 148.0
+offset_top = 928.0
+offset_right = 548.0
+offset_bottom = 993.0
+text = "Settings"
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1437286810]
+anchor_mode = 0
+limit_left = 0
+limit_top = 0
+limit_right = 700
+limit_bottom = 1280

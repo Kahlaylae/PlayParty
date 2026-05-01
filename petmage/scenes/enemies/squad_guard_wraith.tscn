@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://squad_guard_wraith"]
+
+[ext_resource type="PackedScene" uid="uid://b6wto0r412yfe" path="res://scenes/enemies/guard.tscn" id="1_guard"]
+[ext_resource type="PackedScene" uid="uid://lbja5vufwoqy" path="res://scenes/enemies/wraith.tscn" id="2_wraith"]
+
+[node name="squad_guard_wraith" type="Node2D"]
+
+[node name="guard" parent="." instance=ExtResource("1_guard")]
+position = Vector2(0, 0)
+
+[node name="wraith1" parent="." instance=ExtResource("2_wraith")]
+position = Vector2(-300, -200)
+
+[node name="wraith2" parent="." instance=ExtResource("2_wraith")]
+position = Vector2(300, -200)

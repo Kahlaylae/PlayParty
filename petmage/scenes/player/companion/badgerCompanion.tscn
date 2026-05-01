@@ -312,12 +312,11 @@ pushback_strength = 800.0
 melee_range = 250.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=826490155]
-position = Vector2(31.999985, -85)
-scale = Vector2(3.5, 3.5)
+position = Vector2(24.999985, -42.999996)
+scale = Vector2(1.8515625, 1.8515625)
 sprite_frames = SubResource("SpriteFrames_p8gxt")
-animation = &"idle"
+animation = &"attack2"
 autoplay = "idle"
-frame_progress = 0.3284872
 offset = Vector2(0, -40)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=995430842]

@@ -1,0 +1,109 @@
+[gd_scene format=3 uid="uid://mswqjuq404sv"]
+
+[ext_resource type="PackedScene" uid="uid://csk83uitp27qj" path="res://scenes/batMain.tscn" id="1_o5qli"]
+[ext_resource type="Texture2D" uid="uid://dm3bx0df8hjot" path="res://assetsRaw/map/paralax/plx-1.png" id="2_choun"]
+[ext_resource type="Script" uid="uid://lfy722wnikqp" path="res://script/parallax.gd" id="2_ya4ey"]
+[ext_resource type="Texture2D" uid="uid://bicqoc2xapdmh" path="res://assetsRaw/map/paralax/plx-2.png" id="3_ya4ey"]
+[ext_resource type="Texture2D" uid="uid://cikcix40k0yji" path="res://assetsRaw/map/paralax/plx-3.png" id="4_eb6dy"]
+[ext_resource type="Texture2D" uid="uid://dgynqgoc37ife" path="res://assetsRaw/map/paralax/plx-4.png" id="5_trceg"]
+[ext_resource type="Texture2D" uid="uid://wca034udmhij" path="res://assetsRaw/map/paralax/plx-5.png" id="6_a8y0u"]
+[ext_resource type="Texture2D" uid="uid://0qta1lwxs6hj" path="res://assetsRaw/map/6.png" id="7_ya4ey"]
+[ext_resource type="Texture2D" uid="uid://07cv1hag4wfy" path="res://assetsRaw/map/8.png" id="8_eb6dy"]
+[ext_resource type="Script" uid="uid://pyejpjptpvq4" path="res://script/main.gd" id="script_main"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_eb6dy"]
+distance = -4.0
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_trceg"]
+
+[node name="main" type="Node2D" unique_id=228319826]
+script = ExtResource("script_main")
+
+[node name="parallaxBackground" type="Parallax2D" parent="." unique_id=278532048]
+scale = Vector2(3, 3)
+scroll_offset = Vector2(408, 984)
+ignore_camera_scroll = true
+script = ExtResource("2_ya4ey")
+base_speed = 150.0
+
+[node name="ground" type="Sprite2D" parent="parallaxBackground" unique_id=353844319]
+position = Vector2(-12.500016, 2.6666565)
+scale = Vector2(1.2352151, 1.0216049)
+texture = ExtResource("7_ya4ey")
+region_enabled = true
+region_rect = Rect2(0, 0, 248, 216)
+
+[node name="background4" type="Sprite2D" parent="parallaxBackground" unique_id=620451089]
+position = Vector2(-12.5, -177.33334)
+scale = Vector2(0.849074, 1.5108025)
+texture = ExtResource("2_choun")
+region_enabled = true
+region_rect = Rect2(0, 0, 360, 216)
+
+[node name="background3" type="Sprite2D" parent="parallaxBackground" unique_id=690097866]
+position = Vector2(-12.500015, -167.33334)
+scale = Vector2(1.5283333, 1.4290123)
+texture = ExtResource("3_ya4ey")
+region_enabled = true
+region_rect = Rect2(0, 0, 200, 216)
+
+[node name="background2" type="Sprite2D" parent="parallaxBackground" unique_id=1681033923]
+position = Vector2(-12.999996, -179)
+scale = Vector2(1.8253969, 1.5339508)
+texture = ExtResource("4_eb6dy")
+region_enabled = true
+region_rect = Rect2(0, 0, 168, 216)
+
+[node name="background1" type="Sprite2D" parent="parallaxBackground" unique_id=1168735819]
+position = Vector2(-13.0000105, -178.52435)
+scale = Vector2(1.6666666, 1.5198363)
+texture = ExtResource("5_trceg")
+region_enabled = true
+region_rect = Rect2(0, 0, 184, 216)
+
+[node name="foreground" type="Sprite2D" parent="parallaxBackground" unique_id=97506094]
+position = Vector2(-12.561485, -178.86497)
+scale = Vector2(1.4937091, 1.4937091)
+texture = ExtResource("6_a8y0u")
+region_enabled = true
+region_rect = Rect2(0, 0, 205, 222.70328)
+
+[node name="water" type="Sprite2D" parent="parallaxBackground" unique_id=1264562256]
+position = Vector2(-12.333326, 1.6666689)
+scale = Vector2(1.275, 1.0416666)
+texture = ExtResource("8_eb6dy")
+region_enabled = true
+region_rect = Rect2(0, 0, 240, 216)
+
+[node name="batMain" parent="." unique_id=39988283 instance=ExtResource("1_o5qli")]
+position = Vector2(176, 632)
+hop_max_hold = 5.0
+hop_strength = -300.0
+gravity = 1500.0
+max_fall_speed = 1500.0
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=199411756]
+anchor_mode = 0
+limit_left = -14
+limit_top = 0
+limit_right = 706
+limit_bottom = 1280
+
+[node name="killerzone" type="Area2D" parent="." unique_id=2035655063]
+position = Vector2(376, 968)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="killerzone" unique_id=1911690869]
+position = Vector2(-88, -32)
+scale = Vector2(1, 2)
+shape = SubResource("WorldBoundaryShape2D_eb6dy")
+debug_color = Color(0.86453587, 0, 0.2754476, 1)
+
+[node name="roof" type="Area2D" parent="." unique_id=767058240]
+position = Vector2(344, 336)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="roof" unique_id=2118354701]
+position = Vector2(32, -323)
+rotation = 3.1415927
+scale = Vector2(1, 4)
+shape = SubResource("WorldBoundaryShape2D_trceg")
+debug_color = Color(1, 1, 1, 1)

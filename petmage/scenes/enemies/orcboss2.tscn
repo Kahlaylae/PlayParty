@@ -6,6 +6,7 @@
 [ext_resource type="AudioStream" uid="uid://dxtbll4udabow" path="res://assets/Character/SoundFX/orge.wav" id="2_ceh0n"]
 [ext_resource type="Texture2D" uid="uid://0dftd6hixox6" path="res://assets/Character/Enemies/Enemy-OrcMiniBoss2/ORK_03_ATTAK_001.png" id="3_1kk54"]
 [ext_resource type="Texture2D" uid="uid://dk4dmogrrff68" path="res://assets/Character/Enemies/Enemy-OrcMiniBoss2/ORK_03_ATTAK_002.png" id="4_ceh0n"]
+[ext_resource type="PackedScene" uid="uid://cxghb0dl3jocl" path="res://scenes/powerup.tscn" id="4_fienn"]
 [ext_resource type="Texture2D" uid="uid://n8ktt4b11pse" path="res://assets/Character/Enemies/Enemy-OrcMiniBoss2/ORK_03_ATTAK_003.png" id="5_fienn"]
 [ext_resource type="Texture2D" uid="uid://douy0236iuxux" path="res://assets/Character/Enemies/Enemy-OrcMiniBoss2/ORK_03_ATTAK_004.png" id="6_2fvpf"]
 [ext_resource type="Texture2D" uid="uid://yfinfes62dgw" path="res://assets/Character/Enemies/Enemy-OrcMiniBoss2/ORK_03_ATTAK_005.png" id="7_xgwg0"]
@@ -153,6 +154,7 @@ is_boss = true
 detection_range = 2800.0
 idle_sound = ExtResource("2_ceh0n")
 death_sound = ExtResource("2_1kk54")
+drop_scene = ExtResource("4_fienn")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1416884238]
 position = Vector2(-2, -486)
