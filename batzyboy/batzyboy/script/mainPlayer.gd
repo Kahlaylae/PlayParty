@@ -144,9 +144,10 @@ func take_damage(amount: int) -> void:
 	_invincible = true
 	if _anim.sprite_frames.has_animation("hurt"):
 		_anim.play("hurt")
+	_anim.modulate = Color(6.0, 6.0, 6.0, 1.0)  # instant white blast
 	var tween := create_tween().set_loops(4)
-	tween.tween_property(_anim, "modulate", Color(1.0, 0.15, 0.15, 0.25), 0.25)
-	tween.tween_property(_anim, "modulate", Color.WHITE, 0.25)
+	tween.tween_property(_anim, "modulate", Color(1.0, 1.0, 1.0, 0.15), 0.25)
+	tween.tween_property(_anim, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.25)
 	get_tree().create_timer(2.0).timeout.connect(
 		func() -> void:
 			_invincible = false

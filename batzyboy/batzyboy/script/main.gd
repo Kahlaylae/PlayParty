@@ -472,6 +472,9 @@ func _update_hud_hp(hp: int) -> void:
 	var target := str(maxi(hp, 0))
 	for child in _hearts_node.get_children():
 		child.visible = (child.name == target)
+	_hearts_node.modulate = Color(5.0, 5.0, 5.0, 1.0)
+	var htween := create_tween()
+	htween.tween_property(_hearts_node, "modulate", Color.WHITE, 0.35)
 
 
 # ─── Splash screen ────────────────────────────────────────────────────────────
