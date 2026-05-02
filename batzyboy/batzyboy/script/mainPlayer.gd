@@ -51,6 +51,7 @@ func _ready() -> void:
 	outline_shader.code = """
 shader_type canvas_item;
 uniform float size : hint_range(0.0, 8.0) = 1.0;
+uniform float flash_amount : hint_range(0.0, 1.0) = 0.0;
 void fragment() {
     vec4 col = texture(TEXTURE, UV);
     vec2 p = TEXTURE_PIXEL_SIZE * size;
@@ -60,7 +61,8 @@ void fragment() {
     n += texture(TEXTURE, UV + vec2(0.0,  p.y)).a;
     n += texture(TEXTURE, UV + vec2(0.0, -p.y)).a;
     float outline = min(n, 1.0) * (1.0 - col.a);
-    COLOR = mix(col, vec4(1.0, 1.0, 1.0, 1.0), outline) * COLOR;
+    vec4 outlined = mix(col, vec4(1.0, 1.0, 1.0, 1.0), outline);
+    COLOR = mix(outlined, vec4(1.0, 1.0, 1.0, outlined.a), flash_amount);
 }
 """
 	var outline_mat := ShaderMaterial.new()
@@ -140,17 +142,18 @@ func take_damage(amount: int) -> void:
 	if hp <= 0:
 		_start_dying()
 		return
-	# Hurt — 8 white blink cycles over 2 s (white ↔ normal, alpha stays 1)
+	# Hurt — 8 white blink cycles over 2 s via shader flash_amount uniform
 	_invincible = true
 	if _anim.sprite_frames.has_animation("hurt"):
 		_anim.play("hurt")
+	var mat := _anim.material as ShaderMaterial
 	var tween := create_tween().set_loops(8)
-	tween.tween_property(_anim, "modulate", Color(6.0, 6.0, 6.0, 1.0), 0.05)
-	tween.tween_property(_anim, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.20)
+	tween.tween_method(func(v: float) -> void: mat.set_shader_parameter("flash_amount", v), 0.0, 1.0, 0.05)
+	tween.tween_method(func(v: float) -> void: mat.set_shader_parameter("flash_amount", v), 1.0, 0.0, 0.20)
 	get_tree().create_timer(2.0).timeout.connect(
 		func() -> void:
 			_invincible = false
-			_anim.modulate = Color.WHITE
+			mat.set_shader_parameter("flash_amount", 0.0)
 			if not is_dying and not _eating:
 				_anim.play("fly"),
 		CONNECT_ONE_SHOT
