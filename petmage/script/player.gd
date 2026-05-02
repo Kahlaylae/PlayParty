@@ -33,6 +33,8 @@ extends CharacterBody2D
 signal died
 signal hp_changed(new_hp: int)
 
+var paused: bool = true   # set false by game.gd when the game starts
+
 var _dialogue: Dictionary = {}
 var _idle_timer: float = 0.0
 var _idle_quip_interval: float = 6.0
@@ -71,6 +73,7 @@ func _ready() -> void:
 	collision_mask = 0
 	set_collision_mask_value(1, true)
 	max_hp = hp
+	add_to_group("player")
 	_load_dialogue()
 	_setup_quip_label()
 	_spawn_companions()
@@ -137,6 +140,9 @@ func _spawn_companions() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if paused:
+		return
+
 	# Quip timer
 	if _quip_timer > 0.0:
 		_quip_timer -= delta
@@ -408,3 +414,10 @@ func _check_bounce() -> void:
 					_low_hp_quipped = false
 				_flash_hit()
 		break
+
+
+func instant_kill() -> void:
+	hp = 0
+	emit_signal("hp_changed", 0)
+	emit_signal("died")
+	set_physics_process(false)

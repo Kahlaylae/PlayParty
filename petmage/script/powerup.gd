@@ -20,11 +20,9 @@ func _ready() -> void:
 
 
 func _on_body_entered(body: Node2D) -> void:
-	if not body.is_in_group("player") and body.get_script() == null:
-		# Accept any CharacterBody2D that has the relevant properties
-		pass
+	if not body.is_in_group("player"):
+		return
 	_apply_to_player(body)
-	print("girl wtf i passed it")
 	queue_free()
 
 
