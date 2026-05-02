@@ -396,7 +396,7 @@ func _build_pause_screen() -> void:
 	title.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
 
 	# Top half tap zone → resume
-	_make_label_centered(_pause_panel, -100.0, 32, "▶  Resume")
+	_make_label_centered(_pause_panel, -100.0, 32, "Resume")
 
 	# Subtle divider at screen centre
 	var sep := ColorRect.new()
@@ -412,7 +412,7 @@ func _build_pause_screen() -> void:
 	_pause_panel.add_child(sep)
 
 	# Bottom half tap zone → main menu
-	var menu_lbl := _make_label_centered(_pause_panel, 60.0, 32, "←  Main Menu")
+	var menu_lbl := _make_label_centered(_pause_panel, 60.0, 32, "Main Menu")
 	menu_lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75))
 
 	var hint := _make_label_centered(_pause_panel, 230.0, 16, "spacebar to resume")
@@ -514,7 +514,7 @@ func _build_death_screen() -> void:
 	var died_lbl := _make_label_centered(_death_panel, -200.0, 52, "YOU DIED")
 	died_lbl.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
 
-	_new_best_label = _make_label_centered(_death_panel, -135.0, 26, "★ NEW BEST! ★")
+	_new_best_label = _make_label_centered(_death_panel, -135.0, 26, "NEW BEST!")
 	_new_best_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
 	_new_best_label.hide()
 

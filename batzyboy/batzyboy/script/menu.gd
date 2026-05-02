@@ -25,7 +25,6 @@ var _htp_card_idx: int = 0
 
 # Overlays built in code
 var _htp_layer:      CanvasLayer
-var _htp_icon:       Label
 var _htp_title:      Label
 var _htp_body:       Label
 var _htp_progress:   Label
@@ -122,7 +121,6 @@ func _build_htp_overlay() -> void:
 			_apply_outline_shader(htp_anim)
 		panel.add_child(bat_inst)
 
-	_htp_icon  = _make_label_centered(panel, -20.0,  64, "👆")
 	_htp_title = _make_label_centered(panel,  60.0,  36, "Tap to Hop")
 	_htp_title.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
 	_htp_body  = _make_label_centered(panel, 110.0,  24, "")
@@ -153,7 +151,6 @@ func _htp_next() -> void:
 
 func _update_htp_card() -> void:
 	var card: Dictionary = HTP_CARDS[_htp_card_idx]
-	_htp_icon.text     = card.icon
 	_htp_title.text    = card.title
 	_htp_body.text     = card.body
 	_htp_progress.text = "%d / %d" % [_htp_card_idx + 1, HTP_CARDS.size()]
@@ -182,7 +179,7 @@ func _build_settings_overlay() -> void:
 	# Circle back button — top-right, just above the Settings title
 	# anchor top=0 means offset_top is absolute from screen top; title resolves to y≈360
 	var back_btn := Button.new()
-	back_btn.text           = "←"
+	back_btn.text           = "Back"
 	back_btn.anchor_left    = 1.0
 	back_btn.anchor_right   = 1.0
 	back_btn.anchor_top     = 0.0
