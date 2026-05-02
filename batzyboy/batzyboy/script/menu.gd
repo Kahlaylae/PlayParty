@@ -6,10 +6,10 @@ enum MenuState { MAIN, HOW_TO_PLAY, SETTINGS }
 var _state: MenuState = MenuState.MAIN
 
 const HTP_CARDS: Array = [
-	{ "icon": "▲", "title": "Tap to Hop",     "body": "Tap to flap. Hold longer\nfor a bigger jump." },
-	{ "icon": "!", "title": "Dodge Monsters", "body": "Monsters hurt. You have\n3 hearts — don't waste them." },
-	{ "icon": "♦", "title": "Collect Fruit",  "body": "Grab fruit for points.\nSome fruit heals you too." },
-	{ "icon": "★", "title": "Level Up",       "body": "Earn points AND fly far\nto unlock the next level." },
+	{ "title": "Tap to Hop",     "body": "Tap to flap. Hold longer\nfor a bigger jump." },
+	{ "title": "Dodge Monsters", "body": "Monsters hurt. You have\n3 hearts — don't waste them." },
+	{ "title": "Collect Fruit",  "body": "Grab fruit for points.\nSome fruit heals you too." },
+	{ "title": "Level Up",       "body": "Earn points AND fly far\nto unlock the next level." },
 ]
 var _htp_card_idx: int = 0
 
@@ -66,7 +66,7 @@ func _process(delta: float) -> void:
 
 
 # ── Input ─────────────────────────────────────────────────────────────────────
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton and event.pressed):
 		return
 	if _state == MenuState.HOW_TO_PLAY:
@@ -132,6 +132,35 @@ func _build_htp_overlay() -> void:
 	var hint := _make_label_centered(panel, 290.0, 18, "tap anywhere to continue")
 	hint.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 
+	var htp_x := Button.new()
+	htp_x.text           = "X"
+	htp_x.anchor_left    = 1.0
+	htp_x.anchor_right   = 1.0
+	htp_x.anchor_top     = 0.0
+	htp_x.anchor_bottom  = 0.0
+	htp_x.offset_left    = -112.0
+	htp_x.offset_right   = -52.0
+	htp_x.offset_top     = 40.0
+	htp_x.offset_bottom  = 100.0
+	var htp_x_style := StyleBoxFlat.new()
+	htp_x_style.bg_color                   = Color(0.18, 0.18, 0.18, 0.9)
+	htp_x_style.corner_radius_top_left     = 30
+	htp_x_style.corner_radius_top_right    = 30
+	htp_x_style.corner_radius_bottom_left  = 30
+	htp_x_style.corner_radius_bottom_right = 30
+	htp_x.add_theme_stylebox_override("normal", htp_x_style)
+	var htp_x_hover := htp_x_style.duplicate() as StyleBoxFlat
+	htp_x_hover.bg_color = Color(0.35, 0.35, 0.35, 0.95)
+	htp_x.add_theme_stylebox_override("hover",   htp_x_hover)
+	htp_x.add_theme_stylebox_override("pressed", htp_x_hover)
+	htp_x.add_theme_font_size_override("font_size", 22)
+	htp_x.add_theme_color_override("font_color", Color.WHITE)
+	htp_x.pressed.connect(func():
+		_htp_layer.hide()
+		_state = MenuState.MAIN
+	)
+	panel.add_child(htp_x)
+
 
 func _show_htp() -> void:
 	_state = MenuState.HOW_TO_PLAY
@@ -179,7 +208,7 @@ func _build_settings_overlay() -> void:
 	# Circle back button — top-right, just above the Settings title
 	# anchor top=0 means offset_top is absolute from screen top; title resolves to y≈360
 	var back_btn := Button.new()
-	back_btn.text           = "Back"
+	back_btn.text           = "X"
 	back_btn.anchor_left    = 1.0
 	back_btn.anchor_right   = 1.0
 	back_btn.anchor_top     = 0.0
@@ -239,7 +268,7 @@ func _toggle_audio() -> void:
 
 
 func _audio_label() -> String:
-	return "🔊  Audio: ON" if not SaveManager.audio_muted else "🔇  Audio: OFF"
+	return "Audio: ON" if not SaveManager.audio_muted else "Audio: OFF"
 
 
 # ── Outline shader ───────────────────────────────────────────────────────────

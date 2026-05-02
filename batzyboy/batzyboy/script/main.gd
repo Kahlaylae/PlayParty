@@ -117,9 +117,10 @@ func _input(event: InputEvent) -> void:
 			_start_game()
 		State.PAUSED:
 			# Top half → resume; bottom half → main menu
-			if (event as InputEventMouseButton).position.y < 640.0:
+			if (event as InputEventMouseButton).position.y < get_viewport().size.y / 2.0:
 				_resume_game()
 			else:
+				SaveManager.save_progress(current_level, score)
 				Engine.time_scale = 1.0
 				get_tree().change_scene_to_file("res://scenes/menu.tscn")
 		State.DEAD:
