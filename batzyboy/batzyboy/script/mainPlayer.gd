@@ -102,6 +102,12 @@ func _physics_process(delta: float) -> void:
 	velocity.x = 0.0
 	move_and_slide()
 
+	# Hard ceiling clamp — prevent flying off the top of the screen
+	if global_position.y < 50.0:
+		global_position.y = 50.0
+		velocity.y        = maxf(velocity.y, 0.0)
+		_hopping          = false
+
 	# Poll overlapping bodies — more reliable than body_entered with CharacterBody2D + Jolt
 	if not _invincible and not is_dying and not frozen:
 		for body in _hurtbox.get_overlapping_bodies():
