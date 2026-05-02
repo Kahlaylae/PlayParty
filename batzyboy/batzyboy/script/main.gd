@@ -45,9 +45,9 @@ var _retry_enabled: bool   = false
 @onready var _cam: Camera2D         = $Camera2D
 @onready var _killerzone: Area2D    = $killerzone
 @onready var _roof: Area2D          = $roof
+@onready var _hearts_node: Node2D   = $hearts
 
 # HUD labels
-var _hp_label: Label
 var _pts_label: Label
 var _lv_label: Label
 var _dist_label: Label
@@ -90,6 +90,7 @@ func _ready() -> void:
 	_roof.body_entered.connect(_on_roof_entered)
 
 	_build_hud()
+	_update_hud_hp(3)
 	_build_gradient_bg()
 	_build_splash()
 	_build_death_screen()
@@ -454,7 +455,6 @@ func _build_hud() -> void:
 	hud.layer = 1
 	add_child(hud)
 
-	_hp_label   = _make_label(hud, Vector2(20.0, 20.0),  28, "♥♥♥")
 	_pts_label  = _make_label(hud, Vector2(20.0, 60.0),  22, "0 pts")
 	_lv_label   = _make_label_right(hud, Vector2(-20.0, 20.0), 22, "Lv 1")
 	_dist_label = _make_label_right(hud, Vector2(-20.0, 54.0), 18, "0 m")
@@ -469,7 +469,9 @@ func _update_hud() -> void:
 
 
 func _update_hud_hp(hp: int) -> void:
-	_hp_label.text = "♥".repeat(maxi(hp, 0))
+	var target := str(maxi(hp, 0))
+	for child in _hearts_node.get_children():
+		child.visible = (child.name == target)
 
 
 # ─── Splash screen ────────────────────────────────────────────────────────────
