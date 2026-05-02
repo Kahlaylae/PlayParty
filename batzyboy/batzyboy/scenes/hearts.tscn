@@ -5,21 +5,25 @@
 [node name="Hearts" type="Node2D" unique_id=1811215120]
 
 [node name="3" type="Sprite2D" parent="." unique_id=1958178307]
+texture_filter = 1
 texture = ExtResource("1_ruow3")
 region_enabled = true
-region_rect = Rect2(0, -0.40274048, 33, 10.967003)
+region_rect = Rect2(0, -0.05257702, 33, 10.278254)
 
 [node name="2" type="Sprite2D" parent="." unique_id=1381224829]
+texture_filter = 1
 texture = ExtResource("1_ruow3")
 region_enabled = true
-region_rect = Rect2(-0.054138184, 21.511719, 33.34348, 10.603851)
+region_rect = Rect2(-0.054138184, 21.856363, 33.34348, 10.259207)
 
 [node name="1" type="Sprite2D" parent="." unique_id=558420382]
+texture_filter = 1
 texture = ExtResource("1_ruow3")
 region_enabled = true
-region_rect = Rect2(0, 43.665756, 33, 10.712387)
+region_rect = Rect2(0, 43.82969, 33, 10.278255)
 
 [node name="0" type="Sprite2D" parent="." unique_id=1293967506]
+texture_filter = 1
 texture = ExtResource("1_ruow3")
 region_enabled = true
-region_rect = Rect2(0, 65.27864, 33, 11.721359)
+region_rect = Rect2(0, 65.99033, 33, 10.172287)

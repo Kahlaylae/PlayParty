@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://wca034udmhij" path="res://assetsRaw/map/paralax/plx-5.png" id="6_a8y0u"]
 [ext_resource type="Texture2D" uid="uid://0qta1lwxs6hj" path="res://assetsRaw/map/6.png" id="7_ya4ey"]
 [ext_resource type="Texture2D" uid="uid://07cv1hag4wfy" path="res://assetsRaw/map/8.png" id="8_eb6dy"]
+[ext_resource type="PackedScene" uid="uid://b8ln7otjmug6m" path="res://scenes/hearts.tscn" id="11_ya4ey"]
 [ext_resource type="Script" uid="uid://pyejpjptpvq4" path="res://script/main.gd" id="script_main"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_eb6dy"]
@@ -90,7 +91,7 @@ limit_right = 706
 limit_bottom = 1280
 
 [node name="killerzone" type="Area2D" parent="." unique_id=2035655063]
-position = Vector2(376, 968)
+position = Vector2(392, 968)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="killerzone" unique_id=1911690869]
 position = Vector2(-88, -32)
@@ -107,3 +108,7 @@ rotation = 3.1415927
 scale = Vector2(1, 4)
 shape = SubResource("WorldBoundaryShape2D_trceg")
 debug_color = Color(1, 1, 1, 1)
+
+[node name="hearts" parent="." unique_id=267642753 instance=ExtResource("11_ya4ey")]
+position = Vector2(128, 40)
+scale = Vector2(5.773, 3.604)
