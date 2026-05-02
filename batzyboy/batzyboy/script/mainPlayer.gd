@@ -60,7 +60,7 @@ void fragment() {
     n += texture(TEXTURE, UV + vec2(0.0,  p.y)).a;
     n += texture(TEXTURE, UV + vec2(0.0, -p.y)).a;
     float outline = min(n, 1.0) * (1.0 - col.a);
-    COLOR = mix(col, vec4(1.0, 1.0, 1.0, 1.0), outline);
+    COLOR = mix(col, vec4(1.0, 1.0, 1.0, 1.0), outline) * COLOR;
 }
 """
 	var outline_mat := ShaderMaterial.new()
