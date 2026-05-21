@@ -1,14 +1,7 @@
 [gd_scene format=3 uid="uid://mswqjuq404sv"]
 
 [ext_resource type="PackedScene" uid="uid://csk83uitp27qj" path="res://scenes/batMain.tscn" id="1_o5qli"]
-[ext_resource type="Texture2D" uid="uid://dm3bx0df8hjot" path="res://assetsRaw/map/paralax/plx-1.png" id="2_choun"]
-[ext_resource type="Script" uid="uid://lfy722wnikqp" path="res://script/parallax.gd" id="2_ya4ey"]
-[ext_resource type="Texture2D" uid="uid://bicqoc2xapdmh" path="res://assetsRaw/map/paralax/plx-2.png" id="3_ya4ey"]
-[ext_resource type="Texture2D" uid="uid://cikcix40k0yji" path="res://assetsRaw/map/paralax/plx-3.png" id="4_eb6dy"]
-[ext_resource type="Texture2D" uid="uid://dgynqgoc37ife" path="res://assetsRaw/map/paralax/plx-4.png" id="5_trceg"]
-[ext_resource type="Texture2D" uid="uid://wca034udmhij" path="res://assetsRaw/map/paralax/plx-5.png" id="6_a8y0u"]
-[ext_resource type="Texture2D" uid="uid://0qta1lwxs6hj" path="res://assetsRaw/map/6.png" id="7_ya4ey"]
-[ext_resource type="Texture2D" uid="uid://07cv1hag4wfy" path="res://assetsRaw/map/8.png" id="8_eb6dy"]
+[ext_resource type="PackedScene" uid="uid://bplxbg2sc3n4e" path="res://scenes/parallax.tscn" id="2_plxscene"]
 [ext_resource type="PackedScene" uid="uid://b8ln7otjmug6m" path="res://scenes/hearts.tscn" id="11_ya4ey"]
 [ext_resource type="Script" uid="uid://pyejpjptpvq4" path="res://script/main.gd" id="script_main"]
 
@@ -20,61 +13,8 @@ distance = -4.0
 [node name="main" type="Node2D" unique_id=228319826]
 script = ExtResource("script_main")
 
-[node name="parallaxBackground" type="Parallax2D" parent="." unique_id=278532048]
-scale = Vector2(3, 3)
+[node name="parallaxBackground" parent="." unique_id=278532048 instance=ExtResource("2_plxscene")]
 scroll_offset = Vector2(408, 984)
-ignore_camera_scroll = true
-script = ExtResource("2_ya4ey")
-base_speed = 150.0
-
-[node name="ground" type="Sprite2D" parent="parallaxBackground" unique_id=353844319]
-position = Vector2(-12.500016, 2.6666565)
-scale = Vector2(1.2352151, 1.0216049)
-texture = ExtResource("7_ya4ey")
-region_enabled = true
-region_rect = Rect2(0, 0, 248, 216)
-
-[node name="background4" type="Sprite2D" parent="parallaxBackground" unique_id=620451089]
-position = Vector2(-12.5, -177.33334)
-scale = Vector2(0.849074, 1.5108025)
-texture = ExtResource("2_choun")
-region_enabled = true
-region_rect = Rect2(0, 0, 360, 216)
-
-[node name="background3" type="Sprite2D" parent="parallaxBackground" unique_id=690097866]
-position = Vector2(-12.500015, -167.33334)
-scale = Vector2(1.5283333, 1.4290123)
-texture = ExtResource("3_ya4ey")
-region_enabled = true
-region_rect = Rect2(0, 0, 200, 216)
-
-[node name="background2" type="Sprite2D" parent="parallaxBackground" unique_id=1681033923]
-position = Vector2(-12.999996, -179)
-scale = Vector2(1.8253969, 1.5339508)
-texture = ExtResource("4_eb6dy")
-region_enabled = true
-region_rect = Rect2(0, 0, 168, 216)
-
-[node name="background1" type="Sprite2D" parent="parallaxBackground" unique_id=1168735819]
-position = Vector2(-13.0000105, -178.52435)
-scale = Vector2(1.6666666, 1.5198363)
-texture = ExtResource("5_trceg")
-region_enabled = true
-region_rect = Rect2(0, 0, 184, 216)
-
-[node name="foreground" type="Sprite2D" parent="parallaxBackground" unique_id=97506094]
-position = Vector2(-12.561485, -178.86497)
-scale = Vector2(1.4937091, 1.4937091)
-texture = ExtResource("6_a8y0u")
-region_enabled = true
-region_rect = Rect2(0, 0, 205, 222.70328)
-
-[node name="water" type="Sprite2D" parent="parallaxBackground" unique_id=1264562256]
-position = Vector2(-12.333326, 1.6666689)
-scale = Vector2(1.275, 1.0416666)
-texture = ExtResource("8_eb6dy")
-region_enabled = true
-region_rect = Rect2(0, 0, 240, 216)
 
 [node name="batMain" parent="." unique_id=39988283 instance=ExtResource("1_o5qli")]
 position = Vector2(176, 632)
