@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://b8ln7otjmug6m"]
+
+[ext_resource type="Texture2D" uid="uid://cs4fdsfn0fqvx" path="res://assetsRaw/batmain/HealthUI.png" id="1_ruow3"]
+
+[node name="Hearts" type="Node2D" unique_id=1811215120]
+
+[node name="3" type="Sprite2D" parent="." unique_id=1958178307]
+texture_filter = 1
+texture = ExtResource("1_ruow3")
+region_enabled = true
+region_rect = Rect2(0, -0.05257702, 33, 10.278254)
+
+[node name="2" type="Sprite2D" parent="." unique_id=1381224829]
+texture_filter = 1
+texture = ExtResource("1_ruow3")
+region_enabled = true
+region_rect = Rect2(-0.054138184, 21.856363, 33.34348, 10.259207)
+
+[node name="1" type="Sprite2D" parent="." unique_id=558420382]
+texture_filter = 1
+texture = ExtResource("1_ruow3")
+region_enabled = true
+region_rect = Rect2(0, 43.82969, 33, 10.278255)
+
+[node name="0" type="Sprite2D" parent="." unique_id=1293967506]
+texture_filter = 1
+texture = ExtResource("1_ruow3")
+region_enabled = true
+region_rect = Rect2(0, 65.99033, 33, 10.172287)

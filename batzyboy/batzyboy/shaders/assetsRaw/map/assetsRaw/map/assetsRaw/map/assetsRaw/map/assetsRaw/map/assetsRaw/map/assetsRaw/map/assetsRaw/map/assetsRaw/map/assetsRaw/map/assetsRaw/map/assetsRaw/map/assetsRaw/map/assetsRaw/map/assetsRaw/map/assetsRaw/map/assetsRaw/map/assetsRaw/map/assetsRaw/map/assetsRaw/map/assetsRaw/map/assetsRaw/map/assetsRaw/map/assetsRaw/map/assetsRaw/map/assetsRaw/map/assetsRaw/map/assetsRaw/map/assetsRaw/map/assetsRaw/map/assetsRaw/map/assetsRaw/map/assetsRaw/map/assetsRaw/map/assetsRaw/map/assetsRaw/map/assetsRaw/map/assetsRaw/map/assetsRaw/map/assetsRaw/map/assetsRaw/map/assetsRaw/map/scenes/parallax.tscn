@@ -1,0 +1,191 @@
+[gd_scene format=3 uid="uid://dvkkqgc0ayp6e"]
+
+[ext_resource type="Script" uid="uid://lfy722wnikqp" path="res://script/parallax.gd" id="1_plx"]
+[ext_resource type="Texture2D" uid="uid://dm3bx0df8hjot" path="res://assetsRaw/map/paralax/plx-1.png" id="2_plx"]
+[ext_resource type="Texture2D" uid="uid://bicqoc2xapdmh" path="res://assetsRaw/map/paralax/plx-2.png" id="3_plx"]
+[ext_resource type="Texture2D" uid="uid://cikcix40k0yji" path="res://assetsRaw/map/paralax/plx-3.png" id="4_plx"]
+[ext_resource type="Texture2D" uid="uid://dgynqgoc37ife" path="res://assetsRaw/map/paralax/plx-4.png" id="5_plx"]
+[ext_resource type="Texture2D" uid="uid://wca034udmhij" path="res://assetsRaw/map/paralax/plx-5.png" id="6_plx"]
+[ext_resource type="Texture2D" uid="uid://0qta1lwxs6hj" path="res://assetsRaw/map/6.png" id="7_plx"]
+[ext_resource type="Texture2D" uid="uid://07cv1hag4wfy" path="res://assetsRaw/map/8.png" id="8_plx"]
+[ext_resource type="Texture2D" uid="uid://cgbyq7wnamq8n" path="res://assetsRaw/map/light_stream.jpg" id="9_cyp6n"]
+[ext_resource type="Script" uid="uid://bugekjalynpj4" path="res://script/noise.gd" id="10_0fvxf"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0fvxf"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_cyp6n"]
+noise_type = 3
+seed = 20
+frequency = 0.0043
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_0fvxf"]
+noise = SubResource("FastNoiseLite_cyp6n")
+seamless = true
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_m2jpk"]
+diffuse_texture = SubResource("NoiseTexture2D_0fvxf")
+specular_color = Color(0.31080803, 0.6119682, 0.8533752, 1)
+
+[sub_resource type="Sky" id="Sky_cyp6n"]
+
+[sub_resource type="Environment" id="Environment_0fvxf"]
+background_mode = 3
+background_energy_multiplier = 0.0
+sky = SubResource("Sky_cyp6n")
+glow_enabled = true
+fog_enabled = true
+fog_light_color = Color(0.7001232, 0.7269837, 0.7716584, 1)
+fog_light_energy = 16.0
+fog_sun_scatter = 1.0
+fog_density = 1.0
+fog_height = 1024.0
+fog_height_density = 14.9333
+fog_depth_curve = 1.2745606
+volumetric_fog_enabled = true
+volumetric_fog_density = 1.0
+volumetric_fog_albedo = Color(0.44322166, 0.43598694, 0.30131173, 1)
+volumetric_fog_emission = Color(0.9340804, 0.9340805, 0.93408036, 1)
+volumetric_fog_emission_energy = 1024.0
+volumetric_fog_gi_inject = 16.0
+volumetric_fog_anisotropy = 0.9
+volumetric_fog_length = 1024.0
+volumetric_fog_ambient_inject = 16.0
+adjustment_enabled = true
+adjustment_contrast = 1.25
+adjustment_saturation = 2.0
+
+[node name="parallaxBackground" type="Parallax2D" unique_id=2021570811]
+scale = Vector2(3, 3)
+scroll_offset = Vector2(408, 984)
+ignore_camera_scroll = true
+script = ExtResource("1_plx")
+base_speed = 150.0
+mults = {
+"background1": 0.33,
+"background2": 0.325,
+"background3": 0.315,
+"background4": 0.15,
+"foreground": 0.35,
+"ground": 0.215,
+"noisetexture": 0.36,
+"water": 0.07
+}
+
+[node name="ground" type="Sprite2D" parent="." unique_id=1576932842]
+position = Vector2(-12.500016, 2.6666565)
+scale = Vector2(1.2352151, 1.0216049)
+texture = ExtResource("7_plx")
+region_enabled = true
+region_rect = Rect2(0, 0, 248, 216)
+
+[node name="background4" type="Sprite2D" parent="." unique_id=1475468008]
+position = Vector2(-12.5, -177.33334)
+scale = Vector2(0.849074, 1.5108025)
+texture = ExtResource("2_plx")
+region_enabled = true
+region_rect = Rect2(0, 0, 360, 216)
+
+[node name="PointLight2D2" type="PointLight2D" parent="background4" unique_id=1991729430]
+z_index = 2
+texture_filter = 1
+position = Vector2(171.75569, 27.358513)
+rotation = -0.14946494
+scale = Vector2(0.7289554, 1.1581931)
+skew = -0.29543173
+color = Color(1, 1, 1, 0.36078432)
+energy = 1.34
+blend_mode = 2
+shadow_enabled = true
+shadow_color = Color(0.43134022, 0.43134025, 0.43134025, 0)
+texture = ExtResource("9_cyp6n")
+
+[node name="background3" type="Sprite2D" parent="." unique_id=1521471453]
+position = Vector2(-12.500015, -167.33334)
+scale = Vector2(1.5283333, 1.4290123)
+texture = ExtResource("3_plx")
+region_enabled = true
+region_rect = Rect2(0, 0, 200, 216)
+
+[node name="PointLight2D3" type="PointLight2D" parent="background3" unique_id=706681196]
+z_index = 2
+texture_filter = 1
+position = Vector2(22.137436, 36.622017)
+rotation = -0.27909294
+scale = Vector2(0.41657934, 1.1394465)
+skew = 0.033609748
+color = Color(1, 1, 1, 0.36078432)
+energy = 1.34
+blend_mode = 2
+shadow_enabled = true
+shadow_color = Color(0.43134022, 0.43134025, 0.43134025, 0)
+texture = ExtResource("9_cyp6n")
+
+[node name="background2" type="Sprite2D" parent="." unique_id=1268798545]
+position = Vector2(-12.999996, -179)
+scale = Vector2(1.8253969, 1.5339508)
+texture = ExtResource("4_plx")
+region_enabled = true
+region_rect = Rect2(0, 0, 168, 216)
+
+[node name="DirectionalLight2D" type="DirectionalLight2D" parent="background2" unique_id=1842808239]
+position = Vector2(-49.852173, -72.79677)
+scale = Vector2(0.54782605, 0.6519114)
+energy = 13.46
+blend_mode = 1
+shadow_enabled = true
+shadow_color = Color(0.8980392, 0.8784314, 0.99215686, 1)
+height = 0.1
+max_distance = 13626.0
+
+[node name="background1" type="Sprite2D" parent="." unique_id=2124780172]
+position = Vector2(-13.0000105, -178.52435)
+scale = Vector2(1.6666666, 1.5198363)
+texture = ExtResource("5_plx")
+region_enabled = true
+region_rect = Rect2(0, 0, 184, 216)
+
+[node name="foreground" type="Sprite2D" parent="." unique_id=423098043]
+position = Vector2(-13.333336, -186.66667)
+scale = Vector2(1.4937091, 1.4937091)
+texture = ExtResource("6_plx")
+region_enabled = true
+region_rect = Rect2(0, 0, 205, 222.70328)
+
+[node name="PointLight2D" type="PointLight2D" parent="foreground" unique_id=917369750]
+z_index = 2
+texture_filter = 1
+position = Vector2(-69.625336, 33.920044)
+rotation = -0.26179937
+scale = Vector2(0.42419696, 1.0947144)
+color = Color(1, 1, 1, 0.36078432)
+energy = 1.34
+blend_mode = 2
+shadow_enabled = true
+shadow_color = Color(0.43134022, 0.43134025, 0.43134025, 0)
+texture = ExtResource("9_cyp6n")
+
+[node name="water" type="Sprite2D" parent="." unique_id=539058533]
+modulate = Color(0.3007448, 0.5866887, 0.76205045, 1)
+texture_filter = 1
+material = SubResource("ShaderMaterial_0fvxf")
+use_parent_material = true
+position = Vector2(-13.333337, -2.6666646)
+scale = Vector2(1.275, 1.0416666)
+texture = ExtResource("8_plx")
+region_enabled = true
+region_rect = Rect2(0, 0, 240, 216)
+
+[node name="noisetexture" type="Sprite2D" parent="." unique_id=477360543]
+modulate = Color(1, 1, 1, 0.5058824)
+texture_filter = 1
+texture_repeat = 2
+position = Vector2(-16.000002, -114.666664)
+scale = Vector2(0.69715375, 0.70485705)
+texture = SubResource("CanvasTexture_m2jpk")
+region_enabled = true
+region_rect = Rect2(0, -23.728424, 512, 787.6913)
+script = ExtResource("10_0fvxf")
+drift_speed = 3.96
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1686642164]
+environment = SubResource("Environment_0fvxf")

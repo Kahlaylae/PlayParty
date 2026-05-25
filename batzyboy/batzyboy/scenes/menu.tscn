@@ -1,14 +1,23 @@
 [gd_scene format=3 uid="uid://0egrdlvl1o87"]
 
 [ext_resource type="Script" uid="uid://deupfugd15nrs" path="res://script/menu.gd" id="1_menu"]
-[ext_resource type="PackedScene" uid="uid://bplxbg2sc3n4e" path="res://scenes/parallax.tscn" id="2_plxscene"]
+[ext_resource type="PackedScene" uid="uid://dvkkqgc0ayp6e" path="res://scenes/parallax.tscn" id="2_plxscene"]
 [ext_resource type="PackedScene" uid="uid://csk83uitp27qj" path="res://scenes/batMain.tscn" id="10_70i5f"]
 
 [node name="Menu" type="Node2D" unique_id=1909842331]
 script = ExtResource("1_menu")
 
 [node name="parallaxBackground" parent="." unique_id=2047107240 instance=ExtResource("2_plxscene")]
-scroll_offset = Vector2(400, 992.00006)
+scroll_offset = Vector2(-24, -32)
+
+[node name="Camera2D" type="Camera2D" parent="parallaxBackground" unique_id=1437286810]
+position = Vector2(8, 10.666667)
+scale = Vector2(0.33333334, 0.33333334)
+anchor_mode = 0
+limit_left = 0
+limit_top = 0
+limit_right = 700
+limit_bottom = 1280
 
 [node name="batMain" parent="." unique_id=39988283 instance=ExtResource("10_70i5f")]
 position = Vector2(368, 416)
@@ -71,10 +80,3 @@ offset_top = 928.0
 offset_right = 548.0
 offset_bottom = 993.0
 text = "Settings"
-
-[node name="Camera2D" type="Camera2D" parent="." unique_id=1437286810]
-anchor_mode = 0
-limit_left = 0
-limit_top = 0
-limit_right = 700
-limit_bottom = 1280

@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://b8ofiad3wvqcq"]
+
+[ext_resource type="Script" uid="uid://bjx1mrvc8b0he" path="res://script/fruitbaby.gd" id="1_nbrws"]
+[ext_resource type="Texture2D" uid="uid://dhk2y1m6x78a2" path="res://assets/appleguys/watermelonbabyrun.png" id="2_nbrws"]
+[ext_resource type="Texture2D" uid="uid://drqaobcrddh4w" path="res://assets/appleguys/watermelonbabystill.png" id="3_ckugd"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vgg3a"]
+atlas = ExtResource("2_nbrws")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pho8l"]
+atlas = ExtResource("2_nbrws")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kek77"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vgg3a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pho8l")
+}],
+"loop": true,
+"name": &"run",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_ckugd")
+}],
+"loop": true,
+"name": &"still",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4c57u"]
+
+[node name="watermelonbaby" type="CharacterBody2D" unique_id=712754995]
+texture_filter = 1
+script = ExtResource("1_nbrws")
+
+[node name="animation" type="AnimatedSprite2D" parent="." unique_id=2073381761]
+sprite_frames = SubResource("SpriteFrames_kek77")
+animation = &"still"
+autoplay = "run"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1417007529]
+position = Vector2(0, 1)
+shape = SubResource("CircleShape2D_4c57u")

@@ -18,9 +18,10 @@ const PTS_PER_LEVEL:  int   = 25
 const DIST_PER_LEVEL: float = 10000.0  # 100 m × 100 px/m
 
 # ─── Scene preloads ───────────────────────────────────────────────────────────
-# Monster pool — built at runtime from scenes/mobs/.  Add a new .tscn there
-# and set min_level / damage / wave_amplitude via exported properties.
+# Monster pool — driven by enemies.tscn / enemylist.gd.
+# Open enemies.tscn and drag monster .tscn files into the Enemy Scenes array.
 var _monster_pool: Array = []
+var _enemy_list: Node = null
 
 # Fruit pool — populated at runtime by scanning res://scenes/fruits/.
 # Drop any new fruit .tscn in that folder and it's automatically included.
@@ -204,9 +205,9 @@ func _spawn_x() -> float:
 
 
 func _spawn_y() -> float:
-	# cy = top edge; play area runs from ~y=150 (below roof) to ~y=950 (above killerzone)
+	# cy = top edge; play area runs from ~y=150 (below roof) to y=950 (above water)
 	var cy := _cam.global_position.y
-	return randf_range(cy + 150.0, cy + 950.0)
+	return minf(randf_range(cy + 150.0, cy + 950.0), 950.0)
 
 
 func _spawn_monster() -> void:
@@ -254,12 +255,11 @@ func _spawn_fruit() -> void:
 
 
 func _build_monster_pool() -> void:
-	var scenes: Array[PackedScene] = [
-		preload("res://scenes/mobs/monster1.tscn"),
-		preload("res://scenes/mobs/monster2.tscn"),
-		preload("res://scenes/mobs/monster3.tscn"),
-	]
-	for scene in scenes:
+	_enemy_list = preload("res://scenes/enemies.tscn").instantiate()
+	add_child(_enemy_list)
+	for scene: PackedScene in _enemy_list.enemy_scenes:
+		if scene == null:
+			continue
 		var probe := scene.instantiate()
 		_monster_pool.append({
 			scene     = scene,

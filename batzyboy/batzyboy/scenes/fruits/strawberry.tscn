@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dnx30n2gvkbmq"]
 
-[ext_resource type="Texture2D" uid="uid://bwv2lhk57p0eh" path="res://assetsRaw/objects/Freebies_Icons_Botany.png" id="1_mxbrp"]
+[ext_resource type="Texture2D" uid="uid://bwv2lhk57p0eh" path="res://assetsRaw/objects/1*sprite.png" id="1_mxbrp"]
 [ext_resource type="Script" uid="uid://cfu2yvwu0t7le" path="res://script/fruit.gd" id="script_fruit"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ghwtm"]

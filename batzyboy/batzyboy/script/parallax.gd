@@ -1,30 +1,33 @@
+@tool
 extends Node2D
 
 @export var base_speed: float = 300.0
+## Pick nodes here using the node picker. A matching 0.1 float appears automatically.
+@export var layer_nodes: Array[Node2D] = []:
+	set(v):
+		layer_nodes = v
+		while layer_mults.size() < layer_nodes.size():
+			layer_mults.append(0.1)
+		notify_property_list_changed()
 
-# UV scroll multipliers — 0.0 static, 1.0 full speed
-@export var mults: Dictionary = {
-	"background4":  0.15,
-	"background3":  0.25,
-	"background2":  0.35,
-	"background1":  0.45,
-	"foreground":   0.55,
-	"water":        0.70,
-	"ground":       0.85,
-	"noisetexture": 0.08,
-}
+## Auto-sized to match Layer Nodes. Edit each float to set scroll speed.
+@export var layer_mults: Array[float] = []
 
 
 func _ready() -> void:
-	for child in get_children():
-		if child is Sprite2D:
-			child.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-			child.texture_repeat  = CanvasItem.TEXTURE_REPEAT_ENABLED
+	for node in layer_nodes:
+		if node is Sprite2D:
+			node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			node.texture_repeat  = CanvasItem.TEXTURE_REPEAT_ENABLED
 
 
 func scroll_at(speed: float, delta: float) -> void:
-	for child in get_children():
-		if child is Sprite2D and mults.has(child.name):
-			var r: Rect2 = child.region_rect
-			r.position.x += speed * (mults[child.name] as float) * delta
-			child.region_rect = r
+	for i in layer_nodes.size():
+		var node: Node2D = layer_nodes[i]
+		if not is_instance_valid(node):
+			continue
+		var mult: float = layer_mults[i] if i < layer_mults.size() else 0.1
+		if node is Sprite2D and node.region_enabled:
+			var r: Rect2 = node.region_rect
+			r.position.x += speed * mult * delta
+			node.region_rect = r

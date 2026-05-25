@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://dcv0ch4f3ohh0"]
+
+[ext_resource type="PackedScene" uid="uid://eu0dwjyud60f" path="res://scenes/minorcharacters/applebaby.tscn" id="1_lquwl"]
+[ext_resource type="PackedScene" uid="uid://kt4xj4dsxp67" path="res://scenes/minorcharacters/lemonbaby.tscn" id="2_7mycd"]
+[ext_resource type="PackedScene" uid="uid://bjf3njh3euayn" path="res://scenes/minorcharacters/orangebaby.tscn" id="3_h2yge"]
+[ext_resource type="PackedScene" uid="uid://ofyr18j50uov" path="res://scenes/minorcharacters/strawberrybaby.tscn" id="4_272bh"]
+[ext_resource type="PackedScene" uid="uid://curpygfh3rbi4" path="res://scenes/minorcharacters/pearbaby.tscn" id="5_7mycd"]
+[ext_resource type="PackedScene" uid="uid://b8ofiad3wvqcq" path="res://scenes/minorcharacters/watermelon.tscn" id="6_272bh"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_4c57u"]
+distance = -647.0
+
+[node name="maingame" type="Node2D" unique_id=621957733]
+position = Vector2(-15, -150)
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1421517117]
+position = Vector2(9, -492)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=2063154605]
+shape = SubResource("WorldBoundaryShape2D_4c57u")
+
+[node name="Camera2D" type="Camera2D" parent="Area2D" unique_id=1345059270]
+position = Vector2(15, 512)
+zoom = Vector2(2.5, 2.5)
+
+[node name="applebaby" parent="." unique_id=775343366 instance=ExtResource("1_lquwl")]
+position = Vector2(52, 2)
+
+[node name="lemonbaby" parent="." unique_id=1604801010 instance=ExtResource("2_7mycd")]
+position = Vector2(-93, 2)
+
+[node name="orangebaby" parent="." unique_id=1200206360 instance=ExtResource("3_h2yge")]
+position = Vector2(-52, 2)
+
+[node name="strawberrybaby" parent="." unique_id=712754995 instance=ExtResource("4_272bh")]
+position = Vector2(0, 1)
+
+[node name="pearbaby" parent="." unique_id=1363756705 instance=ExtResource("5_7mycd")]
+position = Vector2(125, 6)
+
+[node name="watermelonbaby" parent="." unique_id=1374750796 instance=ExtResource("6_272bh")]
+position = Vector2(92, 4)

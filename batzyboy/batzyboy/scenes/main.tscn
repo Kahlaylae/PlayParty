@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://mswqjuq404sv"]
 
 [ext_resource type="PackedScene" uid="uid://csk83uitp27qj" path="res://scenes/batMain.tscn" id="1_o5qli"]
-[ext_resource type="PackedScene" uid="uid://bplxbg2sc3n4e" path="res://scenes/parallax.tscn" id="2_plxscene"]
+[ext_resource type="PackedScene" uid="uid://dvkkqgc0ayp6e" path="res://scenes/parallax.tscn" id="2_plxscene"]
 [ext_resource type="PackedScene" uid="uid://b8ln7otjmug6m" path="res://scenes/hearts.tscn" id="11_ya4ey"]
 [ext_resource type="Script" uid="uid://pyejpjptpvq4" path="res://script/main.gd" id="script_main"]
 
@@ -14,7 +14,7 @@ distance = -4.0
 script = ExtResource("script_main")
 
 [node name="parallaxBackground" parent="." unique_id=278532048 instance=ExtResource("2_plxscene")]
-scroll_offset = Vector2(408, 984)
+scroll_offset = Vector2(-48, 0)
 
 [node name="batMain" parent="." unique_id=39988283 instance=ExtResource("1_o5qli")]
 position = Vector2(176, 632)

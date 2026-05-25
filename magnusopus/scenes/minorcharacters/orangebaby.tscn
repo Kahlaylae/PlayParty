@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://bjf3njh3euayn"]
+
+[ext_resource type="Script" uid="uid://bjx1mrvc8b0he" path="res://script/fruitbaby.gd" id="1_s6w1b"]
+[ext_resource type="Texture2D" uid="uid://yjltt0a0f8ik" path="res://assets/appleguys/orangebabyrun.png" id="2_ythsn"]
+[ext_resource type="Texture2D" uid="uid://eu5tigkwrqu5" path="res://assets/appleguys/orangebabystill.png" id="3_1o8xm"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_efxa6"]
+atlas = ExtResource("2_ythsn")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dg77c"]
+atlas = ExtResource("2_ythsn")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kde5q"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_efxa6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dg77c")
+}],
+"loop": true,
+"name": &"running",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_1o8xm")
+}],
+"loop": true,
+"name": &"still",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_3sf8f"]
+
+[node name="orangebaby" type="CharacterBody2D" unique_id=1200206360]
+script = ExtResource("1_s6w1b")
+
+[node name="animation" type="AnimatedSprite2D" parent="." unique_id=66814407]
+texture_filter = 1
+position = Vector2(-1, -2)
+sprite_frames = SubResource("SpriteFrames_kde5q")
+animation = &"running"
+autoplay = "running"
+frame_progress = 0.61232436
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=1412258722]
+position = Vector2(-1, -2)
+shape = SubResource("CircleShape2D_3sf8f")

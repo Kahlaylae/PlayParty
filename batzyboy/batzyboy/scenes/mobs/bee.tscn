@@ -1,0 +1,126 @@
+[gd_scene format=3 uid="uid://c4h5yyjlltmvq"]
+
+[ext_resource type="Script" uid="uid://sd648knp1tw5" path="res://script/monster.gd" id="1_xagkf"]
+[ext_resource type="Texture2D" uid="uid://ik1smsv1kv7p" path="res://assetsRaw/enemies/beefly2.png" id="2_nyqss"]
+[ext_resource type="Texture2D" uid="uid://bmsvtrj3sdy2v" path="res://assetsRaw/enemies/beefly3.png" id="3_6cmpm"]
+[ext_resource type="Texture2D" uid="uid://cgphim3qviueh" path="res://assetsRaw/enemies/beefly.png" id="4_dec73"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qg7k0"]
+atlas = ExtResource("2_nyqss")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vi8ko"]
+atlas = ExtResource("2_nyqss")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wd3oi"]
+atlas = ExtResource("2_nyqss")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i3o6p"]
+atlas = ExtResource("2_nyqss")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3a6uq"]
+atlas = ExtResource("3_6cmpm")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d6q2w"]
+atlas = ExtResource("3_6cmpm")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cj8ot"]
+atlas = ExtResource("3_6cmpm")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a7e1n"]
+atlas = ExtResource("3_6cmpm")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_54d7f"]
+atlas = ExtResource("4_dec73")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hce5j"]
+atlas = ExtResource("4_dec73")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iko12"]
+atlas = ExtResource("4_dec73")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6ln55"]
+atlas = ExtResource("4_dec73")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_m3"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qg7k0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vi8ko")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wd3oi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i3o6p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3a6uq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d6q2w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cj8ot")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a7e1n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_54d7f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hce5j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iko12")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6ln55")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 9.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_m3"]
+radius = 17.992298
+height = 35.984596
+
+[node name="beemonster" type="CharacterBody2D" unique_id=3348626]
+position = Vector2(5, 8)
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("1_xagkf")
+wave_amplitude = 5.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1323211509]
+texture_filter = 3
+position = Vector2(-11, -5)
+scale = Vector2(3.041214, 3.041214)
+sprite_frames = SubResource("SpriteFrames_m3")
+animation = &"fly"
+autoplay = "fly"
+frame_progress = 0.2791239
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1259277943]
+self_modulate = Color(18.892157, 18.892157, 18.892157, 0.5176471)
+texture_filter = 1
+position = Vector2(-11, -4.9999995)
+rotation = -1.6000481
+scale = Vector2(1.520607, 1.520607)
+shape = SubResource("CapsuleShape2D_m3")

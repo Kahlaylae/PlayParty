@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://kt4xj4dsxp67"]
+
+[ext_resource type="Script" uid="uid://bjx1mrvc8b0he" path="res://script/fruitbaby.gd" id="1_rsxf0"]
+[ext_resource type="Texture2D" uid="uid://c25lqo2hdxpx5" path="res://assets/appleguys/lemonbabyrun.png" id="2_rq1rx"]
+[ext_resource type="Texture2D" uid="uid://duxnhkc6i4ogu" path="res://assets/appleguys/lemonbabystill.png" id="3_y1gyg"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4yqo3"]
+atlas = ExtResource("2_rq1rx")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_usgc2"]
+atlas = ExtResource("2_rq1rx")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kde5q"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4yqo3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_usgc2")
+}],
+"loop": true,
+"name": &"running",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_y1gyg")
+}],
+"loop": true,
+"name": &"still",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_3sf8f"]
+
+[node name="lemonbaby" type="CharacterBody2D" unique_id=1604801010]
+script = ExtResource("1_rsxf0")
+
+[node name="animation" type="AnimatedSprite2D" parent="." unique_id=92576760]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_kde5q")
+animation = &"running"
+autoplay = "running"
+frame_progress = 0.272537
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=79373157]
+shape = SubResource("CircleShape2D_3sf8f")

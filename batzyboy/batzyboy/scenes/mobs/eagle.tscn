@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://bcnv7luraromu"]
+
+[ext_resource type="Script" uid="uid://sd648knp1tw5" path="res://script/monster.gd" id="1_cjmhn"]
+[ext_resource type="Texture2D" uid="uid://doisqkp0e7rqx" path="res://assetsRaw/enemies/eaglemonster.png" id="2_cjmhn"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jdi1g"]
+atlas = ExtResource("2_cjmhn")
+region = Rect2(0, 0, 40, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1u520"]
+atlas = ExtResource("2_cjmhn")
+region = Rect2(40, 0, 40, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lopmp"]
+atlas = ExtResource("2_cjmhn")
+region = Rect2(80, 0, 40, 41)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tigm4"]
+atlas = ExtResource("2_cjmhn")
+region = Rect2(120, 0, 40, 41)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_m3"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jdi1g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1u520")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lopmp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tigm4")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 7.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_m3"]
+radius = 17.992298
+height = 35.984596
+
+[node name="eaglemonster" type="CharacterBody2D" unique_id=3348626]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("1_cjmhn")
+wave_amplitude = 5.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1323211509]
+texture_filter = 3
+position = Vector2(-9, -8)
+scale = Vector2(3.041214, 3.041214)
+sprite_frames = SubResource("SpriteFrames_m3")
+animation = &"fly"
+autoplay = "fly"
+frame_progress = 0.32535586
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1259277943]
+self_modulate = Color(18.892157, 18.892157, 18.892157, 0.5176471)
+texture_filter = 1
+position = Vector2(1.0000038, 2.0000005)
+rotation = -1.6000481
+scale = Vector2(1.520607, 1.520607)
+shape = SubResource("CapsuleShape2D_m3")
