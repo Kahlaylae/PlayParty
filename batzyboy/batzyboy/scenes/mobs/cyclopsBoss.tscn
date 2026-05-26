@@ -81,7 +81,7 @@ min_level = 3
 modulate = Color(1.8767959, 1.9364672, 1.3872205, 1)
 texture_filter = 1
 position = Vector2(-2.8750916, -1.3974915)
-scale = Vector2(2.4347, 2.4347)
+scale = Vector2(3.4991899, 3.4991899)
 sprite_frames = SubResource("SpriteFrames_m2")
 animation = &"fly"
 autoplay = "fly"
@@ -91,5 +91,5 @@ flip_h = true
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=489609069]
 position = Vector2(-5.8750916, -1.3974913)
 rotation = -1.6000481
-scale = Vector2(2.6781712, 1.0834415)
+scale = Vector2(3.8491106, 1.5571395)
 shape = SubResource("ConvexPolygonShape2D_yp1w1")

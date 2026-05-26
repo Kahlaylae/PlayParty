@@ -50,8 +50,10 @@ script = ExtResource("1_cjmhn")
 wave_amplitude = 5.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1323211509]
-texture_filter = 3
-position = Vector2(-9, -8)
+modulate = Color(0.91764706, 0.70980394, 0.81960785, 1)
+texture_filter = 1
+texture_repeat = 3
+position = Vector2(8, -8)
 scale = Vector2(3.041214, 3.041214)
 sprite_frames = SubResource("SpriteFrames_m3")
 animation = &"fly"
@@ -61,7 +63,7 @@ frame_progress = 0.32535586
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1259277943]
 self_modulate = Color(18.892157, 18.892157, 18.892157, 0.5176471)
 texture_filter = 1
-position = Vector2(1.0000038, 2.0000005)
+position = Vector2(-7.000002, 1)
 rotation = -1.6000481
 scale = Vector2(1.520607, 1.520607)
 shape = SubResource("CapsuleShape2D_m3")

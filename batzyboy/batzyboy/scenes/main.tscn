@@ -31,7 +31,8 @@ limit_right = 706
 limit_bottom = 1280
 
 [node name="killerzone" type="Area2D" parent="." unique_id=2035655063]
-position = Vector2(392, 968)
+z_index = 2
+position = Vector2(408, 1008)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="killerzone" unique_id=1911690869]
 position = Vector2(-88, -32)

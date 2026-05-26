@@ -111,7 +111,7 @@ wave_amplitude = 5.0
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1323211509]
 texture_filter = 3
 position = Vector2(-11, -5)
-scale = Vector2(3.041214, 3.041214)
+scale = Vector2(1.6129549, 1.6129549)
 sprite_frames = SubResource("SpriteFrames_m3")
 animation = &"fly"
 autoplay = "fly"
@@ -122,5 +122,5 @@ self_modulate = Color(18.892157, 18.892157, 18.892157, 0.5176471)
 texture_filter = 1
 position = Vector2(-11, -4.9999995)
 rotation = -1.6000481
-scale = Vector2(1.520607, 1.520607)
+scale = Vector2(0.8064774, 0.8064774)
 shape = SubResource("CapsuleShape2D_m3")
