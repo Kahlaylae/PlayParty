@@ -1,10 +1,16 @@
 [gd_scene format=3 uid="uid://csk83uitp27qj"]
 
 [ext_resource type="Texture2D" uid="uid://ch1c0sgqtfnqi" path="res://assetsRaw/batmain/Bat_Full.png" id="1_1f1iu"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="2_qmftm"]
 [ext_resource type="Script" uid="uid://dox8u4l8p4qvl" path="res://script/mainPlayer.gd" id="script_bat"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_msxfr"]
 radius = 8.065607
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ja06y"]
+shader = ExtResource("2_qmftm")
+shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_thickness = 0.5
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_k1gsi"]
 atlas = ExtResource("1_1f1iu")
@@ -215,33 +221,37 @@ animations = [{
 }]
 
 [node name="batMain" type="CharacterBody2D" unique_id=39988283]
+z_index = 4
 script = ExtResource("script_bat")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=470550219]
-position = Vector2(-3, -38)
-scale = Vector2(4.8, 4.8)
-shape = SubResource("CircleShape2D_msxfr")
-
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=97536902]
-texture_filter = 1
-texture_repeat = 3
-position = Vector2(-0.9999981, -41.00003)
-scale = Vector2(5, 5)
-sprite_frames = SubResource("SpriteFrames_epk6u")
-animation = &"hurt"
-autoplay = "fly"
-frame = 9
-frame_progress = 1.0
-
 [node name="HurtBox" type="Area2D" parent="." unique_id=200000001]
-position = Vector2(-2, -43.999996)
-scale = Vector2(-0.4132774, -0.4132774)
+position = Vector2(-1.1920929e-07, -4.9999695)
+rotation = 3.1415925
+scale = Vector2(0.4132774, 0.4132774)
 collision_layer = 0
 collision_mask = 2
 monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox" unique_id=200000002]
 position = Vector2(2.4196825, -19.357449)
-scale = Vector2(-9.562041, -9.562041)
+scale = Vector2(12.562, 12.562)
 shape = SubResource("CircleShape2D_msxfr")
 debug_color = Color(0.972549, 0.5803922, 0.60784316, 0.8117647)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=470550219]
+position = Vector2(-1, 1.0000305)
+scale = Vector2(4.8, 4.8)
+shape = SubResource("CircleShape2D_msxfr")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=97536902]
+clip_children = 2
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_ja06y")
+position = Vector2(1.0000018, -2.0000038)
+scale = Vector2(5.5, 5.5)
+sprite_frames = SubResource("SpriteFrames_epk6u")
+animation = &"hurt"
+autoplay = "fly"
+frame = 9
+frame_progress = 1.0

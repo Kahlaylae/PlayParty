@@ -4,6 +4,12 @@
 [ext_resource type="Texture2D" uid="uid://ik1smsv1kv7p" path="res://assetsRaw/enemies/beefly2.png" id="2_nyqss"]
 [ext_resource type="Texture2D" uid="uid://bmsvtrj3sdy2v" path="res://assetsRaw/enemies/beefly3.png" id="3_6cmpm"]
 [ext_resource type="Texture2D" uid="uid://cgphim3qviueh" path="res://assetsRaw/enemies/beefly.png" id="4_dec73"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="shader_ol"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ol"]
+shader = ExtResource("shader_ol")
+shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_thickness = 1.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qg7k0"]
 atlas = ExtResource("2_nyqss")
@@ -102,16 +108,17 @@ radius = 17.992298
 height = 35.984596
 
 [node name="beemonster" type="CharacterBody2D" unique_id=3348626]
-position = Vector2(5, 8)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("1_xagkf")
-wave_amplitude = 5.0
+wave_amplitude = 15.0
+wave_frequency = 4.0
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1323211509]
-texture_filter = 3
-position = Vector2(-11, -5)
-scale = Vector2(1.6129549, 1.6129549)
+[node name="bee1" type="AnimatedSprite2D" parent="." unique_id=1323211509]
+texture_filter = 1
+material = SubResource("ShaderMaterial_ol")
+position = Vector2(0, 4)
+scale = Vector2(1.5, 1.5)
 sprite_frames = SubResource("SpriteFrames_m3")
 animation = &"fly"
 autoplay = "fly"
@@ -120,7 +127,43 @@ frame_progress = 0.2791239
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1259277943]
 self_modulate = Color(18.892157, 18.892157, 18.892157, 0.5176471)
 texture_filter = 1
-position = Vector2(-11, -4.9999995)
+position = Vector2(-0.38544464, 2.6145558)
+rotation = -1.6000481
+scale = Vector2(0.8064774, 0.8064774)
+shape = SubResource("CapsuleShape2D_m3")
+
+[node name="bee2" type="AnimatedSprite2D" parent="." unique_id=761947075]
+texture_filter = 1
+material = SubResource("ShaderMaterial_ol")
+position = Vector2(-26, -35)
+scale = Vector2(1.5, 1.5)
+sprite_frames = SubResource("SpriteFrames_m3")
+animation = &"fly"
+autoplay = "fly"
+frame_progress = 0.2791239
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="." unique_id=96505092]
+self_modulate = Color(18.892157, 18.892157, 18.892157, 0.5176471)
+texture_filter = 1
+position = Vector2(-26.385445, -35.385445)
+rotation = -1.6000481
+scale = Vector2(0.8064774, 0.8064774)
+shape = SubResource("CapsuleShape2D_m3")
+
+[node name="bee3" type="AnimatedSprite2D" parent="." unique_id=719462284]
+texture_filter = 1
+material = SubResource("ShaderMaterial_ol")
+position = Vector2(24, -47)
+scale = Vector2(1.5, 1.5)
+sprite_frames = SubResource("SpriteFrames_m3")
+animation = &"fly"
+autoplay = "fly"
+frame_progress = 0.2791239
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="." unique_id=889486396]
+self_modulate = Color(18.892157, 18.892157, 18.892157, 0.5176471)
+texture_filter = 1
+position = Vector2(23.614555, -47.385445)
 rotation = -1.6000481
 scale = Vector2(0.8064774, 0.8064774)
 shape = SubResource("CapsuleShape2D_m3")

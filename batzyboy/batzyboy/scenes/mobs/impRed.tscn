@@ -1,0 +1,157 @@
+[gd_scene format=3 uid="uid://c7eiibxkwqnuw"]
+
+[ext_resource type="Script" uid="uid://sd648knp1tw5" path="res://script/monster.gd" id="1_7bg5d"]
+[ext_resource type="Texture2D" uid="uid://hlcph5icpbyw" path="res://assetsRaw/enemies/reDemonATTACK.png" id="2_j86p0"]
+[ext_resource type="Texture2D" uid="uid://2chulgpo1jhr" path="res://assetsRaw/enemies/reDemonFLYING.png" id="3_qxw0g"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="shader_ol"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7bg5d"]
+atlas = ExtResource("3_qxw0g")
+region = Rect2(0, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j86p0"]
+atlas = ExtResource("3_qxw0g")
+region = Rect2(79, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qxw0g"]
+atlas = ExtResource("3_qxw0g")
+region = Rect2(158, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ofsrx"]
+atlas = ExtResource("3_qxw0g")
+region = Rect2(237, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ckf0f"]
+atlas = ExtResource("2_j86p0")
+region = Rect2(0, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fo6g2"]
+atlas = ExtResource("2_j86p0")
+region = Rect2(79, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mfibt"]
+atlas = ExtResource("2_j86p0")
+region = Rect2(158, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_anb6t"]
+atlas = ExtResource("2_j86p0")
+region = Rect2(237, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7ktst"]
+atlas = ExtResource("2_j86p0")
+region = Rect2(316, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_02avi"]
+atlas = ExtResource("2_j86p0")
+region = Rect2(395, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rxr72"]
+atlas = ExtResource("2_j86p0")
+region = Rect2(474, 0, 79, 69)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ju68l"]
+atlas = ExtResource("2_j86p0")
+region = Rect2(553, 0, 79, 69)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_m3"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7bg5d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j86p0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qxw0g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ofsrx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7bg5d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j86p0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qxw0g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ofsrx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7bg5d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j86p0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qxw0g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ofsrx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ckf0f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fo6g2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mfibt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_anb6t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7ktst")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_02avi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rxr72")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ju68l")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 7.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_m3"]
+radius = 13.823599
+height = 27.647198
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ol"]
+shader = ExtResource("shader_ol")
+shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_thickness = 1.0
+
+[node name="impRed" type="CharacterBody2D" unique_id=3348626]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("1_7bg5d")
+speed = 350.0
+damage = 2
+wave_amplitude = 50.0
+wave_frequency = 0.1
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1323211509]
+material = SubResource("ShaderMaterial_ol")
+texture_filter = 1
+position = Vector2(8, -1)
+sprite_frames = SubResource("SpriteFrames_m3")
+animation = &"fly"
+autoplay = "fly"
+frame_progress = 0.26597485
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1259277943]
+self_modulate = Color(18.892157, 18.892157, 18.892157, 0.5176471)
+texture_filter = 1
+position = Vector2(1.0000038, 2.0000005)
+rotation = -1.6000481
+scale = Vector2(1.520607, 1.520607)
+shape = SubResource("CapsuleShape2D_m3")

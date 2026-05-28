@@ -3,6 +3,12 @@
 [ext_resource type="Script" uid="uid://sd648knp1tw5" path="res://script/monster.gd" id="1_sbt7k"]
 [ext_resource type="Texture2D" uid="uid://cdl5b5jjhpx5h" path="res://assetsRaw/enemies/Flight.png" id="2_ay7eu"]
 [ext_resource type="Texture2D" uid="uid://cgpds4quldd00" path="res://assetsRaw/enemies/fly monster.png" id="3_tgfbo"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="shader_ol"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ol"]
+shader = ExtResource("shader_ol")
+shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_thickness = 1.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_a1eep"]
 atlas = ExtResource("2_ay7eu")
@@ -460,10 +466,10 @@ animations = [{
 "speed": 14.0
 }]
 
-[sub_resource type="ConvexPolygonShape2D" id="ConvexPolygonShape2D_ksn1y"]
-points = PackedVector2Array(2.268838, 0.3284855, 5.739515, 7.5841, 5.314277, 25.530872, 18.101454, 43.139496, 15.781414, 64.1885, 0.11021435, 33.78158, -26.66012, 49.03962, -27.170948, 12.948987, -12.703541, 17.294632, -8.995621, -4.678955, -7.2622347, -20.185287, -0.18799436, -11.282429, 5.923603, -19.401756, 8.887358, -9.9684925)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sbt7k"]
+size = Vector2(15.792635, 29.186596)
 
-[node name="cyclopsbeginning" type="CharacterBody2D" unique_id=1554728509]
+[node name="cyclops" type="CharacterBody2D" unique_id=1554728509]
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("1_sbt7k")
@@ -471,8 +477,8 @@ script = ExtResource("1_sbt7k")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=185801780]
 texture_filter = 1
 texture_repeat = 3
-position = Vector2(17, 0)
-scale = Vector2(2.8, 2.8)
+material = SubResource("ShaderMaterial_ol")
+position = Vector2(4, -1)
 sprite_frames = SubResource("SpriteFrames_542h5")
 animation = &"fly"
 autoplay = "fly"
@@ -480,7 +486,7 @@ frame_progress = 0.02474903
 flip_h = true
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="." unique_id=2027823239]
-position = Vector2(-3, 14.000001)
+position = Vector2(2, -4.8428774e-08)
 rotation = 3.083089
 scale = Vector2(2.200001, 0.89)
-shape = SubResource("ConvexPolygonShape2D_ksn1y")
+shape = SubResource("RectangleShape2D_sbt7k")

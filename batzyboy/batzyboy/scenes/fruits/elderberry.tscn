@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://cuw70521romjm"]
+
+[ext_resource type="Script" uid="uid://cfu2yvwu0t7le" path="res://script/fruit.gd" id="1_34w6e"]
+[ext_resource type="Texture2D" uid="uid://wbaegahixy3x" path="res://assetsRaw/objects/1HQFruit.png" id="2_20mgk"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="shader_ol"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ol"]
+shader = ExtResource("shader_ol")
+shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_thickness = 1.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7o87m"]
+radius = 24.0
+
+[node name="elderberry" type="Area2D" unique_id=1097651336]
+script = ExtResource("1_34w6e")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1978720028]
+shape = SubResource("CircleShape2D_7o87m")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1559611615]
+material = SubResource("ShaderMaterial_ol")
+texture_filter = 1
+scale = Vector2(2, 2)
+texture = ExtResource("2_20mgk")
+region_enabled = true
+region_rect = Rect2(130, 6, 27, 20)

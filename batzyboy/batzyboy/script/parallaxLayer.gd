@@ -1,4 +1,3 @@
-class_name ParallaxLayer
 extends Resource
 
 ## Set automatically from child name — do not edit manually.

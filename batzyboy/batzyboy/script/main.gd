@@ -18,13 +18,11 @@ const PTS_PER_LEVEL:  int   = 25
 const DIST_PER_LEVEL: float = 10000.0  # 100 m × 100 px/m
 
 # ─── Scene preloads ───────────────────────────────────────────────────────────
-# Monster pool — driven by enemies.tscn / enemylist.gd.
-# Open enemies.tscn and drag monster .tscn files into the Enemy Scenes array.
-var _monster_pool: Array = []
-var _enemy_list: Node = null
+# Drag enemies.tscn / fruits.tscn into these slots in the Inspector on the main node.
+@export var enemy_list_scene: PackedScene
+@export var fruit_list_scene: PackedScene
 
-# Fruit pool — populated at runtime by scanning res://scenes/fruits/.
-# Drop any new fruit .tscn in that folder and it's automatically included.
+var _monster_pool: Array = []
 var _fruit_pool: Array = []
 
 # ─── Game State ───────────────────────────────────────────────────────────────
@@ -207,7 +205,7 @@ func _spawn_x() -> float:
 func _spawn_y() -> float:
 	# cy = top edge; play area runs from ~y=150 (below roof) to y=950 (above water)
 	var cy := _cam.global_position.y
-	return minf(randf_range(cy + 150.0, cy + 950.0), 950.0)
+	return minf(randf_range(cy + 150.0, cy + 900.0), 900.0)
 
 
 func _spawn_monster() -> void:
@@ -218,20 +216,13 @@ func _spawn_monster() -> void:
 		return
 	var entry: Dictionary = eligible[randi() % eligible.size()]
 	var inst := entry.scene.instantiate() as CharacterBody2D
-	inst.speed = _obj_speed()
+	inst.speed          = _obj_speed()
+	inst.damage         = entry.damage
+	inst.wave_amplitude = entry.wave_amplitude
+	inst.wave_frequency = entry.wave_frequency
 	inst.global_position = Vector2(_spawn_x(), _spawn_y())
-	inst.scale = Vector2(1.8, 1.8)
+	inst.scale = entry.spawn_scale
 	add_child(inst)
-	# Drop shadow — duplicate the AnimatedSprite2D, offset and darken
-	var anim := inst.get_node("AnimatedSprite2D") as AnimatedSprite2D
-	if anim:
-		var shadow := anim.duplicate() as AnimatedSprite2D
-		shadow.z_index = -1
-		shadow.modulate = Color(0.0, 0.0, 0.0, 0.28)
-		shadow.material = null   # don't inherit the white outline shader
-		shadow.position = anim.position + Vector2(6.0, 7.0)
-		shadow.play("fly")
-		inst.add_child(shadow)
 
 
 func _spawn_fruit() -> void:
@@ -255,40 +246,48 @@ func _spawn_fruit() -> void:
 
 
 func _build_monster_pool() -> void:
-	_enemy_list = preload("res://scenes/enemies.tscn").instantiate()
-	add_child(_enemy_list)
-	for scene: PackedScene in _enemy_list.enemy_scenes:
+	if enemy_list_scene == null:
+		push_warning("main.gd: enemy_list_scene not set — no monsters will spawn")
+		return
+	var enemy_list := enemy_list_scene.instantiate()
+	for node: Node in enemy_list.enemy_nodes:
+		if not is_instance_valid(node) or node.scene_file_path.is_empty():
+			continue
+		var scene := load(node.scene_file_path) as PackedScene
 		if scene == null:
 			continue
-		var probe := scene.instantiate()
 		_monster_pool.append({
-			scene     = scene,
-			min_level = probe.min_level if "min_level" in probe else 1,
+			scene           = scene,
+			min_level       = node.min_level       if "min_level"       in node else 1,
+			damage          = node.damage          if "damage"          in node else 1,
+			wave_amplitude  = node.wave_amplitude  if "wave_amplitude"  in node else 0.0,
+			wave_frequency  = node.wave_frequency  if "wave_frequency"  in node else 1.0,
+			spawn_scale     = node.scale           if node.scale != Vector2.ONE else Vector2(1.8, 1.8),
 		})
-		probe.queue_free()
+	enemy_list.free()
 	_monster_pool.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return a.min_level < b.min_level
 	)
 
 
 func _build_fruit_pool() -> void:
-	var scenes: Array[PackedScene] = [
-		preload("res://scenes/fruits/berry.tscn"),
-		preload("res://scenes/fruits/bgrape.tscn"),
-		preload("res://scenes/fruits/cherry.tscn"),
-		preload("res://scenes/fruits/grape.tscn"),
-		preload("res://scenes/fruits/plum.tscn"),
-		preload("res://scenes/fruits/strawberry.tscn"),
-	]
-	for scene in scenes:
-		var probe := scene.instantiate()
+	if fruit_list_scene == null:
+		push_warning("main.gd: fruit_list_scene not set — no fruits will spawn")
+		return
+	var fruit_list := fruit_list_scene.instantiate()
+	for node: Node in fruit_list.fruit_nodes:
+		if not is_instance_valid(node) or node.scene_file_path.is_empty():
+			continue
+		var scene := load(node.scene_file_path) as PackedScene
+		if scene == null:
+			continue
 		_fruit_pool.append({
 			scene     = scene,
-			min_level = probe.level  if "level"  in probe else 1,
-			points    = probe.points if "points" in probe else 1,
-			heal      = probe.heal   if "heal"   in probe else 0,
+			min_level = node.level  if "level"  in node else 1,
+			points    = node.points if "points" in node else 1,
+			heal      = node.heal   if "heal"   in node else 0,
 		})
-		probe.queue_free()
+	fruit_list.free()
 	_fruit_pool.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return a.min_level < b.min_level
 	)

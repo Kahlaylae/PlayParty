@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://bsqkcf1vc018v"]
+
+[ext_resource type="Script" uid="uid://cnqb64ayny1mo" path="res://script/fruitlist.gd" id="1_nxg12"]
+[ext_resource type="PackedScene" uid="uid://blp27625cpy6t" path="res://scenes/fruits/orange.tscn" id="2_pltxu"]
+[ext_resource type="Script" uid="uid://cfu2yvwu0t7le" path="res://script/fruit.gd" id="2_y7acc"]
+[ext_resource type="PackedScene" uid="uid://ctpsgv08en0jn" path="res://scenes/fruits/avocado.tscn" id="3_ldo3d"]
+[ext_resource type="PackedScene" uid="uid://calfai0db4ect" path="res://scenes/fruits/banana.tscn" id="4_onbof"]
+[ext_resource type="PackedScene" uid="uid://ba2dh1by5qjeh" path="res://scenes/fruits/blackberry.tscn" id="5_m85c1"]
+[ext_resource type="PackedScene" uid="uid://cuw70521romjm" path="res://scenes/fruits/elderberry.tscn" id="6_nl0wi"]
+[ext_resource type="Texture2D" uid="uid://wbaegahixy3x" path="res://assetsRaw/objects/1HQFruit.png" id="12_fcm2n"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7o87m"]
+radius = 24.0
+
+[node name="fruits" type="Node2D" unique_id=286783067 node_paths=PackedStringArray("fruit_nodes")]
+script = ExtResource("1_nxg12")
+fruit_nodes = [NodePath("orange"), NodePath("avocado"), NodePath("banana")]
+
+[node name="orange" parent="." unique_id=58410367 instance=ExtResource("2_pltxu")]
+position = Vector2(-72, 0)
+
+[node name="avocado" parent="." unique_id=496693809 instance=ExtResource("3_ldo3d")]
+position = Vector2(56, 0)
+
+[node name="banana" parent="." unique_id=430948430 instance=ExtResource("4_onbof")]
+position = Vector2(-136, 0)
+
+[node name="blackberry" parent="." unique_id=888939630 instance=ExtResource("5_m85c1")]
+position = Vector2(120, 0)
+
+[node name="elderberry" parent="." unique_id=1097651336 instance=ExtResource("6_nl0wi")]
+
+[node name="Area2D6" type="Area2D" parent="." unique_id=25416175]
+visible = false
+script = ExtResource("2_y7acc")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D6" unique_id=1645346028]
+shape = SubResource("CircleShape2D_7o87m")
+
+[node name="Sprite2D" type="Sprite2D" parent="Area2D6" unique_id=411285092]
+scale = Vector2(2, 2)
+texture = ExtResource("12_fcm2n")
+region_enabled = true

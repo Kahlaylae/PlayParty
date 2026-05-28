@@ -16,7 +16,7 @@ config/features=PackedStringArray("4.6", "Mobile")
 
 [autoload]
 
-SaveManager="*res://script/save_manager.gd"
+SaveManager="*res://script/saveManager.gd"
 
 [display]
 

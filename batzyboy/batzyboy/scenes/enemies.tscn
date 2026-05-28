@@ -1,28 +1,42 @@
 [gd_scene format=3 uid="uid://c7kvud3y3tsus"]
 
-[ext_resource type="PackedScene" uid="uid://c7eiibxkwqnuw" path="res://scenes/mobs/batClone.tscn" id="1_010eu"]
+[ext_resource type="PackedScene" uid="uid://c7eiibxkwqnuw" path="res://scenes/mobs/impRed.tscn" id="1_010eu"]
 [ext_resource type="Script" uid="uid://8silayfuea5i" path="res://script/enemylist.gd" id="1_pfngh"]
 [ext_resource type="PackedScene" uid="uid://c4h5yyjlltmvq" path="res://scenes/mobs/bee.tscn" id="2_pfngh"]
 [ext_resource type="PackedScene" uid="uid://bhxdfd66jrex2" path="res://scenes/mobs/cyclops.tscn" id="3_csyei"]
-[ext_resource type="PackedScene" uid="uid://bd0wlrugu6266" path="res://scenes/mobs/cyclopsBoss.tscn" id="4_iv5d7"]
-[ext_resource type="PackedScene" uid="uid://bcnv7luraromu" path="res://scenes/mobs/eagle.tscn" id="5_c801f"]
+[ext_resource type="PackedScene" uid="uid://bd0wlrugu6266" path="res://scenes/mobs/upgradeCyclops.tscn" id="4_iv5d7"]
+[ext_resource type="PackedScene" uid="uid://bcnv7luraromu" path="res://scenes/mobs/vampirebat.tscn" id="5_c801f"]
+[ext_resource type="PackedScene" uid="uid://cjpsue7me5wor" path="res://scenes/mobs/reddemon.tscn" id="7_csyei"]
+[ext_resource type="PackedScene" uid="uid://csk83uitp27qj" path="res://scenes/batMain.tscn" id="8_iv5d7"]
 
-[node name="enemies" type="Node2D" unique_id=1720988733]
-position = Vector2(-160, -152)
+[node name="enemies" type="Node2D" unique_id=1720988733 node_paths=PackedStringArray("enemy_nodes")]
 script = ExtResource("1_pfngh")
-enemy_scenes = Array[PackedScene]([ExtResource("2_pfngh"), ExtResource("5_c801f"), ExtResource("3_csyei"), ExtResource("1_010eu"), ExtResource("4_iv5d7")])
+enemy_nodes = [NodePath("cyclops"), NodePath("beemonster"), NodePath("impRed"), NodePath("reddemon"), NodePath("vampirebat"), NodePath("cyclopsLevel2")]
 
-[node name="batclonemonster" parent="." unique_id=3348626 instance=ExtResource("1_010eu")]
-position = Vector2(32, -88)
+[node name="beemonster" parent="." unique_id=3348626 instance=ExtResource("2_pfngh")]
+position = Vector2(-157, -188)
+wave_frequency = 1.0
 
-[node name="beemonster" parent="." unique_id=1280733192 instance=ExtResource("2_pfngh")]
-position = Vector2(127, -112)
+[node name="cyclops" parent="." unique_id=1554728509 instance=ExtResource("3_csyei")]
+position = Vector2(-8, -150)
+scale = Vector2(4.2692275, 4.2692275)
 
-[node name="cyclopsbeginning" parent="." unique_id=1554728509 instance=ExtResource("3_csyei")]
-position = Vector2(213, -64)
+[node name="impRed" parent="." unique_id=1669187962 instance=ExtResource("1_010eu")]
+position = Vector2(-145, -115)
+scale = Vector2(1.7683249, 1.7683249)
 
-[node name="monster" parent="." unique_id=1055266022 instance=ExtResource("4_iv5d7")]
-position = Vector2(-48, -192)
+[node name="reddemon" parent="." unique_id=280916484 instance=ExtResource("7_csyei")]
+position = Vector2(80, 8)
+scale = Vector2(0.6274911, 0.6274911)
 
-[node name="eaglemonster" parent="." unique_id=500753783 instance=ExtResource("5_c801f")]
-position = Vector2(-120, -88)
+[node name="cyclopsLevel2" parent="." unique_id=1055266022 instance=ExtResource("4_iv5d7")]
+position = Vector2(83, -259)
+scale = Vector2(5.4171233, 5.4171233)
+
+[node name="vampirebat" parent="." unique_id=954674817 instance=ExtResource("5_c801f")]
+position = Vector2(176, -96)
+scale = Vector2(1.7705066, 1.7705066)
+wave_frequency = 2.0
+
+[node name="batMain" parent="." unique_id=39988283 instance=ExtResource("8_iv5d7")]
+position = Vector2(-234, -113)

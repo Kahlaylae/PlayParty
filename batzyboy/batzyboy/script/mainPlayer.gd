@@ -17,7 +17,6 @@ var is_dying: bool = false
 
 var _invincible: bool = false
 var _eating: bool     = false
-var _shadow: AnimatedSprite2D = null
 var _eat_sfx: AudioStreamPlayer = null
 
 var _hopping:  bool  = false   # true while boost is still active
@@ -35,13 +34,6 @@ func _ready() -> void:
 	_eat_sfx = AudioStreamPlayer.new()
 	_eat_sfx.stream = load("res://assetsRaw/sounds/eat.mp3")
 	add_child(_eat_sfx)
-
-	# Drop shadow — duplicate anim sprite, offset and darken it
-	_shadow = _anim.duplicate() as AnimatedSprite2D
-	_shadow.z_index = -1
-	_shadow.modulate = Color(0.0, 0.0, 0.0, 0.28)
-	_shadow.position = _anim.position + Vector2(6.0, 7.0)
-	add_child(_shadow)
 
 	# Hurtbox — overlap is polled each physics frame (more reliable with Jolt)
 	# body_entered signal is intentionally not used here
@@ -117,10 +109,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(_delta: float) -> void:
-	# Keep shadow in sync with the main sprite every frame
-	if _shadow and _anim:
-		_shadow.animation = _anim.animation
-		_shadow.frame     = _anim.frame
+	pass
 
 
 # Called by fruit.gd when bat overlaps a fruit

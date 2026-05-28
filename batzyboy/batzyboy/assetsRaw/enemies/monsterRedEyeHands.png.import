@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://doisqkp0e7rqx"
-path="res://.godot/imported/eaglemonster.png-9f9cf6b88c084c2459c6a9e98506a575.ctex"
+uid="uid://bjpyc427c2nmy"
+path="res://.godot/imported/monsterRedEyeHands.png-f9a1464f6305fbbaca35e26f8f64aa86.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assetsRaw/enemies/eaglemonster.png"
-dest_files=["res://.godot/imported/eaglemonster.png-9f9cf6b88c084c2459c6a9e98506a575.ctex"]
+source_file="res://assetsRaw/enemies/monsterRedEyeHands.png"
+dest_files=["res://.godot/imported/monsterRedEyeHands.png-f9a1464f6305fbbaca35e26f8f64aa86.ctex"]
 
 [params]
 

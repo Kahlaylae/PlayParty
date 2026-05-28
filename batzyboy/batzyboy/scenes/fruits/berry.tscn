@@ -1,24 +1,30 @@
 [gd_scene format=3 uid="uid://c7l7omk67dqen"]
 
-[ext_resource type="Texture2D" uid="uid://bwv2lhk57p0eh" path="res://assetsRaw/objects/1*sprite.png" id="1_sogda"]
+[ext_resource type="Texture2D" uid="uid://65o11a5uf2fe" path="res://assetsRaw/objects/Guava.png" id="2_t75at"]
 [ext_resource type="Script" uid="uid://cfu2yvwu0t7le" path="res://script/fruit.gd" id="script_fruit"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="shader_ol"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ol"]
+shader = ExtResource("shader_ol")
+shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_thickness = 1.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ghwtm"]
 
-[node name="fruit" type="Area2D" unique_id=256568744]
+[node name="guava" type="Area2D" unique_id=256568744]
+texture_filter = 1
 scale = Vector2(1.5, 1.5)
 script = ExtResource("script_fruit")
 points = 2
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1309759568]
+material = SubResource("ShaderMaterial_ol")
 texture_filter = 1
 texture_repeat = 3
 scale = Vector2(2, 2)
-texture = ExtResource("1_sogda")
-region_enabled = true
+texture = ExtResource("2_t75at")
 region_rect = Rect2(64, 0, 32, 32)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1145228179]
-position = Vector2(0, 3)
 scale = Vector2(2, 2)
 shape = SubResource("CircleShape2D_ghwtm")

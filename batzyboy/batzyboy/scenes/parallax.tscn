@@ -8,8 +8,9 @@
 [ext_resource type="Texture2D" uid="uid://dpx3x08g0tt3w" path="res://assetsRaw/map/paralax/plx-5.png" id="6_plx"]
 [ext_resource type="Texture2D" uid="uid://07cv1hag4wfy" path="res://assetsRaw/map/8.png" id="8_cyp6n"]
 [ext_resource type="Texture2D" uid="uid://0qta1lwxs6hj" path="res://assetsRaw/map/6.png" id="8_plx"]
+[ext_resource type="Shader" uid="uid://ddm4s3cr8ncle" path="res://script/shaders/water.gdshader" id="10_m2jpk"]
 [ext_resource type="Script" uid="uid://6xlvdff8mhos" path="res://script/fog.gd" id="fog_script"]
-[ext_resource type="Shader" uid="uid://bm3rboayi5xrx" path="res://scenes/fog.gdshader" id="fog_shader"]
+[ext_resource type="Shader" uid="uid://bm3rboayi5xrx" path="res://script/shaders/fog.gdshader" id="fog_shader"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fog"]
 shader = ExtResource("fog_shader")
@@ -52,42 +53,34 @@ specular_color = Color(0.91727555, 0.55966914, 0.572317, 1)
 specular_shininess = 0.35
 texture_filter = 1
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_0fvxf"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_x17sq"]
+shader = ExtResource("10_m2jpk")
+shader_parameter/waterColor = Color(0, 0.34901962, 0.6, 0.15686275)
+shader_parameter/waveStrength = 0.00800000038
+shader_parameter/waveSpeed = 0.30800001463
+shader_parameter/opacity = 0.2690000127775
+shader_parameter/horizon = 1.0
 
 [sub_resource type="Sky" id="Sky_cyp6n"]
 
 [sub_resource type="Environment" id="Environment_0fvxf"]
 background_mode = 3
+background_energy_multiplier = 1.54
 sky = SubResource("Sky_cyp6n")
-glow_enabled = true
-fog_enabled = true
-fog_light_color = Color(0.7001232, 0.7269837, 0.7716584, 1)
-fog_light_energy = 4.05
-fog_sun_scatter = 1.0
-fog_density = 1.0
-fog_height = 1024.0
-fog_height_density = 14.9333
 fog_depth_curve = 1.2745606
-volumetric_fog_enabled = true
-volumetric_fog_density = 1.0
-volumetric_fog_albedo = Color(0.44322166, 0.43598694, 0.30131173, 1)
-volumetric_fog_emission = Color(0.9340804, 0.9340805, 0.93408036, 1)
-volumetric_fog_emission_energy = 1024.0
-volumetric_fog_gi_inject = 16.0
-volumetric_fog_anisotropy = 0.9
-volumetric_fog_length = 1024.0
-volumetric_fog_ambient_inject = 16.0
 adjustment_enabled = true
+adjustment_brightness = 1.03
 adjustment_contrast = 1.25
-adjustment_saturation = 2.0
+adjustment_saturation = 1.64
 
 [node name="parallaxBackground" type="Parallax2D" unique_id=2021570811 node_paths=PackedStringArray("layer_nodes")]
 scale = Vector2(3, 3)
+scroll_offset = Vector2(8, 136)
 ignore_camera_scroll = true
 script = ExtResource("1_plx")
 base_speed = 150.0
-layer_nodes = [NodePath("background4"), NodePath("background3"), NodePath("background2"), NodePath("background1"), NodePath("foreground"), NodePath("ground"), NodePath("water"), NodePath("fog")]
-layer_mults = Array[float]([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.5, 0.7])
+layer_nodes = [NodePath("background4"), NodePath("background3"), NodePath("background2"), NodePath("background1"), NodePath("foreground"), NodePath("ground"), NodePath("reflection"), NodePath("fog"), NodePath("water2")]
+layer_mults = Array[float]([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.5, 0.7, 0.7])
 
 [node name="background4" type="Sprite2D" parent="." unique_id=1475468008]
 z_index = -5
@@ -154,24 +147,36 @@ region_rect = Rect2(0, 0, 205, 222.70328)
 z_index = 1
 texture_filter = 1
 texture_repeat = 2
-position = Vector2(119.271835, 345.3986)
+position = Vector2(117.333336, 322.00003)
 scale = Vector2(1.2352151, 1.0216049)
 texture = ExtResource("8_plx")
 region_enabled = true
 region_rect = Rect2(0, 0, 248, 216)
 
-[node name="water" type="Sprite2D" parent="." unique_id=539058533]
-modulate = Color(0.3007448, 0.5866887, 0.76205045, 1)
-z_index = 1
+[node name="water2" type="Sprite2D" parent="." unique_id=1568036497]
+z_index = 5
+z_as_relative = false
 texture_filter = 1
 texture_repeat = 2
-material = SubResource("ShaderMaterial_0fvxf")
-use_parent_material = true
-position = Vector2(118.438515, 342.7319)
-scale = Vector2(1.275, 1.0416666)
+position = Vector2(114.66667, 376)
+scale = Vector2(1.4790672, 1.1948876)
 texture = ExtResource("8_cyp6n")
 region_enabled = true
-region_rect = Rect2(0, 0, 240, 216)
+region_rect = Rect2(0, 88, 200, 132)
+
+[node name="reflection" type="Sprite2D" parent="." unique_id=539058533]
+modulate = Color(1, 1, 1, 0.15686275)
+z_index = 5
+z_as_relative = false
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_x17sq")
+position = Vector2(114.66666, 384)
+scale = Vector2(1.4790672, 1.1948876)
+texture = ExtResource("8_cyp6n")
+region_enabled = true
+region_rect = Rect2(0, 88, 200, 132)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1686642164]
+process_mode = 3
 environment = SubResource("Environment_0fvxf")

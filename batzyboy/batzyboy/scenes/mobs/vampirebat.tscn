@@ -1,0 +1,205 @@
+[gd_scene format=3 uid="uid://bcnv7luraromu"]
+
+[ext_resource type="Script" uid="uid://sd648knp1tw5" path="res://script/monster.gd" id="1_58um4"]
+[ext_resource type="Texture2D" uid="uid://nbipxn2j6nip" path="res://assetsRaw/enemies/vampirefly.png" id="2_31rs5"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="2_rn7gs"]
+[ext_resource type="Texture2D" uid="uid://cha208rayagog" path="res://assetsRaw/enemies/vampireattack.png" id="3_rn7gs"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_q4ckn"]
+shader = ExtResource("2_rn7gs")
+shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_thickness = 1.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q4ckn"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(0, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8bttf"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(87, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4e63e"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(174, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mri88"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(261, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oclav"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(348, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ik7n0"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(435, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_en71o"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(522, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bokj0"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(609, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_egp0p"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(696, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y81wu"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(783, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1wdna"]
+atlas = ExtResource("2_31rs5")
+region = Rect2(870, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1gh3q"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(0, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iuuqi"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(87, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_otlbf"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(174, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5aiov"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(261, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cbg55"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(348, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k50oo"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(435, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ysokf"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(522, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sg3v7"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(609, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ce5s4"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(696, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hk0r3"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(783, 0, 87, 87)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t24ap"]
+atlas = ExtResource("3_rn7gs")
+region = Rect2(870, 0, 87, 87)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_m3"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q4ckn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8bttf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4e63e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mri88")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oclav")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ik7n0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_en71o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bokj0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_egp0p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y81wu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1wdna")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1gh3q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iuuqi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_otlbf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5aiov")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cbg55")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k50oo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ysokf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sg3v7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ce5s4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hk0r3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t24ap")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 11.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_m3"]
+radius = 8.507092
+height = 92.298386
+
+[node name="vampirebat" type="CharacterBody2D" unique_id=3348626]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("1_58um4")
+wave_amplitude = 10.0
+wave_frequency = 5.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1323211509]
+modulate = Color(0.91764706, 0.70980394, 0.81960785, 1)
+texture_filter = 1
+texture_repeat = 3
+material = SubResource("ShaderMaterial_q4ckn")
+position = Vector2(27.999998, -22)
+scale = Vector2(2.5, 2.5)
+sprite_frames = SubResource("SpriteFrames_m3")
+animation = &"fly"
+autoplay = "fly"
+frame_progress = 0.17750068
+flip_h = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1259277943]
+self_modulate = Color(18.892157, 18.892157, 18.892157, 0.5176471)
+texture_filter = 1
+position = Vector2(12, -1)
+rotation = -1.6000481
+scale = Vector2(1.520607, 1.520607)
+shape = SubResource("CapsuleShape2D_m3")
