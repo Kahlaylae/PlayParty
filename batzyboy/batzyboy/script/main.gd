@@ -39,17 +39,16 @@ var _fruit_timer: float    = 0.0
 var _retry_enabled: bool   = false
 
 # ─── Node refs ────────────────────────────────────────────────────────────────
-@onready var _bat: CharacterBody2D  = $batMain
-@onready var _parallax: Node2D      = $parallaxBackground
-@onready var _cam: Camera2D         = $Camera2D
-@onready var _killerzone: Area2D    = $killerzone
-@onready var _roof: Area2D          = $roof
-@onready var _hearts_node: Node2D   = $hearts
-
-# HUD labels
-var _pts_label: Label
-var _lv_label: Label
-var _dist_label: Label
+@onready var _bat: CharacterBody2D   = $batMain
+@onready var _parallax: Node2D       = $parallaxBackground
+@onready var _cam: Camera2D          = $Camera2D
+@onready var _killerzone: Area2D     = $killerzone
+@onready var _hearts_node: Node2D    = $hearts
+@onready var _spawn_region: Container = $"Spawn Region"
+@onready var _menu_btn: Sprite2D      = $Menu
+@onready var _settings_btn: Sprite2D  = $Settings
+@onready var _pts_rtl: RichTextLabel  = $Points
+@onready var _dist_rtl: RichTextLabel = $DistanceTravelled
 
 # Overlay nodes
 var _splash_layer: CanvasLayer
@@ -86,10 +85,9 @@ func _ready() -> void:
 
 	# Wire up zone collisions
 	_killerzone.body_entered.connect(_on_killerzone_entered)
-	_roof.body_entered.connect(_on_roof_entered)
 
 	_build_hud()
-	_update_hud_hp(3)
+	_update_hud_hp(6)
 	_build_gradient_bg()
 	_build_splash()
 	_build_death_screen()
@@ -111,6 +109,15 @@ func _input(event: InputEvent) -> void:
 
 	if not (event is InputEventMouseButton and event.pressed):
 		return
+
+	# Menu / Settings buttons — clickable during splash and gameplay
+	var click_pos := (event as InputEventMouseButton).position
+	if state in [State.SPLASH, State.PLAYING]:
+		if click_pos.distance_to(_menu_btn.position) < 36.0 \
+				or click_pos.distance_to(_settings_btn.position) < 36.0:
+			_pause_game()
+			return
+
 	match state:
 		State.SPLASH:
 			_start_game()
@@ -191,11 +198,6 @@ func _on_killerzone_entered(body: Node2D) -> void:
 		_bat._start_dying()
 
 
-func _on_roof_entered(body: Node2D) -> void:
-	if body.is_in_group("bat") and _bat.velocity.y < 0.0:
-		_bat.velocity.y = 0.0
-
-
 # ─── Spawning ─────────────────────────────────────────────────────────────────
 func _spawn_x() -> float:
 	# anchor_mode=0 → _cam.global_position is the top-left corner of the viewport
@@ -203,9 +205,8 @@ func _spawn_x() -> float:
 
 
 func _spawn_y() -> float:
-	# cy = top edge; play area runs from ~y=150 (below roof) to y=950 (above water)
-	var cy := _cam.global_position.y
-	return minf(randf_range(cy + 150.0, cy + 900.0), 900.0)
+	var rect := _spawn_region.get_global_rect()
+	return randf_range(rect.position.y, rect.end.y)
 
 
 func _spawn_monster() -> void:
@@ -238,7 +239,10 @@ func _spawn_fruit() -> void:
 	for i in count:
 		var entry: Dictionary = eligible[randi() % eligible.size()]
 		var inst := entry.scene.instantiate() as Area2D
-		inst.speed = _obj_speed()
+		var base_speed: float = entry.speed if entry.speed > 0.0 else _obj_speed()
+		inst.speed  = base_speed + (_obj_speed() - OBJ_SPEED_MIN)
+		inst.points = entry.points
+		inst.heal   = entry.heal
 		# Stagger each fruit 130 px further right — forms a collectable line
 		inst.global_position = Vector2(base_x + i * 130.0, base_y)
 		inst.collected.connect(_on_fruit_collected)
@@ -286,6 +290,7 @@ func _build_fruit_pool() -> void:
 			min_level = node.level  if "level"  in node else 1,
 			points    = node.points if "points" in node else 1,
 			heal      = node.heal   if "heal"   in node else 0,
+			speed     = node.speed  if "speed"  in node else 0.0,
 		})
 	fruit_list.free()
 	_fruit_pool.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -309,6 +314,7 @@ func _on_fruit_collected(pts: int, heal: int) -> void:
 
 
 func _on_hp_changed(hp: int) -> void:
+	SaveManager.player_hp = hp
 	_update_hud_hp(hp)
 
 
@@ -455,23 +461,21 @@ func _build_hud() -> void:
 	hud.layer = 1
 	add_child(hud)
 
-	_pts_label  = _make_label(hud, Vector2(20.0, 60.0),  22, "0 pts")
-	_lv_label   = _make_label_right(hud, Vector2(-20.0, 20.0), 22, "Lv 1")
-	_dist_label = _make_label_right(hud, Vector2(-20.0, 54.0), 18, "0 m")
+	_pts_rtl.bbcode_enabled = true
+	_pts_rtl.text = "0 pts"
+	_dist_rtl.bbcode_enabled = true
+	_dist_rtl.text = "Lv 1\n0 m"
 
 	hud.hide()  # shown when game starts
 
 
 func _update_hud() -> void:
-	_pts_label.text  = "%d pts" % score
-	_lv_label.text   = "Lv %d" % current_level
-	_dist_label.text = "%d m"  % int(dist_px / 100.0)
+	_pts_rtl.text  = "%d pts" % score
+	_dist_rtl.text = "Lv %d\n%d m" % [current_level, int(dist_px / 100.0)]
 
 
 func _update_hud_hp(hp: int) -> void:
-	var target := str(maxi(hp, 0))
-	for child in _hearts_node.get_children():
-		child.visible = (child.name == target)
+	_hearts_node.set_hp(hp)
 	_hearts_node.modulate = Color(5.0, 5.0, 5.0, 1.0)
 	var htween := create_tween()
 	htween.tween_property(_hearts_node, "modulate", Color.WHITE, 0.35)

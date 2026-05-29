@@ -4,6 +4,10 @@
 [ext_resource type="PackedScene" uid="uid://dvkkqgc0ayp6e" path="res://scenes/parallax.tscn" id="2_plxscene"]
 [ext_resource type="PackedScene" uid="uid://c7kvud3y3tsus" path="res://scenes/enemies.tscn" id="2_tefeu"]
 [ext_resource type="PackedScene" uid="uid://bsqkcf1vc018v" path="res://scenes/fruits.tscn" id="3_o6xl0"]
+[ext_resource type="Script" uid="uid://dvwp4pw5nqeqe" path="res://script/spawnRegion.gd" id="7_o6xl0"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="8_choun"]
+[ext_resource type="Texture2D" uid="uid://x436ym42jyk6" path="res://assetsRaw/UI/help.png" id="9_choun"]
+[ext_resource type="Texture2D" uid="uid://b4760lpwu4aay" path="res://assetsRaw/UI/settings.png" id="10_eb6dy"]
 [ext_resource type="PackedScene" uid="uid://b8ln7otjmug6m" path="res://scenes/hearts.tscn" id="11_ya4ey"]
 [ext_resource type="Script" uid="uid://pyejpjptpvq4" path="res://script/main.gd" id="script_main"]
 
@@ -12,6 +16,16 @@ distance = -4.0
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_trceg"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_trceg"]
+shader = ExtResource("8_choun")
+shader_parameter/line_color = Color(0, 0, 0, 1)
+shader_parameter/line_thickness = 20.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_a8y0u"]
+shader = ExtResource("8_choun")
+shader_parameter/line_color = Color(0, 0, 0, 1)
+shader_parameter/line_thickness = 20.0
+
 [node name="main" type="Node2D" unique_id=228319826]
 script = ExtResource("script_main")
 enemy_list_scene = ExtResource("2_tefeu")
@@ -19,10 +33,11 @@ fruit_list_scene = ExtResource("3_o6xl0")
 
 [node name="parallaxBackground" parent="." unique_id=278532048 instance=ExtResource("2_plxscene")]
 texture_filter = 1
-scroll_offset = Vector2(-48, 0)
+scroll_offset = Vector2(-48, 144)
 
 [node name="batMain" parent="." unique_id=39988283 instance=ExtResource("1_o5qli")]
-position = Vector2(184, 691)
+z_index = 5
+position = Vector2(72, 592)
 scale = Vector2(0.76484525, 0.8928068)
 hop_max_hold = 5.0
 hop_strength = -300.0
@@ -38,7 +53,7 @@ limit_bottom = 1280
 
 [node name="killerzone" type="Area2D" parent="." unique_id=2035655063]
 z_index = 2
-position = Vector2(408, 1008)
+position = Vector2(464, 936)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="killerzone" unique_id=1911690869]
 position = Vector2(-88, -32)
@@ -46,8 +61,8 @@ scale = Vector2(1, 2)
 shape = SubResource("WorldBoundaryShape2D_eb6dy")
 debug_color = Color(0.86453587, 0, 0.2754476, 1)
 
-[node name="roof" type="Area2D" parent="." unique_id=767058240]
-position = Vector2(344, 336)
+[node name="roof" type="StaticBody2D" parent="." unique_id=767058240]
+position = Vector2(336, 433)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="roof" unique_id=2118354701]
 position = Vector2(32, -323)
@@ -57,5 +72,45 @@ shape = SubResource("WorldBoundaryShape2D_trceg")
 debug_color = Color(1, 1, 1, 1)
 
 [node name="hearts" parent="." unique_id=267642753 instance=ExtResource("11_ya4ey")]
+z_index = 5
 position = Vector2(128, 40)
-scale = Vector2(5.773, 3.604)
+scale = Vector2(5, 5)
+
+[node name="Spawn Region" type="Container" parent="." unique_id=728920113]
+z_index = 5
+offset_left = 720.0
+offset_top = 208.0
+offset_right = 870.0
+offset_bottom = 808.0
+scale = Vector2(0.6400012, 1)
+script = ExtResource("7_o6xl0")
+
+[node name="Menu" type="Sprite2D" parent="." unique_id=1210426236]
+z_index = 5
+material = SubResource("ShaderMaterial_trceg")
+position = Vector2(594, 36.125)
+scale = Vector2(0.11718747, 0.10964913)
+texture = ExtResource("9_choun")
+region_enabled = true
+region_rect = Rect2(0, -11, 512, 539)
+
+[node name="Settings" type="Sprite2D" parent="." unique_id=457869902]
+z_index = 5
+material = SubResource("ShaderMaterial_a8y0u")
+position = Vector2(664.00006, 32)
+scale = Vector2(0.10156265, 0.10156265)
+texture = ExtResource("10_eb6dy")
+
+[node name="Points" type="RichTextLabel" parent="." unique_id=19796658]
+z_index = 5
+offset_left = 32.0
+offset_top = 66.0
+offset_right = 72.0
+offset_bottom = 106.0
+
+[node name="DistanceTravelled" type="RichTextLabel" parent="." unique_id=1807309056]
+z_index = 5
+offset_left = 624.0
+offset_top = 72.0
+offset_right = 664.0
+offset_bottom = 112.0

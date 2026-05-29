@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cs4fdsfn0fqvx"
-path="res://.godot/imported/HealthUI.png-f839a9da791e8c1761cad07db82c702b.ctex"
+uid="uid://bbffo6oth0xky"
+path="res://.godot/imported/menu.png-15635f63cadacac512e367fed8fc1b2d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assetsRaw/batmain/HealthUI.png"
-dest_files=["res://.godot/imported/HealthUI.png-f839a9da791e8c1761cad07db82c702b.ctex"]
+source_file="res://assetsRaw/UI/menu.png"
+dest_files=["res://.godot/imported/menu.png-15635f63cadacac512e367fed8fc1b2d.ctex"]
 
 [params]
 

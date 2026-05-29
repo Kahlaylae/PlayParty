@@ -1,29 +1,60 @@
 [gd_scene format=3 uid="uid://b8ln7otjmug6m"]
 
-[ext_resource type="Texture2D" uid="uid://cs4fdsfn0fqvx" path="res://assetsRaw/batmain/HealthUI.png" id="1_ruow3"]
+[ext_resource type="Script" uid="uid://di1e4ryu1kxtd" path="res://script/hitpoints.gd" id="1_14ev0"]
+[ext_resource type="Texture2D" path="res://assetsRaw/UI/HealthUI.png" id="1_ruow3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ruow3"]
+atlas = ExtResource("1_ruow3")
+region = Rect2(11, 11, 11, 11)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_14ev0"]
+atlas = ExtResource("1_ruow3")
+region = Rect2(22, 11, 11, 11)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hugpe"]
+atlas = ExtResource("1_ruow3")
+region = Rect2(22, 33, 11, 11)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_q6mno"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ruow3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_14ev0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hugpe")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
 
 [node name="Hearts" type="Node2D" unique_id=1811215120]
+script = ExtResource("1_14ev0")
 
-[node name="3" type="Sprite2D" parent="." unique_id=1958178307]
+[node name="heart1" type="AnimatedSprite2D" parent="." unique_id=1169918901]
 texture_filter = 1
-texture = ExtResource("1_ruow3")
-region_enabled = true
-region_rect = Rect2(0, -0.05257702, 33, 10.278254)
+position = Vector2(-16, 0)
+sprite_frames = SubResource("SpriteFrames_q6mno")
 
-[node name="2" type="Sprite2D" parent="." unique_id=1381224829]
+[node name="heart2" type="AnimatedSprite2D" parent="." unique_id=8489853]
 texture_filter = 1
-texture = ExtResource("1_ruow3")
-region_enabled = true
-region_rect = Rect2(-0.054138184, 21.856363, 33.34348, 10.259207)
+position = Vector2(-8, 0)
+sprite_frames = SubResource("SpriteFrames_q6mno")
 
-[node name="1" type="Sprite2D" parent="." unique_id=558420382]
+[node name="heart3" type="AnimatedSprite2D" parent="." unique_id=28425624]
 texture_filter = 1
-texture = ExtResource("1_ruow3")
-region_enabled = true
-region_rect = Rect2(0, 43.82969, 33, 10.278255)
+sprite_frames = SubResource("SpriteFrames_q6mno")
 
-[node name="0" type="Sprite2D" parent="." unique_id=1293967506]
+[node name="heart4" type="AnimatedSprite2D" parent="." unique_id=120574820]
 texture_filter = 1
-texture = ExtResource("1_ruow3")
-region_enabled = true
-region_rect = Rect2(0, 65.99033, 33, 10.172287)
+position = Vector2(8, 0)
+sprite_frames = SubResource("SpriteFrames_q6mno")
+
+[node name="heart5" type="AnimatedSprite2D" parent="." unique_id=752732043]
+texture_filter = 1
+position = Vector2(16, 0)
+sprite_frames = SubResource("SpriteFrames_q6mno")

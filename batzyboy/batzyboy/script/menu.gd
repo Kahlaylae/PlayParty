@@ -83,6 +83,7 @@ func _on_new_game() -> void:
 func _on_continue() -> void:
 	if SaveManager.has_save():
 		SaveManager.resume_requested = true
+		SaveManager.restore_hp = true
 		get_tree().change_scene_to_file(GAME_SCENE)
 
 

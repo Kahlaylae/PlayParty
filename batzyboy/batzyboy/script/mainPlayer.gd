@@ -6,7 +6,7 @@ extends CharacterBody2D
 @export var hop_strength: float = -600.0   # kept for first-tap in main.gd
 @export var gravity: float      = 1200.0
 @export var max_fall_speed: float  = 800.0
-@export var max_hp: int            = 3
+@export var max_hp: int            = 10
 
 signal died
 signal hp_changed(new_hp: int)
@@ -27,7 +27,12 @@ var _hop_held: float = 0.0     # seconds the current hop has been held
 
 
 func _ready() -> void:
-	hp = max_hp
+	# Resume: restore saved HP; new game: start at 6/10
+	if SaveManager.restore_hp:
+		hp = SaveManager.player_hp
+		SaveManager.restore_hp = false
+	else:
+		hp = 6
 	add_to_group("bat")
 	_anim.play("fly")
 
