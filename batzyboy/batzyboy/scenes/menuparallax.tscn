@@ -20,8 +20,10 @@ metadata/_edit_use_anchors_ = true
 
 [node name="Background" type="Sprite2D" parent="." unique_id=1948084174]
 z_index = -4
+texture_filter = 1
+texture_repeat = 2
 position = Vector2(432, 800)
 scale = Vector2(1.9446409, 1.7799566)
 texture = ExtResource("1_lhmr6")
 region_enabled = true
-region_rect = Rect2(0, 77, 1071, 1518)
+region_rect = Rect2(0, 10465.634, 1071, 1518)

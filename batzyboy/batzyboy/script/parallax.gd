@@ -37,5 +37,6 @@ func scroll_at(speed: float, delta: float) -> void:
 		var mult: float = layer_mults[i] if i < layer_mults.size() else 0.1
 		if node is Sprite2D and node.region_enabled:
 			var r: Rect2 = node.region_rect
-			r.position.x += speed * mult * delta
+			var dir: float = -1.0 if node.flip_h else 1.0
+			r.position.x += speed * mult * delta * dir
 			node.region_rect = r

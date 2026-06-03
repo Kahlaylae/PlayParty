@@ -117,7 +117,7 @@ limit_bottom = 1280
 
 [node name="killerzone" type="Area2D" parent="." unique_id=2035655063]
 z_index = 2
-position = Vector2(499, 913)
+position = Vector2(467, 1004)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="killerzone" unique_id=1911690869]
 position = Vector2(-88, -32)
@@ -136,7 +136,7 @@ debug_color = Color(1, 1, 1, 1)
 
 [node name="Floor Slide" type="StaticBody2D" parent="." unique_id=899723696]
 z_index = 7
-position = Vector2(385, 901)
+position = Vector2(351, 981)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor Slide" unique_id=55745031]
 scale = Vector2(0.1, 0.1)
@@ -144,7 +144,7 @@ shape = SubResource("WorldBoundaryShape2D_choun")
 
 [node name="monsterspawner" type="Area2D" parent="." unique_id=1493950178]
 z_index = 5
-position = Vector2(695.00006, 238)
+position = Vector2(670.99994, 280)
 scale = Vector2(0.6400012, 1)
 script = ExtResource("7_o6xl0")
 
