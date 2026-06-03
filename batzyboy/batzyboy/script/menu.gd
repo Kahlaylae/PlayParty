@@ -1,4 +1,4 @@
-extends Node2D
+extends CanvasLayer
 
 const GAME_SCENE := "res://scenes/main.tscn"
 
@@ -14,14 +14,14 @@ const HTP_CARDS: Array = [
 var _htp_card_idx: int = 0
 
 # ── Scene node refs ───────────────────────────────────────────────────────────
-@onready var _parallax: Node2D        = $parallaxBackground
-@onready var _bat:      Node          = $batMain
-@onready var _title:    RichTextLabel = $UI/title
-@onready var _points:   RichTextLabel = $UI/points
-@onready var _btn_new:  Button        = $UI/newGame
-@onready var _btn_cont: Button        = $UI/continue
-@onready var _btn_htp:  Button        = $UI/howTo
-@onready var _btn_set:  Button        = $UI/settings
+@onready var _parallax: Node2D        = $menuparallax
+@onready var _title:    RichTextLabel = $title
+@onready var _points:   RichTextLabel = $points
+@onready var _btn_new:  Button        = $"New Game"
+@onready var _btn_cont: Button        = $Continue
+@onready var _btn_htp:  Button        = $How2Button
+@onready var _btn_set:  Button        = $Settings
+@onready var _btn_coll: Button        = $Collections
 
 # Overlays built in code
 var _htp_layer:      CanvasLayer
@@ -34,13 +34,15 @@ var _audio_btn:      Button
 
 func _ready() -> void:
 	# Bat is visual-only — disable all logic
-	_bat.set_physics_process(false)
-	_bat.set_process(false)
-	_bat.set("frozen", true)
-	var anim := _bat.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
-	if anim:
-		anim.play("fly")
-		_apply_outline_shader(anim)
+	var _bat := get_node_or_null("batMain")
+	if _bat:
+		_bat.set_physics_process(false)
+		_bat.set_process(false)
+		_bat.set("frozen", true)
+		var anim := _bat.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+		if anim:
+			anim.play("fly")
+			_apply_outline_shader(anim)
 
 	_title.bbcode_enabled = true
 	_title.text = "[center][color=#ffe44d][font_size=80]BATZY BOY[/font_size][/color][/center]"
@@ -56,13 +58,10 @@ func _ready() -> void:
 	_btn_cont.pressed.connect(_on_continue)
 	_btn_htp.pressed.connect(_show_htp)
 	_btn_set.pressed.connect(_show_settings)
+	_btn_coll.pressed.connect(_on_collections)
 
 	_build_htp_overlay()
 	_build_settings_overlay()
-
-
-func _process(delta: float) -> void:
-	_parallax.scroll_at(150.0, delta)
 
 
 # ── Input ─────────────────────────────────────────────────────────────────────
@@ -78,6 +77,10 @@ func _on_new_game() -> void:
 	SaveManager.clear()
 	SaveManager.resume_requested = false
 	get_tree().change_scene_to_file(GAME_SCENE)
+
+
+func _on_collections() -> void:
+	get_tree().change_scene_to_file("res://scenes/collections.tscn")
 
 
 func _on_continue() -> void:

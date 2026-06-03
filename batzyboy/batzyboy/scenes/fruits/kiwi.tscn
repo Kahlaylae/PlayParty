@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://bgrj3hlp2er73"]
+
+[ext_resource type="Script" uid="uid://cfu2yvwu0t7le" path="res://script/fruit.gd" id="1_62fv8"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="2_yoh6g"]
+[ext_resource type="Texture2D" uid="uid://cww5gh4ovo8is" path="res://assetsRaw/objects/Kiwi.png" id="3_1fwpm"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7o87m"]
+radius = 24.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jlcbh"]
+shader = ExtResource("2_yoh6g")
+shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_thickness = 0.750000035625
+
+[node name="kiwi" type="Area2D" unique_id=1492634455]
+script = ExtResource("1_62fv8")
+points = 10
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=778973776]
+shape = SubResource("CircleShape2D_7o87m")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=572649613]
+texture_filter = 1
+material = SubResource("ShaderMaterial_jlcbh")
+texture = ExtResource("3_1fwpm")

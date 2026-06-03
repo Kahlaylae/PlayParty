@@ -1,5 +1,7 @@
-extends Container
+extends Sprite2D
 
+#PLAYWINDOW JUST RUNS A WINDOW OF PARALLAX BACKGROUND EMBEDDED INTO IT IN MENU.TSCN 
+#maintaining batzy or batmain flying infront of it. 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

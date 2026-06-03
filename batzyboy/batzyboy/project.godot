@@ -22,7 +22,8 @@ SaveManager="*res://script/saveManager.gd"
 
 window/size/viewport_width=720
 window/size/viewport_height=1280
-window/size/initial_position=Vector2i(-354, -980)
+window/size/initial_position_type=2
+window/stretch/mode="canvas_items"
 
 [input]
 

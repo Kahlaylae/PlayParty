@@ -1,0 +1,108 @@
+[gd_scene format=3 uid="uid://cxn6d1qvawj3g"]
+
+[ext_resource type="Script" uid="uid://c6c1u4orlwjd0" path="res://script/collections.gd" id="1_kxtot"]
+[ext_resource type="PackedScene" uid="uid://lln3kc1yk262" path="res://scenes/menuparallax.tscn" id="2_q1ne7"]
+[ext_resource type="Texture2D" uid="uid://us0jichfhwtg" path="res://assetsRaw/UI/uiElements/collectionswindow.png" id="3_03hsv"]
+[ext_resource type="Script" uid="uid://dlxpaifmdfkea" path="res://script/fruitunlock.gd" id="4_8y54x"]
+[ext_resource type="PackedScene" uid="uid://cuw70521romjm" path="res://scenes/fruits/apple.tscn" id="5_gmcut"]
+[ext_resource type="PackedScene" uid="uid://calfai0db4ect" path="res://scenes/fruits/banana.tscn" id="6_rdvru"]
+[ext_resource type="PackedScene" uid="uid://blp27625cpy6t" path="res://scenes/fruits/orange.tscn" id="7_1qk7f"]
+[ext_resource type="PackedScene" uid="uid://ba2dh1by5qjeh" path="res://scenes/fruits/blackberry.tscn" id="8_mx6ix"]
+[ext_resource type="PackedScene" uid="uid://ctpsgv08en0jn" path="res://scenes/fruits/blueberry.tscn" id="9_wc8c8"]
+[ext_resource type="PackedScene" uid="uid://m0qe1jyle05n" path="res://scenes/fruits/cranberry.tscn" id="10_x6p3a"]
+[ext_resource type="PackedScene" uid="uid://cbcvku67x52np" path="res://scenes/fruits/apricot.tscn" id="11_6yano"]
+
+[node name="collections" type="CanvasLayer" unique_id=711208428]
+script = ExtResource("1_kxtot")
+
+[node name="Title" type="RichTextLabel" parent="." unique_id=375607090]
+offset_left = 96.0
+offset_top = 160.0
+offset_right = 196.0
+offset_bottom = 220.0
+scale = Vector2(5, 3)
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.0
+bbcode_enabled = true
+text = "Fruit
+Collection"
+fit_content = true
+scroll_active = false
+autowrap_mode = 2
+tab_size = 2
+context_menu_enabled = true
+horizontal_alignment = 1
+justification_flags = 1
+visible_characters_behavior = 2
+
+[node name="collections window" type="NinePatchRect" parent="." unique_id=1642370233]
+texture_filter = 1
+offset_left = 32.0
+offset_top = 336.00003
+offset_right = 1761.1051
+offset_bottom = 1836.0
+scale = Vector2(0.37013367, 0.5970936)
+texture = ExtResource("3_03hsv")
+draw_center = false
+patch_margin_left = 750
+patch_margin_top = 750
+patch_margin_right = 750
+patch_margin_bottom = 750
+axis_stretch_vertical = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="fruitunlock" type="Node" parent="collections window" unique_id=1129968096]
+script = ExtResource("4_8y54x")
+
+[node name="apple" parent="collections window/fruitunlock" unique_id=1097651336 instance=ExtResource("5_gmcut")]
+texture_filter = 1
+position = Vector2(113, 464)
+scale = Vector2(2, 2)
+points = 5
+pulse_speed = 1.0
+
+[node name="banana" parent="collections window/fruitunlock" unique_id=430948430 instance=ExtResource("6_rdvru")]
+position = Vector2(224, 465)
+scale = Vector2(2, 2)
+points = 6
+pulse_speed = 2.0
+
+[node name="orange" parent="collections window/fruitunlock" unique_id=58410367 instance=ExtResource("7_1qk7f")]
+position = Vector2(344, 464)
+scale = Vector2(2, 2)
+
+[node name="blackberry" parent="collections window/fruitunlock" unique_id=888939630 instance=ExtResource("8_mx6ix")]
+position = Vector2(464, 465)
+scale = Vector2(2, 2)
+level = 2
+points = 7
+
+[node name="blueberry" parent="collections window/fruitunlock" unique_id=496693809 instance=ExtResource("9_wc8c8")]
+position = Vector2(592, 465)
+scale = Vector2(2, 2)
+level = 2
+points = 7
+heal = 1
+
+[node name="cranberry" parent="collections window/fruitunlock" unique_id=1967415121 instance=ExtResource("10_x6p3a")]
+position = Vector2(113, 637)
+scale = Vector2(2, 2)
+level = 2
+heal = 1
+
+[node name="apricot" parent="collections window/fruitunlock" unique_id=894439911 instance=ExtResource("11_6yano")]
+position = Vector2(224, 637)
+scale = Vector2(2, 2)
+level = 3
+heal = 1
+pulse_speed = 2.0
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=753899521]
+anchor_mode = 0
+limit_left = 0
+limit_top = 0
+limit_right = 720
+limit_bottom = 1280
+
+[node name="menuparallax" parent="." unique_id=684406184 instance=ExtResource("2_q1ne7")]
+scroll_offset = Vector2(-56, -80)

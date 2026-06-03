@@ -39,16 +39,17 @@ var _fruit_timer: float    = 0.0
 var _retry_enabled: bool   = false
 
 # ─── Node refs ────────────────────────────────────────────────────────────────
-@onready var _bat: CharacterBody2D   = $batMain
-@onready var _parallax: Node2D       = $parallaxBackground
-@onready var _cam: Camera2D          = $Camera2D
-@onready var _killerzone: Area2D     = $killerzone
-@onready var _hearts_node: Node2D    = $hearts
-@onready var _spawn_region: Container = $"Spawn Region"
-@onready var _menu_btn: Sprite2D      = $Menu
-@onready var _settings_btn: Sprite2D  = $Settings
-@onready var _pts_rtl: RichTextLabel  = $Points
-@onready var _dist_rtl: RichTextLabel = $DistanceTravelled
+@onready var _bat: CharacterBody2D   = $batMainSpawn
+@onready var _parallax: Node2D         = $CanvasLayer/parallaxBackground
+@onready var _cam: Camera2D            = $Camera2D
+@onready var _killerzone: Area2D       = $killerzone
+@onready var _hearts_node: Node2D      = $CanvasLayer/hearts
+@onready var _monster_spawner: Area2D  = $monsterspawner
+@onready var _fruit_spawner: Node2D    = $fruitspawner
+@onready var _menu_btn: Button         = $CanvasLayer/MenuButton
+@onready var _settings_btn: Button     = $CanvasLayer/How2Button
+@onready var _pts_rtl: RichTextLabel   = $CanvasLayer/Points
+@onready var _dist_rtl: RichTextLabel  = $CanvasLayer/DistanceTravelled
 
 # Overlay nodes
 var _splash_layer: CanvasLayer
@@ -137,11 +138,11 @@ func _input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	match state:
 		State.SPLASH:
-			_parallax.scroll_at(SPEED_UI, delta)
+			_parallax.base_speed = SPEED_UI
 		State.PLAYING:
 			dist_px += scroll_speed * delta
 			_update_level()
-			_parallax.scroll_at(scroll_speed, delta)
+			_parallax.base_speed = scroll_speed
 			_monster_timer -= delta
 			if _monster_timer <= 0.0:
 				_spawn_monster()
@@ -153,11 +154,11 @@ func _process(delta: float) -> void:
 			_update_hud()
 		State.LEVEL_UP:
 			# World keeps scrolling during the countdown, spawning is paused
-			_parallax.scroll_at(scroll_speed, delta)
+			_parallax.base_speed = scroll_speed
 		State.PAUSED:
 			pass   # Engine.time_scale = 0 freezes delta; nothing to do here
 		State.DEAD:
-			_parallax.scroll_at(SPEED_UI, delta)
+			_parallax.base_speed = SPEED_UI
 
 
 # ─── Game flow ────────────────────────────────────────────────────────────────
@@ -205,8 +206,7 @@ func _spawn_x() -> float:
 
 
 func _spawn_y() -> float:
-	var rect := _spawn_region.get_global_rect()
-	return randf_range(rect.position.y, rect.end.y)
+	return _monster_spawner.get_spawn_y()
 
 
 func _spawn_monster() -> void:
@@ -221,7 +221,7 @@ func _spawn_monster() -> void:
 	inst.damage         = entry.damage
 	inst.wave_amplitude = entry.wave_amplitude
 	inst.wave_frequency = entry.wave_frequency
-	inst.global_position = Vector2(_spawn_x(), _spawn_y())
+	inst.global_position = Vector2(_spawn_x() + randf_range(0.0, 200.0), _spawn_y())
 	inst.scale = entry.spawn_scale
 	add_child(inst)
 
@@ -233,18 +233,22 @@ func _spawn_fruit() -> void:
 	if eligible.is_empty():
 		return
 	# Cluster size grows with level: 1 at L1, 2 at L3, 3 at L5, capped at 4
-	var count := mini(1 + current_level / 2, 4)
-	var base_x := _spawn_x()
-	var base_y := _spawn_y()
+	var count: int = mini(1 + int(current_level) / 2, 4)
+	var base_x  := _spawn_x()
+	var spawn_y: float = _fruit_spawner.get_spawn_y()
+	# Divide 500 px spread into equal slots so fruits never clump
+	var slot_w  := 500.0 / maxi(count, 1)
 	for i in count:
 		var entry: Dictionary = eligible[randi() % eligible.size()]
 		var inst := entry.scene.instantiate() as Area2D
-		var base_speed: float = entry.speed if entry.speed > 0.0 else _obj_speed()
-		inst.speed  = base_speed + (_obj_speed() - OBJ_SPEED_MIN)
-		inst.points = entry.points
-		inst.heal   = entry.heal
-		# Stagger each fruit 130 px further right — forms a collectable line
-		inst.global_position = Vector2(base_x + i * 130.0, base_y)
+		inst.speed          = randf_range(200.0, 600.0)
+		inst.points         = entry.points
+		inst.heal           = entry.heal
+		inst.pulse_speed    = entry.pulse_speed
+		inst.collision_mask = 1
+		# Each fruit gets its own slot with small jitter inside it
+		var slot_x := base_x + i * slot_w + randf_range(0.0, slot_w * 0.6)
+		inst.global_position = Vector2(slot_x, spawn_y)
 		inst.collected.connect(_on_fruit_collected)
 		add_child(inst)
 
@@ -286,11 +290,11 @@ func _build_fruit_pool() -> void:
 		if scene == null:
 			continue
 		_fruit_pool.append({
-			scene     = scene,
-			min_level = node.level  if "level"  in node else 1,
-			points    = node.points if "points" in node else 1,
-			heal      = node.heal   if "heal"   in node else 0,
-			speed     = node.speed  if "speed"  in node else 0.0,
+			scene       = scene,
+			min_level   = node.level      if "level"      in node else 1,
+			points      = node.points     if "points"     in node else 1,
+			heal        = node.heal       if "heal"       in node else 0,
+			pulse_speed = node.pulse_speed if "pulse_speed" in node else 3.0,
 		})
 	fruit_list.free()
 	_fruit_pool.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -438,16 +442,16 @@ func _build_gradient_bg() -> void:
 	tex.fill_from = Vector2(0.5, 0.0)
 	tex.fill_to   = Vector2(0.5, 1.0)
 
-	var tr := TextureRect.new()
-	tr.texture      = tex
-	tr.expand_mode  = TextureRect.EXPAND_IGNORE_SIZE
-	tr.stretch_mode = TextureRect.STRETCH_SCALE
-	tr.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var tex_rect := TextureRect.new()
+	tex_rect.texture      = tex
+	tex_rect.expand_mode  = TextureRect.EXPAND_IGNORE_SIZE
+	tex_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	tex_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	var layer := CanvasLayer.new()
 	layer.layer = -1
 	add_child(layer)
-	layer.add_child(tr)
+	layer.add_child(tex_rect)
 
 
 # ─── HUD ──────────────────────────────────────────────────────────────────────

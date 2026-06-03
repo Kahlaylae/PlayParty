@@ -2,56 +2,163 @@
 
 [ext_resource type="Script" uid="uid://cnqb64ayny1mo" path="res://script/fruitlist.gd" id="1_nxg12"]
 [ext_resource type="PackedScene" uid="uid://blp27625cpy6t" path="res://scenes/fruits/orange.tscn" id="2_pltxu"]
-[ext_resource type="Script" uid="uid://cfu2yvwu0t7le" path="res://script/fruit.gd" id="2_y7acc"]
-[ext_resource type="PackedScene" uid="uid://ctpsgv08en0jn" path="res://scenes/fruits/avocado.tscn" id="3_ldo3d"]
+[ext_resource type="PackedScene" uid="uid://ctpsgv08en0jn" path="res://scenes/fruits/blueberry.tscn" id="3_ldo3d"]
+[ext_resource type="PackedScene" uid="uid://cbcvku67x52np" path="res://scenes/fruits/apricot.tscn" id="3_qql31"]
 [ext_resource type="PackedScene" uid="uid://calfai0db4ect" path="res://scenes/fruits/banana.tscn" id="4_onbof"]
 [ext_resource type="PackedScene" uid="uid://ba2dh1by5qjeh" path="res://scenes/fruits/blackberry.tscn" id="5_m85c1"]
-[ext_resource type="PackedScene" uid="uid://cuw70521romjm" path="res://scenes/fruits/elderberry.tscn" id="6_nl0wi"]
-[ext_resource type="Texture2D" uid="uid://wbaegahixy3x" path="res://assetsRaw/objects/1HQFruit.png" id="12_fcm2n"]
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_7o87m"]
-radius = 24.0
+[ext_resource type="PackedScene" uid="uid://cuw70521romjm" path="res://scenes/fruits/apple.tscn" id="6_nl0wi"]
+[ext_resource type="PackedScene" uid="uid://m0qe1jyle05n" path="res://scenes/fruits/cranberry.tscn" id="7_kpu2v"]
+[ext_resource type="PackedScene" uid="uid://c2skaqnyrqhe6" path="res://scenes/fruits/dragonfruit.tscn" id="8_4vd64"]
+[ext_resource type="PackedScene" uid="uid://wa2j01mljhcy" path="res://scenes/fruits/durian.tscn" id="9_8tfhk"]
+[ext_resource type="PackedScene" uid="uid://6lj6spwmfm7t" path="res://scenes/fruits/elderberry.tscn" id="10_mt14n"]
+[ext_resource type="PackedScene" uid="uid://cwdrmxowcwsri" path="res://scenes/fruits/grape.tscn" id="11_j63wx"]
+[ext_resource type="PackedScene" uid="uid://dm13ojul72ild" path="res://scenes/fruits/guava.tscn" id="12_u3s3n"]
+[ext_resource type="PackedScene" uid="uid://bgrj3hlp2er73" path="res://scenes/fruits/kiwi.tscn" id="13_boq36"]
+[ext_resource type="PackedScene" uid="uid://sbj321m5mmb0" path="res://scenes/fruits/lemon.tscn" id="14_qisun"]
+[ext_resource type="PackedScene" uid="uid://fb4xw3rfqrtf" path="res://scenes/fruits/lime.tscn" id="15_ekihp"]
+[ext_resource type="PackedScene" uid="uid://cgnycfvoe8h82" path="res://scenes/fruits/lychee.tscn" id="16_3gded"]
+[ext_resource type="PackedScene" uid="uid://bt1t8q0plpy6d" path="res://scenes/fruits/mango.tscn" id="17_iwoa4"]
+[ext_resource type="PackedScene" uid="uid://dwhg2wy5w670m" path="res://scenes/fruits/papaya.tscn" id="19_c6sni"]
+[ext_resource type="PackedScene" uid="uid://buuvwdd4rnsy" path="res://scenes/fruits/peach.tscn" id="20_yivkn"]
+[ext_resource type="PackedScene" uid="uid://fa73m7mhaqno" path="res://scenes/fruits/pear.tscn" id="21_h1txc"]
+[ext_resource type="PackedScene" uid="uid://yacl8hlhoai3" path="res://scenes/fruits/pineapple.tscn" id="22_d4l6x"]
+[ext_resource type="PackedScene" uid="uid://ckk1h6bhoxb3v" path="res://scenes/fruits/plum.tscn" id="23_oxmro"]
+[ext_resource type="PackedScene" uid="uid://dlyju3mgsre44" path="res://scenes/fruits/pomegranate.tscn" id="24_uduev"]
+[ext_resource type="PackedScene" uid="uid://cfmmcop70jx36" path="res://scenes/fruits/rasberry.tscn" id="25_twpm1"]
+[ext_resource type="PackedScene" uid="uid://chmyewyerhv3s" path="res://scenes/fruits/starfruit.tscn" id="26_poyf7"]
+[ext_resource type="PackedScene" uid="uid://cgmbtrhh3ppse" path="res://scenes/fruits/strawbberry.tscn" id="27_gxa4e"]
+[ext_resource type="PackedScene" uid="uid://cpkxssed4ugge" path="res://scenes/fruits/watermelon.tscn" id="28_fepun"]
 
 [node name="fruits" type="Node2D" unique_id=286783067 node_paths=PackedStringArray("fruit_nodes")]
+scale = Vector2(5.5164576, 5.5164576)
 script = ExtResource("1_nxg12")
-fruit_nodes = [NodePath("orange"), NodePath("avocado"), NodePath("banana"), NodePath("blackberry"), NodePath("elderberry")]
+fruit_nodes = [NodePath("apple"), NodePath("banana"), NodePath("orange"), NodePath("blackberry"), NodePath("blueberry"), NodePath("cranberry"), NodePath("apricot")]
 
-[node name="orange" parent="." unique_id=58410367 instance=ExtResource("2_pltxu")]
-position = Vector2(-72, 0)
-scale = Vector2(1.05, 1.05)
-points = 10
-
-[node name="avocado" parent="." unique_id=496693809 instance=ExtResource("3_ldo3d")]
-position = Vector2(56, 0)
-scale = Vector2(1.05, 1.05)
-points = 10
-heal = 3
+[node name="apple" parent="." unique_id=1097651336 instance=ExtResource("6_nl0wi")]
+texture_filter = 1
+position = Vector2(-155.53459, -138.49467)
+points = 5
+speed = 150.0
+pulse_speed = 1.0
 
 [node name="banana" parent="." unique_id=430948430 instance=ExtResource("4_onbof")]
-position = Vector2(-136, 0)
-scale = Vector2(1.05, 1.05)
-points = 10
+position = Vector2(-96.07615, -140.66998)
+scale = Vector2(0.99999994, 0.99999994)
+points = 6
+speed = 250.0
+pulse_speed = 2.0
+
+[node name="orange" parent="." unique_id=58410367 instance=ExtResource("2_pltxu")]
+position = Vector2(-36.073875, -137.76958)
+scale = Vector2(0.99999994, 0.99999994)
+speed = 450.0
 
 [node name="blackberry" parent="." unique_id=888939630 instance=ExtResource("5_m85c1")]
-position = Vector2(120, 0)
-scale = Vector2(1.05, 1.05)
-points = 10
+position = Vector2(26.103708, -137.76958)
+scale = Vector2(0.99999994, 0.99999994)
+level = 2
+points = 7
+speed = 480.0
 
-[node name="elderberry" parent="." unique_id=1097651336 instance=ExtResource("6_nl0wi")]
-scale = Vector2(1.05, 1.05)
-points = 10
+[node name="blueberry" parent="." unique_id=496693809 instance=ExtResource("3_ldo3d")]
+position = Vector2(87.01236, -137.76958)
+scale = Vector2(0.99999994, 0.99999994)
+level = 2
+points = 7
+heal = 1
+speed = 380.0
+
+[node name="cranberry" parent="." unique_id=1967415121 instance=ExtResource("7_kpu2v")]
+position = Vector2(-155.17204, -71.0601)
+scale = Vector2(0.9999998, 0.9999998)
+level = 2
+heal = 1
+speed = 350.0
+
+[node name="apricot" parent="." unique_id=894439911 instance=ExtResource("3_qql31")]
+position = Vector2(-96.07615, -71.0601)
+level = 3
+heal = 1
+speed = 150.0
+pulse_speed = 2.0
+
+[node name="dragonfruit" parent="." unique_id=1355612217 instance=ExtResource("8_4vd64")]
+position = Vector2(-36, 32)
 heal = 2
+sprite_scale = 4.0
 
-[node name="Area2D6" type="Area2D" parent="." unique_id=25416175]
-visible = false
-scale = Vector2(1.05, 1.05)
-script = ExtResource("2_y7acc")
-points = 10
+[node name="durian" parent="." unique_id=1660278325 instance=ExtResource("9_8tfhk")]
+position = Vector2(39.999996, 31.999996)
+sprite_scale = 4.0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D6" unique_id=1645346028]
-shape = SubResource("CircleShape2D_7o87m")
+[node name="elderberry" parent="." unique_id=2085339095 instance=ExtResource("10_mt14n")]
+position = Vector2(103.99999, 35)
+sprite_scale = 3.5
 
-[node name="Sprite2D" type="Sprite2D" parent="Area2D6" unique_id=411285092]
-scale = Vector2(2, 2)
-texture = ExtResource("12_fcm2n")
-region_enabled = true
+[node name="grape" parent="." unique_id=2074970349 instance=ExtResource("11_j63wx")]
+position = Vector2(-165, 104)
+sprite_scale = 4.0
+
+[node name="guava2" parent="." unique_id=913801321 instance=ExtResource("12_u3s3n")]
+position = Vector2(-98.614, 65.25927)
+sprite_scale = 4.0
+
+[node name="kiwi" parent="." unique_id=1492634455 instance=ExtResource("13_boq36")]
+position = Vector2(-231.99998, 103.999985)
+sprite_scale = 4.0
+
+[node name="lemon" parent="." unique_id=475052392 instance=ExtResource("14_qisun")]
+position = Vector2(-36, 96)
+sprite_scale = 4.0
+
+[node name="lime" parent="." unique_id=1729668955 instance=ExtResource("15_ekihp")]
+position = Vector2(-95.99999, 95.99999)
+sprite_scale = 4.0
+
+[node name="lychee" parent="." unique_id=1309820932 instance=ExtResource("16_3gded")]
+position = Vector2(168.00006, 39.99994)
+sprite_scale = 4.0
+
+[node name="mango" parent="." unique_id=388876463 instance=ExtResource("17_iwoa4")]
+position = Vector2(40, 101)
+sprite_scale = 4.0
+
+[node name="papaya" parent="." unique_id=677381443 instance=ExtResource("19_c6sni")]
+position = Vector2(-88.00001, 175.99998)
+sprite_scale = 4.0
+
+[node name="peach" parent="." unique_id=662884294 instance=ExtResource("20_yivkn")]
+position = Vector2(119.99998, 176)
+sprite_scale = 4.0
+
+[node name="pear" parent="." unique_id=60090814 instance=ExtResource("21_h1txc")]
+position = Vector2(-232, 176)
+sprite_scale = 4.0
+
+[node name="pineapple" parent="." unique_id=1672463173 instance=ExtResource("22_d4l6x")]
+position = Vector2(-408, 63.999992)
+sprite_scale = 4.0
+
+[node name="plum" parent="." unique_id=1019236651 instance=ExtResource("23_oxmro")]
+position = Vector2(-232, 40)
+sprite_scale = 4.0
+
+[node name="pomegranate" parent="." unique_id=608386025 instance=ExtResource("24_uduev")]
+position = Vector2(-232.00002, -32.00003)
+sprite_scale = 4.0
+
+[node name="rasberry" parent="." unique_id=2006076044 instance=ExtResource("25_twpm1")]
+position = Vector2(104.00003, 101)
+sprite_scale = 4.0
+
+[node name="starfruit" parent="." unique_id=77195411 instance=ExtResource("26_poyf7")]
+position = Vector2(55.99999, 182)
+sprite_scale = 4.0
+
+[node name="strawbberry" parent="." unique_id=519825979 instance=ExtResource("27_gxa4e")]
+position = Vector2(-165, 181.99997)
+sprite_scale = 4.0
+
+[node name="watermelon" parent="." unique_id=1022520154 instance=ExtResource("28_fepun")]
+position = Vector2(-15.999997, 182)
+sprite_scale = 4.0

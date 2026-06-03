@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://cbcvku67x52np"]
+
+[ext_resource type="Script" uid="uid://cfu2yvwu0t7le" path="res://script/fruit.gd" id="1_tmoq2"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="2_ud51j"]
+[ext_resource type="Texture2D" uid="uid://cgrhgh1myjufp" path="res://assetsRaw/objects/Apricot.png" id="3_lq5fc"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7o87m"]
+radius = 24.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jlcbh"]
+shader = ExtResource("2_ud51j")
+shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_thickness = 0.400000019
+
+[node name="apricot" type="Area2D" unique_id=894439911]
+script = ExtResource("1_tmoq2")
+points = 10
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=285123576]
+shape = SubResource("CircleShape2D_7o87m")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1927832926]
+texture_filter = 1
+material = SubResource("ShaderMaterial_jlcbh")
+position = Vector2(1, -6)
+scale = Vector2(4.591813, 4.591813)
+texture = ExtResource("3_lq5fc")

@@ -15,7 +15,9 @@ void fragment() {
 	float inline = 1.0;
 	float outline = 0.0;
 	for (int i = 0; i < OFFSETS.length(); i++) {
-		float sample = texture(TEXTURE, UV + size * OFFSETS[i]).a;
+		vec2 sample_uv = UV + size * OFFSETS[i];
+		vec2 in_bounds = step(vec2(0.0), sample_uv) * step(sample_uv, vec2(1.0));
+		float sample = texture(TEXTURE, clamp(sample_uv, vec2(0.0), vec2(1.0))).a * in_bounds.x * in_bounds.y;
 		outline += sample;
 		inline *= sample;
 	}

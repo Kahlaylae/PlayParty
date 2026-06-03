@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b8ln7otjmug6m"]
 
 [ext_resource type="Script" uid="uid://di1e4ryu1kxtd" path="res://script/hitpoints.gd" id="1_14ev0"]
-[ext_resource type="Texture2D" path="res://assetsRaw/UI/HealthUI.png" id="1_ruow3"]
+[ext_resource type="Texture2D" uid="uid://cs4fdsfn0fqvx" path="res://assetsRaw/UI/HealthUI.png" id="1_ruow3"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ruow3"]
 atlas = ExtResource("1_ruow3")
@@ -37,12 +37,12 @@ script = ExtResource("1_14ev0")
 
 [node name="heart1" type="AnimatedSprite2D" parent="." unique_id=1169918901]
 texture_filter = 1
-position = Vector2(-16, 0)
+position = Vector2(-20, 0)
 sprite_frames = SubResource("SpriteFrames_q6mno")
 
 [node name="heart2" type="AnimatedSprite2D" parent="." unique_id=8489853]
 texture_filter = 1
-position = Vector2(-8, 0)
+position = Vector2(-10, 0)
 sprite_frames = SubResource("SpriteFrames_q6mno")
 
 [node name="heart3" type="AnimatedSprite2D" parent="." unique_id=28425624]
@@ -51,10 +51,10 @@ sprite_frames = SubResource("SpriteFrames_q6mno")
 
 [node name="heart4" type="AnimatedSprite2D" parent="." unique_id=120574820]
 texture_filter = 1
-position = Vector2(8, 0)
+position = Vector2(10, 0)
 sprite_frames = SubResource("SpriteFrames_q6mno")
 
 [node name="heart5" type="AnimatedSprite2D" parent="." unique_id=752732043]
 texture_filter = 1
-position = Vector2(16, 0)
+position = Vector2(20, 0)
 sprite_frames = SubResource("SpriteFrames_q6mno")

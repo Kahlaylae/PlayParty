@@ -13,6 +13,7 @@ var audio_muted:      bool = false
 var resume_requested: bool = false   # set by menu, consumed by main.gd
 var player_hp:        int  = 6       # persisted so quit/resume restores HP
 var restore_hp:       bool = false    # set by menu on continue, consumed by mainPlayer
+var unlocked_fruits:  Array[String] = ["apple"]   # starter fruit always unlocked
 
 var _music: AudioStreamPlayer
 
@@ -45,10 +46,11 @@ func save() -> void:
 		push_error("SaveManager: could not open save file for writing")
 		return
 	var data := {
-		"high_score":   high_score,
-		"resume_level": resume_level,
-		"audio_muted":  audio_muted,
-		"player_hp":    player_hp,
+		"high_score":      high_score,
+		"resume_level":    resume_level,
+		"audio_muted":     audio_muted,
+		"player_hp":       player_hp,
+		"unlocked_fruits": unlocked_fruits,
 	}
 	file.store_string(JSON.stringify(data))
 	file.close()
@@ -70,6 +72,9 @@ func load_data() -> void:
 	resume_level = int(d.get("resume_level", 1))
 	audio_muted  = bool(d.get("audio_muted", false))
 	player_hp    = int(d.get("player_hp",   6))
+	var saved_fruits = d.get("unlocked_fruits", ["apple"])
+	if saved_fruits is Array:
+		unlocked_fruits.assign(saved_fruits)
 
 
 # Called on every level-up to checkpoint progress

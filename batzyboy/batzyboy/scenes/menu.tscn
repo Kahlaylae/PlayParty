@@ -1,43 +1,41 @@
 [gd_scene format=3 uid="uid://0egrdlvl1o87"]
 
 [ext_resource type="Script" uid="uid://deupfugd15nrs" path="res://script/menu.gd" id="1_menu"]
-[ext_resource type="PackedScene" uid="uid://dvkkqgc0ayp6e" path="res://scenes/parallax.tscn" id="2_plxscene"]
-[ext_resource type="PackedScene" uid="uid://csk83uitp27qj" path="res://scenes/batMain.tscn" id="10_70i5f"]
+[ext_resource type="PackedScene" uid="uid://lln3kc1yk262" path="res://scenes/menuparallax.tscn" id="4_i6lef"]
+[ext_resource type="Texture2D" uid="uid://bhkdrb3u6qvxl" path="res://assetsRaw/UI/uiElements/button.png" id="5_i6lef"]
+[ext_resource type="Texture2D" uid="uid://ctobljutnodd1" path="res://assetsRaw/UI/uiElements/how2button.png" id="6_70i5f"]
+[ext_resource type="Texture2D" uid="uid://copbrucwkub0f" path="res://assetsRaw/UI/uiElements/menubutton.png" id="7_mj5lg"]
 
-[node name="Menu" type="Node2D" unique_id=1909842331]
+[node name="Menu" type="CanvasLayer" unique_id=93736883]
 script = ExtResource("1_menu")
 
-[node name="parallaxBackground" parent="." unique_id=2047107240 instance=ExtResource("2_plxscene")]
-scroll_offset = Vector2(-24, -32)
-
-[node name="Camera2D" type="Camera2D" parent="parallaxBackground" unique_id=1437286810]
-position = Vector2(8, 10.666667)
-scale = Vector2(0.33333334, 0.33333334)
+[node name="Camera2D" type="Camera2D" parent="." unique_id=392909159]
 anchor_mode = 0
 limit_left = 0
 limit_top = 0
-limit_right = 700
+limit_right = 720
 limit_bottom = 1280
 
-[node name="batMain" parent="." unique_id=39988283 instance=ExtResource("10_70i5f")]
-position = Vector2(368, 416)
-hop_strength = -300.0
-gravity = 1500.0
-max_fall_speed = 1500.0
+[node name="menuparallax" parent="." unique_id=684406184 instance=ExtResource("4_i6lef")]
 
-[node name="UI" type="CanvasLayer" parent="." unique_id=190323549]
-
-[node name="title" type="RichTextLabel" parent="UI" unique_id=855156664]
+[node name="title" type="RichTextLabel" parent="." unique_id=855156664]
+modulate = Color(0.29988563, 0.034962468, 0.47321045, 1)
 offset_left = 48.0
 offset_top = 104.0
 offset_right = 648.0
 offset_bottom = 219.0
 bbcode_enabled = true
-text = "[center]BATZY BOY[/center]"
+text = "BATZY BOY"
 fit_content = true
 scroll_active = false
+tab_size = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+visible_characters = 12
+visible_ratio = 1.3333334
 
-[node name="points" type="RichTextLabel" parent="UI" unique_id=2077840069]
+[node name="points" type="RichTextLabel" parent="." unique_id=2077840069]
+modulate = Color(0.644008, 0.114435025, 0.45860434, 1)
 offset_left = 48.0
 offset_top = 531.0
 offset_right = 648.0
@@ -46,37 +44,85 @@ bbcode_enabled = true
 text = "[center]Best: 0 pts[/center]"
 scroll_active = false
 
-[node name="linebreak" type="ColorRect" parent="UI" unique_id=1627730958]
+[node name="linebreak" type="ColorRect" parent="." unique_id=1627730958]
 offset_left = 98.0
 offset_top = 595.0
 offset_right = 598.0
 offset_bottom = 598.0
 color = Color(0.862182, 0.948163, 0, 0.55)
 
-[node name="newGame" type="Button" parent="UI" unique_id=797704834]
-offset_left = 148.0
-offset_top = 643.0
-offset_right = 548.0
-offset_bottom = 708.0
+[node name="New Game" type="Button" parent="." unique_id=797704834]
+offset_left = 152.0
+offset_top = 598.0
+offset_right = 546.4945
+offset_bottom = 749.0
+tooltip_text = "Start new game"
 text = "New Game"
+icon = ExtResource("5_i6lef")
+flat = true
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+text_direction = 3
 
-[node name="continue" type="Button" parent="UI" unique_id=1702845098]
-offset_left = 148.0
-offset_top = 728.0
-offset_right = 548.0
-offset_bottom = 793.0
+[node name="Continue" type="Button" parent="." unique_id=228510509]
+offset_left = 152.0
+offset_top = 760.0
+offset_right = 546.4945
+offset_bottom = 911.0
+tooltip_text = "Start new game"
 text = "Continue"
+icon = ExtResource("5_i6lef")
+flat = true
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+text_direction = 3
 
-[node name="howTo" type="Button" parent="UI" unique_id=1168936817]
-offset_left = 148.0
-offset_top = 833.0
-offset_right = 548.0
-offset_bottom = 898.0
-text = "How To Play"
+[node name="Collections" type="Button" parent="." unique_id=530726723]
+offset_left = 152.0
+offset_top = 920.0
+offset_right = 546.4945
+offset_bottom = 1071.0
+tooltip_text = "Start new game"
+text = "Collection
+"
+icon = ExtResource("5_i6lef")
+flat = true
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+text_direction = 3
 
-[node name="settings" type="Button" parent="UI" unique_id=920308471]
-offset_left = 148.0
-offset_top = 928.0
-offset_right = 548.0
-offset_bottom = 993.0
+[node name="Settings" type="Button" parent="." unique_id=603684612]
+offset_left = 152.0
+offset_top = 1088.0
+offset_right = 546.4945
+offset_bottom = 1239.0
+tooltip_text = "Start new game"
 text = "Settings"
+icon = ExtResource("5_i6lef")
+flat = true
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+text_direction = 3
+
+[node name="How2Button" type="Button" parent="." unique_id=1692130217]
+offset_left = 574.0
+offset_top = 16.0
+offset_right = 662.0
+offset_bottom = 146.0
+scale = Vector2(0.5305642, 0.42598733)
+icon = ExtResource("6_70i5f")
+flat = true
+
+[node name="MenuButton" type="Button" parent="." unique_id=273321422]
+texture_filter = 1
+offset_left = 640.0
+offset_top = 13.0
+offset_right = 777.0
+offset_bottom = 149.0
+scale = Vector2(0.43579486, 0.43579486)
+icon = ExtResource("7_mj5lg")
+flat = true

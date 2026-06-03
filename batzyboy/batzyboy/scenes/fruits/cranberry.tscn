@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://m0qe1jyle05n"]
+
+[ext_resource type="Script" uid="uid://cfu2yvwu0t7le" path="res://script/fruit.gd" id="1_uvaxb"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="2_a6lcn"]
+[ext_resource type="Texture2D" uid="uid://cuqhgskm6kyfy" path="res://assetsRaw/objects/CranBerry.png" id="3_mcj2r"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7o87m"]
+radius = 24.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jlcbh"]
+shader = ExtResource("2_a6lcn")
+shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_thickness = 0.750000035625
+
+[node name="cranberry" type="Area2D" unique_id=1967415121]
+script = ExtResource("1_uvaxb")
+points = 10
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=432414164]
+shape = SubResource("CircleShape2D_7o87m")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=914588680]
+texture_filter = 1
+material = SubResource("ShaderMaterial_jlcbh")
+scale = Vector2(2.603846, 2.603846)
+texture = ExtResource("3_mcj2r")

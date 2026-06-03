@@ -19,6 +19,14 @@ func _ready() -> void:
 		if node is Sprite2D:
 			node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			node.texture_repeat  = CanvasItem.TEXTURE_REPEAT_ENABLED
+			# Auto-enable region so scroll_at works on any tiling sprite
+			if not node.region_enabled and node.texture != null:
+				node.region_enabled = true
+				node.region_rect = Rect2(Vector2.ZERO, Vector2(node.texture.get_width(), node.texture.get_height()))
+
+
+func _process(delta: float) -> void:
+	scroll_at(base_speed, delta)
 
 
 func scroll_at(speed: float, delta: float) -> void:
