@@ -38,27 +38,23 @@ fruit_nodes = [NodePath("apple"), NodePath("banana"), NodePath("orange"), NodePa
 texture_filter = 1
 position = Vector2(-155.53459, -138.49467)
 points = 5
-speed = 150.0
 pulse_speed = 1.0
 
 [node name="banana" parent="." unique_id=430948430 instance=ExtResource("4_onbof")]
 position = Vector2(-96.07615, -140.66998)
 scale = Vector2(0.99999994, 0.99999994)
 points = 6
-speed = 250.0
 pulse_speed = 2.0
 
 [node name="orange" parent="." unique_id=58410367 instance=ExtResource("2_pltxu")]
 position = Vector2(-36.073875, -137.76958)
 scale = Vector2(0.99999994, 0.99999994)
-speed = 450.0
 
 [node name="blackberry" parent="." unique_id=888939630 instance=ExtResource("5_m85c1")]
 position = Vector2(26.103708, -137.76958)
 scale = Vector2(0.99999994, 0.99999994)
 level = 2
 points = 7
-speed = 480.0
 
 [node name="blueberry" parent="." unique_id=496693809 instance=ExtResource("3_ldo3d")]
 position = Vector2(87.01236, -137.76958)
@@ -66,99 +62,76 @@ scale = Vector2(0.99999994, 0.99999994)
 level = 2
 points = 7
 heal = 1
-speed = 380.0
 
 [node name="cranberry" parent="." unique_id=1967415121 instance=ExtResource("7_kpu2v")]
 position = Vector2(-155.17204, -71.0601)
 scale = Vector2(0.9999998, 0.9999998)
 level = 2
 heal = 1
-speed = 350.0
 
 [node name="apricot" parent="." unique_id=894439911 instance=ExtResource("3_qql31")]
 position = Vector2(-96.07615, -71.0601)
 level = 3
 heal = 1
-speed = 150.0
 pulse_speed = 2.0
 
 [node name="dragonfruit" parent="." unique_id=1355612217 instance=ExtResource("8_4vd64")]
 position = Vector2(-36, 32)
 heal = 2
-sprite_scale = 4.0
 
 [node name="durian" parent="." unique_id=1660278325 instance=ExtResource("9_8tfhk")]
 position = Vector2(39.999996, 31.999996)
-sprite_scale = 4.0
 
 [node name="elderberry" parent="." unique_id=2085339095 instance=ExtResource("10_mt14n")]
 position = Vector2(103.99999, 35)
-sprite_scale = 3.5
 
 [node name="grape" parent="." unique_id=2074970349 instance=ExtResource("11_j63wx")]
 position = Vector2(-165, 104)
-sprite_scale = 4.0
 
 [node name="guava2" parent="." unique_id=913801321 instance=ExtResource("12_u3s3n")]
 position = Vector2(-98.614, 65.25927)
-sprite_scale = 4.0
 
 [node name="kiwi" parent="." unique_id=1492634455 instance=ExtResource("13_boq36")]
 position = Vector2(-231.99998, 103.999985)
-sprite_scale = 4.0
 
 [node name="lemon" parent="." unique_id=475052392 instance=ExtResource("14_qisun")]
 position = Vector2(-36, 96)
-sprite_scale = 4.0
 
 [node name="lime" parent="." unique_id=1729668955 instance=ExtResource("15_ekihp")]
 position = Vector2(-95.99999, 95.99999)
-sprite_scale = 4.0
 
 [node name="lychee" parent="." unique_id=1309820932 instance=ExtResource("16_3gded")]
 position = Vector2(168.00006, 39.99994)
-sprite_scale = 4.0
 
 [node name="mango" parent="." unique_id=388876463 instance=ExtResource("17_iwoa4")]
 position = Vector2(40, 101)
-sprite_scale = 4.0
 
 [node name="papaya" parent="." unique_id=677381443 instance=ExtResource("19_c6sni")]
 position = Vector2(-88.00001, 175.99998)
-sprite_scale = 4.0
 
 [node name="peach" parent="." unique_id=662884294 instance=ExtResource("20_yivkn")]
 position = Vector2(119.99998, 176)
-sprite_scale = 4.0
 
 [node name="pear" parent="." unique_id=60090814 instance=ExtResource("21_h1txc")]
 position = Vector2(-232, 176)
-sprite_scale = 4.0
 
 [node name="pineapple" parent="." unique_id=1672463173 instance=ExtResource("22_d4l6x")]
 position = Vector2(-408, 63.999992)
-sprite_scale = 4.0
 
 [node name="plum" parent="." unique_id=1019236651 instance=ExtResource("23_oxmro")]
 position = Vector2(-232, 40)
-sprite_scale = 4.0
 
 [node name="pomegranate" parent="." unique_id=608386025 instance=ExtResource("24_uduev")]
 position = Vector2(-232.00002, -32.00003)
-sprite_scale = 4.0
 
 [node name="rasberry" parent="." unique_id=2006076044 instance=ExtResource("25_twpm1")]
 position = Vector2(104.00003, 101)
-sprite_scale = 4.0
 
 [node name="starfruit" parent="." unique_id=77195411 instance=ExtResource("26_poyf7")]
 position = Vector2(55.99999, 182)
-sprite_scale = 4.0
 
 [node name="strawbberry" parent="." unique_id=519825979 instance=ExtResource("27_gxa4e")]
 position = Vector2(-165, 181.99997)
-sprite_scale = 4.0
 
 [node name="watermelon" parent="." unique_id=1022520154 instance=ExtResource("28_fepun")]
 position = Vector2(-15.999997, 182)
-sprite_scale = 4.0

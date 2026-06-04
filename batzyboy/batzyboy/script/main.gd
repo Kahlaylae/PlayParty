@@ -12,10 +12,17 @@ const MAX_LEVEL:  int   = 20      # level at which SPEED_MAX is reached
 const OBJ_SPEED_MIN: float = 300.0
 const OBJ_SPEED_MAX: float = 350.0
 
-# Leveling thresholds (must satisfy BOTH to advance).
-# L1→L2 requires 25 pts + 100 m; each level scales by the same factor.
-const PTS_PER_LEVEL:  int   = 25
+# Leveling thresholds — distance in pixels (100 px = 1 m).
+# Level advances when: all fruits for this level caught once AND dist_px >= level * DIST_PER_LEVEL.
 const DIST_PER_LEVEL: float = 10000.0  # 100 m × 100 px/m
+const WIN_LEVEL:      int   = 9        # reaching this level's completion triggers win screen
+
+# ─── Debug (set false for release) ───────────────────────────────────────────
+const DEBUG: bool = true
+
+# ─── Monster spawn interval (tweak these two values) ─────────────────────────
+const MONSTER_INTERVAL_MAX: float = 1.5   # seconds between spawns at level 1
+const MONSTER_INTERVAL_MIN: float = 0.5   # floor — never faster than this
 
 # ─── Scene preloads ───────────────────────────────────────────────────────────
 # Drag enemies.tscn / fruits.tscn into these slots in the Inspector on the main node.
@@ -45,7 +52,8 @@ var _retry_enabled: bool   = false
 @onready var _killerzone: Area2D       = $killerzone
 @onready var _hearts_node: Node2D      = $CanvasLayer/hearts
 @onready var _monster_spawner: Area2D  = $monsterspawner
-@onready var _fruit_spawner: Node2D    = $fruitspawner
+@onready var _fruit_spawner: Area2D    = $fruitspawner
+@onready var _floor_slide: StaticBody2D = $"Floor Slide"
 @onready var _menu_btn: Button         = $CanvasLayer/MenuButton
 @onready var _settings_btn: Button     = $CanvasLayer/How2Button
 @onready var _pts_rtl: RichTextLabel   = $CanvasLayer/Points
@@ -74,7 +82,8 @@ func _ready() -> void:
 	# Resume from save if requested by menu
 	if SaveManager.resume_requested:
 		current_level = maxi(SaveManager.resume_level, 1)
-		dist_px       = float(current_level - 1) * DIST_PER_LEVEL
+		dist_px       = SaveManager.resume_dist
+		score         = SaveManager.resume_score
 		SaveManager.resume_requested = false
 
 	# Wire up bat signals
@@ -127,7 +136,7 @@ func _input(event: InputEvent) -> void:
 			if (event as InputEventMouseButton).position.y < get_viewport().size.y / 2.0:
 				_resume_game()
 			else:
-				SaveManager.save_progress(current_level, score)
+				SaveManager.save_progress(current_level, score, dist_px)
 				Engine.time_scale = 1.0
 				get_tree().change_scene_to_file("res://scenes/menu.tscn")
 		State.DEAD:
@@ -150,7 +159,8 @@ func _process(delta: float) -> void:
 			_fruit_timer -= delta
 			if _fruit_timer <= 0.0:
 				_spawn_fruit()
-				_fruit_timer = maxf(0.8, randf_range(1.5, 3.5) / sqrt(float(current_level)))
+				# L1≈2–2.5s, L5≈1–1.7s, L6+ approaches 0.8s floor
+				_fruit_timer = maxf(0.8, randf_range(1.8, 2.5) / pow(float(current_level), 0.6))
 			_update_hud()
 		State.LEVEL_UP:
 			# World keeps scrolling during the countdown, spawning is paused
@@ -234,23 +244,49 @@ func _spawn_fruit() -> void:
 		return
 	# Cluster size grows with level: 1 at L1, 2 at L3, 3 at L5, capped at 4
 	var count: int = mini(1 + int(current_level) / 2, 4)
-	var base_x  := _spawn_x()
 	var spawn_y: float = _fruit_spawner.get_spawn_y()
-	# Divide 500 px spread into equal slots so fruits never clump
-	var slot_w  := 500.0 / maxi(count, 1)
-	for i in count:
+
+	# Build a list of unique X positions — minimum 60 px apart
+	var xs: Array[float] = []
+	var attempts := 0
+	while xs.size() < count and attempts < 40:
+		attempts += 1
+		var x: float = _fruit_spawner.get_spawn_x()
+		if xs.all(func(ex: float) -> bool: return abs(ex - x) >= 60.0):
+			xs.append(x)
+
+	# Accumulated stagger so each fruit fires at a different moment
+	var delay := 0.0
+	for i in xs.size():
+		delay += randf_range(0.09, 0.4)
 		var entry: Dictionary = eligible[randi() % eligible.size()]
-		var inst := entry.scene.instantiate() as Area2D
-		inst.speed          = randf_range(200.0, 600.0)
-		inst.points         = entry.points
-		inst.heal           = entry.heal
-		inst.pulse_speed    = entry.pulse_speed
-		inst.collision_mask = 1
-		# Each fruit gets its own slot with small jitter inside it
-		var slot_x := base_x + i * slot_w + randf_range(0.0, slot_w * 0.6)
-		inst.global_position = Vector2(slot_x, spawn_y)
-		inst.collected.connect(_on_fruit_collected)
-		add_child(inst)
+		var fs  := randf_range(40.0, 160.0)
+		var sine_freq := randf_range(0.6, 2.2)
+		var sine_amp  := randf_range(15.0, 55.0)
+		var pts:  int   = entry.points
+		var heal: int   = entry.heal
+		var ps:   float = entry.pulse_speed
+		var fid:  String = entry.get("fruit_id", "")
+		var scn  := entry.scene as PackedScene
+		var pos  := Vector2(xs[i], spawn_y)
+		get_tree().create_timer(delay).timeout.connect(
+			func() -> void:
+				if not is_inside_tree():
+					return
+				var inst := scn.instantiate() as Area2D
+				inst.fall_speed     = fs
+				inst.sine_freq      = sine_freq
+				inst.sine_amp       = sine_amp
+				inst.fruit_id       = fid
+				inst.max_y          = _floor_slide.global_position.y
+				inst.points         = pts
+				inst.heal           = heal
+				inst.pulse_speed    = ps
+				inst.collision_mask = 1
+				inst.global_position = pos
+				inst.collected.connect(_on_fruit_collected)
+				add_child(inst)
+		)
 
 
 func _build_monster_pool() -> void:
@@ -291,6 +327,7 @@ func _build_fruit_pool() -> void:
 			continue
 		_fruit_pool.append({
 			scene       = scene,
+			fruit_id    = node.name.to_lower(),
 			min_level   = node.level      if "level"      in node else 1,
 			points      = node.points     if "points"     in node else 1,
 			heal        = node.heal       if "heal"       in node else 0,
@@ -300,6 +337,11 @@ func _build_fruit_pool() -> void:
 	_fruit_pool.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return a.min_level < b.min_level
 	)
+	if DEBUG:
+		print("[FruitPool] %d fruits loaded:" % _fruit_pool.size())
+		for e: Dictionary in _fruit_pool:
+			var unlocked: bool = e.fruit_id in SaveManager.unlocked_fruits
+			print("  L%d  %-18s  %s" % [e.min_level, e.fruit_id, "UNLOCKED" if unlocked else "locked"])
 
 
 # Returns the current object scroll speed, clamped between OBJ_SPEED_MIN and OBJ_SPEED_MAX.
@@ -311,10 +353,42 @@ func _obj_speed() -> float:
 
 
 # ─── Signals from bat / fruit ─────────────────────────────────────────────────
-func _on_fruit_collected(pts: int, heal: int) -> void:
+func _on_fruit_collected(pts: int, heal: int, fruit_id: String) -> void:
 	score += pts
 	if heal > 0:
 		_bat.heal(heal)
+	var is_new := fruit_id != "" and fruit_id not in SaveManager.unlocked_fruits
+	if DEBUG:
+		print("[FruitEaten] id='%s'  is_new=%s  pts=%d" % [fruit_id, str(is_new), pts])
+	SaveManager.unlock_fruit(fruit_id)
+	if is_new:
+		_show_fruit_unlocked_toast(fruit_id)
+		if DEBUG:
+			print("[FruitPool] unlocked so far: %s" % str(SaveManager.unlocked_fruits))
+
+
+func _show_fruit_unlocked_toast(fruit_id: String) -> void:
+	var lbl := Label.new()
+	lbl.text = "✨ %s Unlocked!" % fruit_id.capitalize()
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 28)
+	lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.3))
+	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
+	lbl.add_theme_constant_override("outline_size", 3)
+	lbl.anchor_left   = 0.5
+	lbl.anchor_right  = 0.5
+	lbl.anchor_top    = 0.5
+	lbl.anchor_bottom = 0.5
+	lbl.offset_left   = -300.0
+	lbl.offset_right  =  300.0
+	lbl.offset_top    = -220.0
+	lbl.offset_bottom = -185.0
+	_get_hud().add_child(lbl)
+	var t := create_tween()
+	t.tween_property(lbl, "modulate:a", 1.0, 0.15).from(0.0)
+	t.tween_interval(1.2)
+	t.tween_property(lbl, "modulate:a", 0.0, 0.4)
+	t.tween_callback(lbl.queue_free)
 
 
 func _on_hp_changed(hp: int) -> void:
@@ -324,29 +398,47 @@ func _on_hp_changed(hp: int) -> void:
 
 # ─── Level ────────────────────────────────────────────────────────────────────
 func _update_level() -> void:
-	# Advance only when BOTH point and distance thresholds are met.
-	var pts_needed:  int   = current_level * PTS_PER_LEVEL
+	# Always keep scroll_speed in sync.
+	scroll_speed = minf(
+		SPEED_MIN + (SPEED_MAX - SPEED_MIN) * float(current_level - 1) / float(MAX_LEVEL - 1),
+		SPEED_MAX
+	)
+	# Advance when: all fruits for this level caught at least once AND distance milestone met.
 	var dist_needed: float = current_level * DIST_PER_LEVEL
-	if score >= pts_needed and dist_px >= dist_needed:
-		var new_level := current_level + 1
-		current_level = new_level
-		# Recompute scroll_speed immediately so the countdown screen scrolls at the new speed.
+	var fruits_done := SaveManager.is_level_fruits_complete(current_level, _fruit_pool)
+	var dist_done   := dist_px >= dist_needed
+	if DEBUG:
+		if int(dist_px) % 500 < 5:
+			var level_fruits := _fruit_pool.filter(func(e: Dictionary) -> bool: return e.min_level == current_level)
+			var caught := level_fruits.filter(func(e: Dictionary) -> bool: return (e.fruit_id as String) in SaveManager.unlocked_fruits)
+			var missing := level_fruits.filter(func(e: Dictionary) -> bool: return (e.fruit_id as String) not in SaveManager.unlocked_fruits)
+			var missing_names := missing.map(func(e: Dictionary) -> String: return e.fruit_id as String)
+			print("[LevelGate L%d]  fruits %d/%d  missing=%s  |  dist %dm/%dm  |  fruits_done=%s  dist_done=%s" % [
+				current_level,
+				caught.size(), level_fruits.size(), str(missing_names),
+				int(dist_px / 100.0), int(dist_needed / 100.0),
+				str(fruits_done), str(dist_done)
+			])
+	if fruits_done and dist_done:
+		if DEBUG:
+			print("[LevelUp] Conditions met at L%d  dist=%dm  unlocked=%s" % [
+				current_level, int(dist_px / 100.0), str(SaveManager.unlocked_fruits)
+			])
+		if current_level >= WIN_LEVEL:
+			_show_win_screen()
+			return
+		current_level += 1
+		# Recompute speed at the new level immediately.
 		scroll_speed = minf(
 			SPEED_MIN + (SPEED_MAX - SPEED_MIN) * float(current_level - 1) / float(MAX_LEVEL - 1),
 			SPEED_MAX
 		)
 		_show_level_up(current_level)
-		return
-	# Always keep scroll_speed in sync even when no level-up happens.
-	scroll_speed = minf(
-		SPEED_MIN + (SPEED_MAX - SPEED_MIN) * float(current_level - 1) / float(MAX_LEVEL - 1),
-		SPEED_MAX
-	)
 
 
 func _current_interval() -> float:
-	# Tighter monster spawning each level; floor at 0.6 s.
-	return maxf(0.6, 3.0 / float(current_level))
+	# Tighter monster spawning each level; tweakable via MONSTER_INTERVAL_MAX/MIN consts.
+	return maxf(MONSTER_INTERVAL_MIN, MONSTER_INTERVAL_MAX / float(current_level))
 
 
 func _show_level_up(lvl: int) -> void:
@@ -360,7 +452,7 @@ func _show_level_up(lvl: int) -> void:
 	var fade := create_tween()
 	fade.tween_property(_level_up_panel, "modulate:a", 1.0, 0.3).from(0.0)
 	# Checkpoint save on every level-up
-	SaveManager.save_progress(lvl, score)
+	SaveManager.save_progress(lvl, score, dist_px)
 	await get_tree().create_timer(1.0).timeout
 	for i: int in [3, 2, 1]:
 		_countdown_label.text = str(i)
@@ -370,7 +462,62 @@ func _show_level_up(lvl: int) -> void:
 	state = State.PLAYING
 
 
-# ─── Pause ───────────────────────────────────────────────────────────────────
+func _show_win_screen() -> void:
+	state = State.DEAD   # reuse DEAD to stop spawning; win panel takes over
+	SaveManager.save_progress(current_level, score, dist_px)
+	if score > SaveManager.high_score:
+		SaveManager.high_score = score
+		SaveManager.save()
+
+	# Build win overlay procedurally
+	var win_layer := CanvasLayer.new()
+	win_layer.layer = 20
+	add_child(win_layer)
+
+	var bg := ColorRect.new()
+	bg.color = Color(0.05, 0.02, 0.15, 0.92)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	win_layer.add_child(bg)
+
+	var panel := VBoxContainer.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	panel.offset_left   = -260.0
+	panel.offset_right  =  260.0
+	panel.offset_top    = -300.0
+	panel.offset_bottom =  300.0
+	panel.alignment     = BoxContainer.ALIGNMENT_CENTER
+	win_layer.add_child(panel)
+
+	var title_lbl := Label.new()
+	title_lbl.text                    = "YOU COLLECTED THEM ALL!"
+	title_lbl.horizontal_alignment    = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.add_theme_font_size_override("font_size", 48)
+	title_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
+	panel.add_child(title_lbl)
+
+	var score_lbl := Label.new()
+	score_lbl.text                 = "%d pts  ·  Best: %d pts" % [score, SaveManager.high_score]
+	score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_lbl.add_theme_font_size_override("font_size", 32)
+	panel.add_child(score_lbl)
+
+	var spacer := Control.new()
+	spacer.custom_minimum_size = Vector2(0, 40)
+	panel.add_child(spacer)
+
+	var menu_btn := Button.new()
+	menu_btn.text = "Back to Menu"
+	menu_btn.custom_minimum_size = Vector2(300, 70)
+	menu_btn.pressed.connect(func() -> void:
+		get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	)
+	panel.add_child(menu_btn)
+
+	var tween := create_tween()
+	tween.tween_property(bg, "modulate:a", 1.0, 0.5).from(0.0)
+
+
+# ─── Pause ────────────────────────────────────────────────────────────────────
 func _pause_game() -> void:
 	state = State.PAUSED
 	Engine.time_scale = 0.0   # freezes delta → all movement stops

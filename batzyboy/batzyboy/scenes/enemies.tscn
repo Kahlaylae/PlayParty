@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://csk83uitp27qj" path="res://scenes/batMain.tscn" id="8_iv5d7"]
 
 [node name="enemies" type="Node2D" unique_id=1720988733 node_paths=PackedStringArray("enemy_nodes")]
+position = Vector2(-23, -8)
 script = ExtResource("1_pfngh")
 enemy_nodes = [NodePath("cyclops"), NodePath("beemonster"), NodePath("impRed"), NodePath("reddemon"), NodePath("vampirebat"), NodePath("cyclopsLevel2")]
 
@@ -28,6 +29,7 @@ scale = Vector2(1.7683249, 1.7683249)
 [node name="reddemon" parent="." unique_id=280916484 instance=ExtResource("7_csyei")]
 position = Vector2(80, 8)
 scale = Vector2(0.6274911, 0.6274911)
+min_level = 2
 
 [node name="cyclopsLevel2" parent="." unique_id=1055266022 instance=ExtResource("4_iv5d7")]
 position = Vector2(83, -259)

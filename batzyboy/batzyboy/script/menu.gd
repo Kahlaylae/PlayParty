@@ -14,7 +14,6 @@ const HTP_CARDS: Array = [
 var _htp_card_idx: int = 0
 
 # ── Scene node refs ───────────────────────────────────────────────────────────
-@onready var _parallax: Node2D        = $menuparallax
 @onready var _title:    RichTextLabel = $title
 @onready var _points:   RichTextLabel = $points
 @onready var _btn_new:  Button        = $"New Game"
@@ -51,7 +50,18 @@ func _ready() -> void:
 
 	_points.text = "[center]Best: %d pts[/center]" % SaveManager.high_score
 
-	if not SaveManager.has_save():
+	# Continue button — only available if save exists AND player has >1 heart to sacrifice
+	if SaveManager.has_save() and SaveManager.player_hp > 1:
+		_btn_cont.text    = "Continue  (-1 ♥)"
+		_btn_cont.disabled = false
+		_btn_cont.modulate = Color(1, 1, 1)
+	elif SaveManager.has_save() and SaveManager.player_hp <= 1:
+		_btn_cont.text    = "Continue  (no hearts)"
+		_btn_cont.disabled = true
+		_btn_cont.modulate = Color(0.45, 0.45, 0.45)
+	else:
+		_btn_cont.text    = "Continue"
+		_btn_cont.disabled = true
 		_btn_cont.modulate = Color(0.45, 0.45, 0.45)
 
 	_btn_new.pressed.connect(_on_new_game)
@@ -84,9 +94,11 @@ func _on_collections() -> void:
 
 
 func _on_continue() -> void:
-	if SaveManager.has_save():
+	if SaveManager.has_save() and SaveManager.player_hp > 1:
+		SaveManager.player_hp -= 1
+		SaveManager.save()
 		SaveManager.resume_requested = true
-		SaveManager.restore_hp = true
+		SaveManager.restore_hp = false   # HP already deducted; don't restore
 		get_tree().change_scene_to_file(GAME_SCENE)
 
 

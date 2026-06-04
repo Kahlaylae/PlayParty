@@ -9,6 +9,8 @@ const SAVE_PATH := "user://batzyboy_save.json"
 
 var high_score:       int  = 0
 var resume_level:     int  = 1
+var resume_score:     int  = 0         # restored when continuing a session
+var resume_dist:      float = 0.0      # restored when continuing a session
 var audio_muted:      bool = false
 var resume_requested: bool = false   # set by menu, consumed by main.gd
 var player_hp:        int  = 6       # persisted so quit/resume restores HP
@@ -48,6 +50,8 @@ func save() -> void:
 	var data := {
 		"high_score":      high_score,
 		"resume_level":    resume_level,
+		"resume_score":    resume_score,
+		"resume_dist":     resume_dist,
 		"audio_muted":     audio_muted,
 		"player_hp":       player_hp,
 		"unlocked_fruits": unlocked_fruits,
@@ -70,6 +74,8 @@ func load_data() -> void:
 	var d := parsed as Dictionary
 	high_score   = int(d.get("high_score",   0))
 	resume_level = int(d.get("resume_level", 1))
+	resume_score = int(d.get("resume_score", 0))
+	resume_dist  = float(d.get("resume_dist", 0.0))
 	audio_muted  = bool(d.get("audio_muted", false))
 	player_hp    = int(d.get("player_hp",   6))
 	var saved_fruits = d.get("unlocked_fruits", ["apple"])
@@ -78,17 +84,40 @@ func load_data() -> void:
 
 
 # Called on every level-up to checkpoint progress
-func save_progress(level: int, score: int) -> void:
+func save_progress(level: int, score: int, dist: float = 0.0) -> void:
 	resume_level = level
+	resume_score = score
+	resume_dist  = dist
 	if score > high_score:
 		high_score = score
 	save()
+
+
+# Unlock a fruit by its id (node name lowercased). Saves immediately.
+func unlock_fruit(id: String) -> void:
+	var key := id.to_lower()
+	if key not in unlocked_fruits:
+		unlocked_fruits.append(key)
+		save()
+
+
+# Returns true when every fruit whose min_level == level has been caught at least once.
+# fruit_pool is the Array of Dictionaries built by main.gd (_fruit_pool).
+func is_level_fruits_complete(level: int, fruit_pool: Array) -> bool:
+	for entry: Dictionary in fruit_pool:
+		if entry.get("min_level", 1) == level:
+			if entry.get("fruit_id", "") not in unlocked_fruits:
+				return false
+	return true
 
 
 # Clear all saved data (e.g. "New Game" wipe)
 func clear() -> void:
 	high_score   = 0
 	resume_level = 1
+	resume_score = 0
+	resume_dist  = 0.0
+	unlocked_fruits = ["apple"]
 	audio_muted  = audio_muted  # preserve audio pref
 	if FileAccess.file_exists(SAVE_PATH):
 		var dir := DirAccess.open("user://")

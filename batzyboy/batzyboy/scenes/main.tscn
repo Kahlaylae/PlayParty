@@ -158,6 +158,6 @@ position = Vector2(227, 123)
 script = ExtResource("8_choun")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="fruitspawner" unique_id=1553090796]
-position = Vector2(-7, 37)
+position = Vector2(-155, 30)
 shape = SubResource("SegmentShape2D_ya4ey")
 debug_color = Color(0.76862746, 0.35686275, 0.69411767, 0.9764706)
