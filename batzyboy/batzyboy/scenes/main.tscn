@@ -4,28 +4,33 @@
 [ext_resource type="PackedScene" uid="uid://dvkkqgc0ayp6e" path="res://scenes/parallax.tscn" id="2_plxscene"]
 [ext_resource type="PackedScene" uid="uid://c7kvud3y3tsus" path="res://scenes/enemies.tscn" id="2_tefeu"]
 [ext_resource type="PackedScene" uid="uid://bsqkcf1vc018v" path="res://scenes/fruits.tscn" id="3_o6xl0"]
+[ext_resource type="FontFile" uid="uid://bjabx2uloeigs" path="res://assetsRaw/fonts/Ithaca.ttf" id="5_jkv2x"]
+[ext_resource type="Shader" uid="uid://d28whffvtp7is" path="res://script/shaders/icon.gdshader" id="7_a8y0u"]
 [ext_resource type="Script" uid="uid://dvwp4pw5nqeqe" path="res://script/monsterSpawner.gd" id="7_o6xl0"]
-[ext_resource type="Texture2D" uid="uid://ctobljutnodd1" path="res://assetsRaw/UI/uiElements/how2button.png" id="8_85g3d"]
 [ext_resource type="Script" uid="uid://cavia1c0gf7lo" path="res://script/fruitspawner.gd" id="8_choun"]
-[ext_resource type="Texture2D" uid="uid://copbrucwkub0f" path="res://assetsRaw/UI/uiElements/menubutton.png" id="9_choun"]
-[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="9_ya4ey"]
+[ext_resource type="Texture2D" uid="uid://c6v83uf57wvwf" path="res://assetsRaw/UI/uiElements/help.png" id="8_jkv2x"]
+[ext_resource type="Texture2D" uid="uid://dicsa872vbd3b" path="res://assetsRaw/UI/uiElements/pause.png" id="9_jkv2x"]
 [ext_resource type="PackedScene" uid="uid://b8ln7otjmug6m" path="res://scenes/hearts.tscn" id="11_ya4ey"]
+[ext_resource type="Script" uid="uid://nddelbsjxla6" path="res://script/helpbutton.gd" id="script_helpbtn"]
 [ext_resource type="Script" uid="uid://pyejpjptpvq4" path="res://script/main.gd" id="script_main"]
+[ext_resource type="Script" uid="uid://1h8cyhlf32sv" path="res://script/menubutton.gd" id="script_menubtn"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_eb6dy"]
-shader = ExtResource("9_ya4ey")
-shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 2.9030001378925
+shader = ExtResource("7_a8y0u")
+shader_parameter/tint = Color(0.101960786, 0.73333335, 0.7607843, 1)
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+shader_parameter/outline_thickness = 1.0000000475
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_trceg"]
-shader = ExtResource("9_ya4ey")
-shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 2.3550001118625
+shader = ExtResource("7_a8y0u")
+shader_parameter/tint = Color(0.101960786, 0.73333335, 0.7607843, 1)
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+shader_parameter/outline_thickness = 1.5
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_trceg"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_eb6dy"]
 distance = -4.0
-
-[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_trceg"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_choun"]
 
@@ -34,74 +39,110 @@ a = Vector2(-3.125, -51)
 b = Vector2(-3.125, 631)
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_ya4ey"]
-b = Vector2(500, 0)
+a = Vector2(3, 2)
+b = Vector2(355, 2)
 
 [node name="main" type="Node2D" unique_id=228319826]
 script = ExtResource("script_main")
 enemy_list_scene = ExtResource("2_tefeu")
 fruit_list_scene = ExtResource("3_o6xl0")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=974696404]
+[node name="CanvasLayer2" type="CanvasLayer" parent="." unique_id=929590190]
 layer = -1
+
+[node name="parallaxBackground" parent="CanvasLayer2" unique_id=278532048 instance=ExtResource("2_plxscene")]
+texture_filter = 1
+scroll_offset = Vector2(-120, -8)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=974696404]
+layer = 5
 follow_viewport_enabled = true
 
 [node name="hearts" parent="CanvasLayer" unique_id=267642753 instance=ExtResource("11_ya4ey")]
 z_index = 5
-position = Vector2(128, 40)
+texture_filter = 1
+position = Vector2(136, 64)
 scale = Vector2(5, 5)
 
 [node name="Points" type="RichTextLabel" parent="CanvasLayer" unique_id=19796658]
 z_index = 5
-offset_left = 36.0
-offset_top = 71.0
-offset_right = 76.0
-offset_bottom = 111.0
-scale = Vector2(4.5378385, 1.1729485)
+texture_filter = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -456.0
+offset_top = 48.0
+offset_right = -306.0
+offset_bottom = 98.0
+grow_horizontal = 0
+theme_override_fonts/normal_font = ExtResource("5_jkv2x")
+theme_override_font_sizes/normal_font_size = 50
+text = "Points"
+fit_content = true
 scroll_active = false
 autowrap_mode = 0
+tab_size = 5
+horizontal_alignment = 1
 
 [node name="DistanceTravelled" type="RichTextLabel" parent="CanvasLayer" unique_id=1807309056]
 z_index = 5
-offset_left = 678.0
-offset_top = 73.0
-offset_right = 718.0
-offset_bottom = 113.0
-scale = Vector2(-2.0019119, 0.8560413)
+texture_filter = 1
+layout_direction = 2
+offset_left = 400.0
+offset_right = 550.0
+offset_bottom = 100.0
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/normal_font_size = 50
+text = "testing"
 scroll_active = false
 autowrap_mode = 0
+horizontal_alignment = 1
 
 [node name="How2Button" type="Button" parent="CanvasLayer" unique_id=1590330913]
-texture_filter = 3
+texture_filter = 1
 texture_repeat = 2
 material = SubResource("ShaderMaterial_eb6dy")
-offset_left = 574.0
-offset_top = 16.0
-offset_right = 662.0
-offset_bottom = 146.0
-scale = Vector2(0.5305642, 0.42598733)
-icon = ExtResource("8_85g3d")
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 208.0
+offset_top = 32.0
+offset_right = 280.0
+offset_bottom = 104.0
+grow_horizontal = 2
+scale = Vector2(0.8385135, 0.8385135)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.0
+icon = ExtResource("8_jkv2x")
 flat = true
+text_overrun_behavior = 1
+script = ExtResource("script_helpbtn")
 
 [node name="MenuButton" type="Button" parent="CanvasLayer" unique_id=1906885141]
-texture_filter = 2
-texture_repeat = 2
-material = SubResource("ShaderMaterial_trceg")
-offset_left = 640.0
-offset_top = 13.0
-offset_right = 777.0
-offset_bottom = 149.0
-scale = Vector2(0.43579486, 0.43579486)
-icon = ExtResource("9_choun")
-flat = true
-
-[node name="parallaxBackground" parent="CanvasLayer" unique_id=278532048 instance=ExtResource("2_plxscene")]
-z_index = -2
 texture_filter = 1
-scroll_offset = Vector2(-61, -24)
+texture_repeat = 3
+material = SubResource("ShaderMaterial_trceg")
+offset_left = 616.00006
+offset_top = 32.0
+offset_right = 688.00006
+offset_bottom = 104.0
+scale = Vector2(0.704, 0.839)
+icon = ExtResource("9_jkv2x")
+flat = true
+script = ExtResource("script_menubtn")
+
+[node name="roof" type="StaticBody2D" parent="CanvasLayer" unique_id=767058240]
+position = Vector2(344, 120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CanvasLayer/roof" unique_id=2118354701]
+rotation = 3.1415927
+scale = Vector2(1, 4)
+shape = SubResource("WorldBoundaryShape2D_trceg")
+debug_color = Color(1, 1, 1, 1)
 
 [node name="batMainSpawn" parent="." unique_id=39988283 instance=ExtResource("1_o5qli")]
-z_index = 5
-position = Vector2(173, 476)
+position = Vector2(168, 520)
 scale = Vector2(0.76484525, 0.8928068)
 hop_max_hold = 5.0
 hop_strength = -300.0
@@ -125,22 +166,14 @@ scale = Vector2(1, 2)
 shape = SubResource("WorldBoundaryShape2D_eb6dy")
 debug_color = Color(0.86453587, 0, 0.2754476, 1)
 
-[node name="roof" type="StaticBody2D" parent="." unique_id=767058240]
-position = Vector2(344, 100)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="roof" unique_id=2118354701]
-rotation = 3.1415927
-scale = Vector2(1, 4)
-shape = SubResource("WorldBoundaryShape2D_trceg")
-debug_color = Color(1, 1, 1, 1)
-
 [node name="Floor Slide" type="StaticBody2D" parent="." unique_id=899723696]
 z_index = 7
-position = Vector2(351, 981)
+position = Vector2(360, 1016)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor Slide" unique_id=55745031]
-scale = Vector2(0.1, 0.1)
+scale = Vector2(20, 20)
 shape = SubResource("WorldBoundaryShape2D_choun")
+one_way_collision = true
 
 [node name="monsterspawner" type="Area2D" parent="." unique_id=1493950178]
 z_index = 5
@@ -154,10 +187,11 @@ shape = SubResource("SegmentShape2D_eb6dy")
 debug_color = Color(0.6039216, 0.47843137, 0.6784314, 1)
 
 [node name="fruitspawner" type="Area2D" parent="." unique_id=1838625759]
-position = Vector2(227, 123)
+position = Vector2(536, 168.00002)
+rotation = 1.5707964
 script = ExtResource("8_choun")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="fruitspawner" unique_id=1553090796]
-position = Vector2(-155, 30)
+position = Vector2(-1.5258789e-05, 6.6698285e-13)
 shape = SubResource("SegmentShape2D_ya4ey")
 debug_color = Color(0.76862746, 0.35686275, 0.69411767, 0.9764706)

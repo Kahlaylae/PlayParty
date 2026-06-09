@@ -11,16 +11,6 @@
       "status": "live"
     },
     {
-      "id": "petmage",
-      "title": "Pet Mage",
-      "thumbnail": "petmage/petmage.512x512.png",
-      "shortDescription": "Command a powerful wizard and their magical pet companions. Summon fairy allies, unleash spells, and survive endless waves of monsters.",
-      "longDescription": "Pet Mage is a fast-paced auto-battler where your wizard and their magical companions battle for survival. Summon fairy pets, dodge enemy swarms, and outlast the endless horde in this free browser game.",
-      "gameType": "Action auto-battler",
-      "path": "petmage/index.html",
-      "status": "live"
-    },
-    {
       "id": "batzyboy",
       "title": "Batzy Boy",
       "thumbnail": "batzyboy/maingame/batboy.512x512.png",

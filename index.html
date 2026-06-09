@@ -8,7 +8,7 @@
     
     <title>Play Party Online | Free Indie Games</title>
     <meta name="description" content="Free online indie games you can play from anywhere. Funny, absurd, and made with heart by KxHStudios.">
-    <meta name="keywords" content="Indie Games, Free Games, Online Games, Browser Games, Emoji Hunter, Pet Mage, PetMage, Batzy Boy, BatzyBoy, bat game, tap to fly, Auto-Battler, Arcade Games, KxHStudios, Play Party">
+    <meta name="keywords" content="Indie Games, Free Games, Online Games, Browser Games, Emoji Hunter, Batzy Boy, BatzyBoy, bat game, tap to fly, Arcade Games, KxHStudios, Play Party">
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/favicon.png">
@@ -76,32 +76,6 @@
     }
     </script>
 
-    <!-- Structured Data - Pet Mage Game -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "VideoGame",
-        "name": "Pet Mage",
-        "description": "Pet Mage is a fast-paced auto-battler where your wizard and their magical companions battle for survival. Summon fairy pets, dodge enemy swarms, and outlast the endless horde in this free browser game.",
-        "genre": ["Action", "Auto-Battler", "Arcade"],
-        "gamePlatform": "Web Browser",
-        "playMode": "SinglePlayer",
-        "applicationCategory": "Game",
-        "operatingSystem": "Any",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "availability": "https://schema.org/InStock"
-        },
-        "author": {
-            "@type": "Organization",
-            "name": "KxHStudios"
-        },
-        "url": "https://playparty.online/petmage/"
-    }
-    </script>
-    
     <!-- Structured Data - Batzy Boy Game -->
     <script type="application/ld+json">
     {
@@ -193,7 +167,7 @@
                     <article class="game-card" itemscope itemtype="https://schema.org/VideoGame">
                         <a href="emojihunter/index.html" itemprop="url">
                             <img src="emojihunter/assets/emojihunter.png" alt="Emoji Hunter - Bluey the stinky tofu battles emoji monsters" class="game-thumbnail" itemprop="image">
-                            <h3 itemprop="name" class="seo-only">Emoji Hunter</h3>
+                            <h3 itemprop="name">Emoji Hunter</h3>
                             <p itemprop="description" class="seo-only">Can Bluey survive the long dark cold night? Help them defend against mobs of monsters, zombies and freaky demons of all kinds and stay alive for as long as possible.</p>
                             <meta itemprop="genre" content="Arcade">
                             <meta itemprop="gamePlatform" content="Web Browser">
@@ -201,23 +175,11 @@
                         </a>
                     </article>
 
-                    <!-- Pet Mage -->
-                    <article class="game-card" itemscope itemtype="https://schema.org/VideoGame">
-                        <a href="petmage/index.html" itemprop="url">
-                            <img src="petmage/Runtime/assets/petmage.webp" alt="Pet Mage No Hands - armless hooded mage battles monster waves from portals" class="game-thumbnail" itemprop="image">
-                            <h3 itemprop="name" class="seo-only">Pet Mage: No Hands</h3>
-                            <p itemprop="description" class="seo-only">An armless hooded mage trapped in a terrarium battles endless monster waves from unstable portals. Fight goblins and massive creatures aided by a fire-orb pixie and a badger companion.</p>
-                            <meta itemprop="genre" content="Action">
-                            <meta itemprop="gamePlatform" content="Web Browser">
-                            <span class="play-badge">&#9658; Play Now</span>
-                        </a>
-                    </article>
-                    
                     <!-- Batzy Boy -->
                     <article class="game-card" itemscope itemtype="https://schema.org/VideoGame">
                         <a href="batzyboy/index.html" itemprop="url">
                             <img src="batzyboy/maingame/batboy.512x512.png" alt="Batzy Boy - tap to flap a bat through endless skies dodging monsters and collecting fruit" class="game-thumbnail" itemprop="image">
-                            <h3 itemprop="name" class="seo-only">Batzy Boy</h3>
+                            <h3 itemprop="name">Batzy Boy</h3>
                             <p itemprop="description" class="seo-only">Tap to flap your bat through an endless side-scrolling world. Dodge monsters, collect fruit, and level up through 20 difficulty levels.</p>
                             <meta itemprop="genre" content="Casual">
                             <meta itemprop="gamePlatform" content="Web Browser">
@@ -245,30 +207,6 @@
                 </ul>
                 <p>If you're looking for a weird, chaotic, food-powered indie arcade game — this is it.</p>
                 <p>Play now on PlayParty.online and unleash fermented fury. More games coming soon!</p>
-
-                <h2>Pet Mage: No Hands</h2>
-                <p>Play Pet Mage: No Hands free in your browser — no download required.</p>
-                <p>
-                    An armless hooded mage is trapped inside a small terrarium, endlessly battling hordes of monsters
-                    spawning from unstable portals. With relentless wave-based combat, players unleash powerful magic
-                    to survive constant enemy swarms — including goblins and massive creatures.
-                </p>
-                <p>
-                    Aided by a fire-orb-throwing pixie and a summoned badger companion, gameplay focuses on nonstop
-                    arena action, enemy clearing, and survival against overwhelming odds. Built for high-intensity
-                    combat fans, Pet Mage: No Hands delivers chaotic magical mayhem and continuous monster waves
-                    inside a confined, ever-active arena.
-                </p>
-                <ul>
-                    <li>Arena-style wave survival — every wave harder than the last</li>
-                    <li>Unstable portal mechanics — monsters never stop spawning</li>
-                    <li>Pixie companion that throws fire orbs at enemies</li>
-                    <li>Badger companion for close-range combat support</li>
-                    <li>Powerful magical abilities — no hands needed</li>
-                    <li>Free to play — runs entirely in your browser</li>
-                    <li>Desktop and mobile compatible</li>
-                </ul>
-                <p><a href="petmage/index.html">Play Pet Mage: No Hands now on PlayParty.online</a></p>
 
                 <h2>Batzy Boy</h2>
                 <p>Play Batzy Boy free in your browser — no download required. One tap to flap, optimized for mobile portrait screens.</p>
@@ -305,5 +243,16 @@
         </div>
     </main>
     
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('in-view');
+                    observer.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.05 });
+        document.querySelectorAll('.game-card').forEach(c => observer.observe(c));
+    </script>
 </body>
 </html>

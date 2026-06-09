@@ -1,29 +1,21 @@
 [gd_scene format=3 uid="uid://lln3kc1yk262"]
 
-[ext_resource type="Texture2D" uid="uid://3lndwhd2ixvl" path="res://assetsRaw/UI/uiElements/background.png" id="1_lhmr6"]
 [ext_resource type="Script" uid="uid://bqjm856geffdc" path="res://script/menuparallax.gd" id="1_ni3vu"]
+[ext_resource type="Texture2D" uid="uid://xdx4shgc1f5q" path="res://assetsRaw/UI/uiElements/3parallax.png" id="2_ni3vu"]
 
 [node name="menuparallax" type="Parallax2D" unique_id=577794802 node_paths=PackedStringArray("layer_nodes")]
+scroll_scale = Vector2(0, 0)
 script = ExtResource("1_ni3vu")
 layer_nodes = [NodePath("Background")]
-layer_mults = Array[float]([0.5])
-
-[node name="backgroundcanvas" type="ColorRect" parent="." unique_id=476482668]
-z_index = -4
-offset_left = -128.0
-offset_top = -160.0
-offset_right = 592.0
-offset_bottom = 1120.0
-scale = Vector2(1.318114, 1.318114)
-color = Color(4.813075e-07, 0.50927085, 0.6303529, 1)
-metadata/_edit_use_anchors_ = true
+layer_mults = Array[float]([0.045])
 
 [node name="Background" type="Sprite2D" parent="." unique_id=1948084174]
 z_index = -4
 texture_filter = 1
 texture_repeat = 2
-position = Vector2(432, 800)
-scale = Vector2(1.9446409, 1.7799566)
-texture = ExtResource("1_lhmr6")
+position = Vector2(360.00003, 631.99994)
+scale = Vector2(5.880208, 6.911352)
+texture = ExtResource("2_ni3vu")
 region_enabled = true
-region_rect = Rect2(0, 10465.634, 1071, 1518)
+region_rect = Rect2(0, 1340.3938, 192, 223.52)
+region_filter_clip_enabled = true

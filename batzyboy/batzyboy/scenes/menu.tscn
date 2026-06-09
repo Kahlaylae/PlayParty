@@ -1,10 +1,27 @@
 [gd_scene format=3 uid="uid://0egrdlvl1o87"]
 
 [ext_resource type="Script" uid="uid://deupfugd15nrs" path="res://script/menu.gd" id="1_menu"]
+[ext_resource type="Shader" uid="uid://d28whffvtp7is" path="res://script/shaders/icon.gdshader" id="4_13sgg"]
 [ext_resource type="PackedScene" uid="uid://lln3kc1yk262" path="res://scenes/menuparallax.tscn" id="4_i6lef"]
+[ext_resource type="Texture2D" uid="uid://c6v83uf57wvwf" path="res://assetsRaw/UI/uiElements/help.png" id="5_70i5f"]
 [ext_resource type="Texture2D" uid="uid://bhkdrb3u6qvxl" path="res://assetsRaw/UI/uiElements/button.png" id="5_i6lef"]
-[ext_resource type="Texture2D" uid="uid://ctobljutnodd1" path="res://assetsRaw/UI/uiElements/how2button.png" id="6_70i5f"]
-[ext_resource type="Texture2D" uid="uid://copbrucwkub0f" path="res://assetsRaw/UI/uiElements/menubutton.png" id="7_mj5lg"]
+[ext_resource type="Texture2D" uid="uid://c2exp81joc5hr" path="res://assetsRaw/UI/uiElements/play.png" id="7_mj5lg"]
+[ext_resource type="Script" uid="uid://1h8cyhlf32sv" path="res://script/menubutton.gd" id="8_ufwb2"]
+[ext_resource type="PackedScene" uid="uid://cn0fvswas4h5i" path="res://scenes/playwindow.tscn" id="9_i6lef"]
+[ext_resource type="PackedScene" uid="uid://csk83uitp27qj" path="res://scenes/batMain.tscn" id="10_70i5f"]
+[ext_resource type="Script" uid="uid://nddelbsjxla6" path="res://script/helpbutton.gd" id="script_helpbtn"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6cdou"]
+shader = ExtResource("4_13sgg")
+shader_parameter/tint = Color(0.4117647, 0.8627451, 0.89411765, 1)
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+shader_parameter/outline_thickness = 1.0000000475
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_i42df"]
+shader = ExtResource("4_13sgg")
+shader_parameter/tint = Color(0.4117647, 0.8627451, 0.89411765, 1)
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+shader_parameter/outline_thickness = 1.5
 
 [node name="Menu" type="CanvasLayer" unique_id=93736883]
 script = ExtResource("1_menu")
@@ -17,13 +34,16 @@ limit_right = 720
 limit_bottom = 1280
 
 [node name="menuparallax" parent="." unique_id=684406184 instance=ExtResource("4_i6lef")]
+z_index = -10
 
 [node name="title" type="RichTextLabel" parent="." unique_id=855156664]
-modulate = Color(0.29988563, 0.034962468, 0.47321045, 1)
-offset_left = 48.0
-offset_top = 104.0
-offset_right = 648.0
-offset_bottom = 219.0
+z_index = 8
+offset_left = 62.0
+offset_top = 86.0
+offset_right = 662.0
+offset_bottom = 526.0
+theme_override_constants/line_separation = -10
+theme_override_font_sizes/normal_font_size = 250
 bbcode_enabled = true
 text = "BATZY BOY"
 fit_content = true
@@ -35,28 +55,31 @@ visible_characters = 12
 visible_ratio = 1.3333334
 
 [node name="points" type="RichTextLabel" parent="." unique_id=2077840069]
-modulate = Color(0.644008, 0.114435025, 0.45860434, 1)
-offset_left = 48.0
-offset_top = 531.0
-offset_right = 648.0
-offset_bottom = 581.0
+z_index = 8
+offset_left = 49.0
+offset_top = 494.0
+offset_right = 649.0
+offset_bottom = 544.0
+theme_override_font_sizes/normal_font_size = 50
 bbcode_enabled = true
 text = "[center]Best: 0 pts[/center]"
 scroll_active = false
 
 [node name="linebreak" type="ColorRect" parent="." unique_id=1627730958]
-offset_left = 98.0
-offset_top = 595.0
-offset_right = 598.0
-offset_bottom = 598.0
+offset_left = 100.0
+offset_top = 587.0
+offset_right = 600.0
+offset_bottom = 590.0
 color = Color(0.862182, 0.948163, 0, 0.55)
 
 [node name="New Game" type="Button" parent="." unique_id=797704834]
+texture_filter = 1
 offset_left = 152.0
 offset_top = 598.0
 offset_right = 546.4945
 offset_bottom = 749.0
 tooltip_text = "Start new game"
+theme_override_font_sizes/font_size = 60
 text = "New Game"
 icon = ExtResource("5_i6lef")
 flat = true
@@ -71,6 +94,7 @@ offset_top = 760.0
 offset_right = 546.4945
 offset_bottom = 911.0
 tooltip_text = "Start new game"
+theme_override_font_sizes/font_size = 60
 text = "Continue"
 icon = ExtResource("5_i6lef")
 flat = true
@@ -85,6 +109,7 @@ offset_top = 920.0
 offset_right = 546.4945
 offset_bottom = 1071.0
 tooltip_text = "Start new game"
+theme_override_font_sizes/font_size = 60
 text = "Collection
 "
 icon = ExtResource("5_i6lef")
@@ -96,10 +121,11 @@ text_direction = 3
 
 [node name="Settings" type="Button" parent="." unique_id=603684612]
 offset_left = 152.0
-offset_top = 1088.0
+offset_top = 1083.0
 offset_right = 546.4945
-offset_bottom = 1239.0
+offset_bottom = 1234.0
 tooltip_text = "Start new game"
+theme_override_font_sizes/font_size = 60
 text = "Settings"
 icon = ExtResource("5_i6lef")
 flat = true
@@ -108,21 +134,43 @@ icon_alignment = 1
 expand_icon = true
 text_direction = 3
 
-[node name="How2Button" type="Button" parent="." unique_id=1692130217]
-offset_left = 574.0
-offset_top = 16.0
-offset_right = 662.0
-offset_bottom = 146.0
-scale = Vector2(0.5305642, 0.42598733)
-icon = ExtResource("6_70i5f")
+[node name="How2Button" type="Button" parent="." unique_id=1148477431]
+texture_filter = 3
+texture_repeat = 2
+material = SubResource("ShaderMaterial_6cdou")
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 216.0
+offset_top = 32.0
+offset_right = 288.0
+offset_bottom = 104.0
+grow_horizontal = 2
+scale = Vector2(0.8385135, 0.8385135)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.0
+icon = ExtResource("5_70i5f")
 flat = true
+text_overrun_behavior = 1
+script = ExtResource("script_helpbtn")
 
-[node name="MenuButton" type="Button" parent="." unique_id=273321422]
+[node name="MenuButton" type="Button" parent="." unique_id=296806399]
 texture_filter = 1
+texture_repeat = 3
+material = SubResource("ShaderMaterial_i42df")
 offset_left = 640.0
-offset_top = 13.0
-offset_right = 777.0
-offset_bottom = 149.0
-scale = Vector2(0.43579486, 0.43579486)
+offset_top = 32.0
+offset_right = 712.0
+offset_bottom = 104.0
+scale = Vector2(0.704, 0.839)
 icon = ExtResource("7_mj5lg")
 flat = true
+script = ExtResource("8_ufwb2")
+
+[node name="Playwindow" parent="." unique_id=2062320398 instance=ExtResource("9_i6lef")]
+position = Vector2(-21, 23)
+
+[node name="batMain" parent="." unique_id=39988283 instance=ExtResource("10_70i5f")]
+z_index = 50
+position = Vector2(355, 323)

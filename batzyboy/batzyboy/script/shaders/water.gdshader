@@ -12,7 +12,7 @@ void fragment() {
     offset.x = sin(UV.y * 20.0 + TIME * waveSpeed) * waveStrength;
     offset.y = cos(UV.x * 15.0 + TIME * waveSpeed * 0.7) * waveStrength * 0.5;
 
-    vec2 reflectUV = vec2(SCREEN_UV.x + offset.x, 2.0 * horizon - SCREEN_UV.y + offset.y);
+     vec2 reflectUV = vec2(SCREEN_UV.x + offset.x, 2.0 * horizon - SCREEN_UV.y + offset.y);
     reflectUV = clamp(reflectUV, vec2(0.001), vec2(0.999));
 
     vec4 reflection = texture(screenTexture, reflectUV);

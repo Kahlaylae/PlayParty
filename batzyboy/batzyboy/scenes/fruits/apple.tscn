@@ -10,8 +10,8 @@ radius = 24.0
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ol"]
 resource_local_to_scene = true
 shader = ExtResource("2_7hfkm")
-shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 0.50000002375
+shader_parameter/line_color = Color(0.49803922, 1, 0.42745098, 0.8901961)
+shader_parameter/line_thickness = 0.550000026125
 
 [node name="apple" type="Area2D" unique_id=1097651336]
 script = ExtResource("1_trdmo")
@@ -22,5 +22,5 @@ shape = SubResource("CircleShape2D_trdmo")
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1559611615]
 texture_filter = 1
 material = SubResource("ShaderMaterial_ol")
-scale = Vector2(2.6589427, 2.6589427)
+scale = Vector2(3.1110926, 3.1110926)
 texture = ExtResource("3_2ti7h")

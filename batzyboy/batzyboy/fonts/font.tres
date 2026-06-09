@@ -1,0 +1,8 @@
+[gd_resource type="Theme" format=3 uid="uid://puaer3kb02pb"]
+
+[ext_resource type="FontFile" uid="uid://bic03ecfy0xsy" path="res://assetsRaw/fonts/NotoColorEmoji-Regular.ttf" id="1_ljexp"]
+
+[resource]
+resource_local_to_scene = true
+default_font = ExtResource("1_ljexp")
+default_font_size = 74

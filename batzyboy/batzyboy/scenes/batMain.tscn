@@ -13,7 +13,7 @@ radius = 8.065607
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ja06y"]
 shader = ExtResource("2_qmftm")
 shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 0.5
+shader_parameter/line_thickness = 0.350000016625
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_h1twc"]
 atlas = ExtResource("3_epk6u")
@@ -216,7 +216,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"fly",
-"speed": 11.0
+"speed": 13.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -274,7 +274,7 @@ debug_color = Color(0.972549, 0.5803922, 0.60784316, 0.8117647)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=470550219]
 position = Vector2(-1, 1.0000305)
-scale = Vector2(4.8, 4.8)
+scale = Vector2(2, 2)
 shape = SubResource("CircleShape2D_msxfr")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=97536902]
@@ -282,8 +282,8 @@ clip_children = 2
 texture_filter = 1
 texture_repeat = 2
 material = SubResource("ShaderMaterial_ja06y")
-position = Vector2(1.0000018, -2.0000038)
 scale = Vector2(5.5, 5.5)
 sprite_frames = SubResource("SpriteFrames_epk6u")
-animation = &"eat"
+animation = &"fly"
 autoplay = "fly"
+frame_progress = 0.20824409

@@ -7,6 +7,10 @@ extends Node
 
 const SAVE_PATH := "user://batzyboy_save.json"
 
+# Runtime score — not persisted to disk, reset each game session.
+signal fruit_unlocked(fruit_id: String)
+
+var score:            int  = 0
 var high_score:       int  = 0
 var resume_level:     int  = 1
 var resume_score:     int  = 0         # restored when continuing a session
@@ -84,13 +88,17 @@ func load_data() -> void:
 
 
 # Called on every level-up to checkpoint progress
-func save_progress(level: int, score: int, dist: float = 0.0) -> void:
+func save_progress(level: int, pts: int, dist: float = 0.0) -> void:
 	resume_level = level
-	resume_score = score
+	resume_score = pts
 	resume_dist  = dist
-	if score > high_score:
-		high_score = score
+	if pts > high_score:
+		high_score = pts
 	save()
+
+
+func add_score(pts: int) -> void:
+	score += pts
 
 
 # Unlock a fruit by its id (node name lowercased). Saves immediately.
@@ -99,6 +107,7 @@ func unlock_fruit(id: String) -> void:
 	if key not in unlocked_fruits:
 		unlocked_fruits.append(key)
 		save()
+		fruit_unlocked.emit(key)
 
 
 # Returns true when every fruit whose min_level == level has been caught at least once.

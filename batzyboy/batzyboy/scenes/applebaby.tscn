@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://cpwvl0ijo7nes"]
+
+[ext_resource type="Texture2D" uid="uid://c0j15y5y8omle" path="res://assetsRaw/appleguys/applebabyrun.png" id="1_qnq7e"]
+[ext_resource type="Texture2D" uid="uid://dxl73qccg10bo" path="res://assetsRaw/appleguys/applebabystill.png" id="2_6hsvf"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3xmoo"]
+atlas = ExtResource("1_qnq7e")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ok82l"]
+atlas = ExtResource("1_qnq7e")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kde5q"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3xmoo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ok82l")
+}],
+"loop": true,
+"name": &"running",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_6hsvf")
+}],
+"loop": true,
+"name": &"still",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_3sf8f"]
+
+[node name="applebaby" type="CharacterBody2D" unique_id=775343366]
+
+[node name="animation" type="AnimatedSprite2D" parent="." unique_id=789322965]
+texture_filter = 1
+position = Vector2(0, 4)
+sprite_frames = SubResource("SpriteFrames_kde5q")
+animation = &"running"
+autoplay = "running"
+frame_progress = 0.40674898
+
+[node name="shape" type="CollisionShape2D" parent="." unique_id=1242696327]
+position = Vector2(0, 4)
+shape = SubResource("CircleShape2D_3sf8f")

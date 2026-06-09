@@ -9,8 +9,8 @@ radius = 24.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jlcbh"]
 shader = ExtResource("2_pmauy")
-shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 0.750000035625
+shader_parameter/line_color = Color(0.87058824, 0.23137255, 0.21960784, 1)
+shader_parameter/line_thickness = 0.50000002375
 
 [node name="lemon" type="Area2D" unique_id=475052392]
 script = ExtResource("1_urfhf")
@@ -22,4 +22,6 @@ shape = SubResource("CircleShape2D_7o87m")
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=956053364]
 texture_filter = 1
 material = SubResource("ShaderMaterial_jlcbh")
+scale = Vector2(3.7, 3.7)
 texture = ExtResource("3_ivft1")
+offset = Vector2(0, -1)

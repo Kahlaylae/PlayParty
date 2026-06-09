@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://ofyr18j50uov"]
+
+[ext_resource type="Script" uid="uid://bjx1mrvc8b0he" path="res://script/fruitbaby.gd" id="1_l728n"]
+[ext_resource type="Texture2D" uid="uid://dsqauroyy1cl4" path="res://assets/appleguys/strawberrybabyrun.png" id="2_g3un2"]
+[ext_resource type="Texture2D" uid="uid://cs2sxb26ulg1n" path="res://assets/appleguys/strawberrybabystill.png" id="3_lfeyr"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_272bh"]
+atlas = ExtResource("2_g3un2")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5vw27"]
+atlas = ExtResource("2_g3un2")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kek77"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_272bh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5vw27")
+}],
+"loop": true,
+"name": &"run",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_lfeyr")
+}],
+"loop": true,
+"name": &"still",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4c57u"]
+
+[node name="strawberrybaby" type="CharacterBody2D" unique_id=712754995]
+texture_filter = 1
+script = ExtResource("1_l728n")
+
+[node name="animation" type="AnimatedSprite2D" parent="." unique_id=2073381761]
+sprite_frames = SubResource("SpriteFrames_kek77")
+animation = &"run"
+autoplay = "run"
+frame_progress = 0.4585022
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1417007529]
+position = Vector2(0, 1)
+shape = SubResource("CircleShape2D_4c57u")

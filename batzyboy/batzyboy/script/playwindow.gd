@@ -1,13 +1,29 @@
-extends Sprite2D
+extends Node2D
+## Circular window into the game — shows bat flying with scrolling parallax.
+## Drop into any scene (menu, collections, etc.) for a live preview effect.
 
-#PLAYWINDOW JUST RUNS A WINDOW OF PARALLAX BACKGROUND EMBEDDED INTO IT IN MENU.TSCN 
-#maintaining batzy or batmain flying infront of it. 
+@export var scroll_speed: float = 100.0
 
-# Called when the node enters the scene tree for the first time.
+var _parallax: Node2D
+var _bat: CharacterBody2D
+
+
 func _ready() -> void:
-	pass # Replace with function body.
+	var vp := get_node_or_null("CircleWindow/GameViewport") as SubViewport
+	if vp:
+		_parallax = vp.get_node_or_null("parallaxBackground") as Node2D
+		_bat = vp.get_node_or_null("batMain") as CharacterBody2D
+
+	# Freeze bat — visual only, no gameplay.
+	if _bat:
+		_bat.set_physics_process(false)
+		_bat.set_process(false)
+		_bat.set("frozen", true)
+		var anim := _bat.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+		if anim:
+			anim.play("fly")
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+func _process(_delta: float) -> void:
+	if _parallax:
+		_parallax.base_speed = scroll_speed

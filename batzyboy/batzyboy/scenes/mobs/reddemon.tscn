@@ -11,7 +11,7 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ol"]
 shader = ExtResource("shader_ol")
 shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 2.000000095
+shader_parameter/line_thickness = 1.0070000478325
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5dek7"]
 atlas = ExtResource("3_s7j0v")
@@ -194,4 +194,4 @@ scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_542h5")
 animation = &"fly"
 autoplay = "fly"
-frame_progress = 0.50631845
+frame_progress = 0.9409011

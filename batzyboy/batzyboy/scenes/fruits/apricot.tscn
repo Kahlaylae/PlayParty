@@ -9,7 +9,7 @@ radius = 24.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jlcbh"]
 shader = ExtResource("2_ud51j")
-shader_parameter/line_color = Color(1, 1, 1, 1)
+shader_parameter/line_color = Color(0.49803922, 1, 0.42745098, 0.8901961)
 shader_parameter/line_thickness = 0.400000019
 
 [node name="apricot" type="Area2D" unique_id=894439911]

@@ -25,6 +25,12 @@ window/size/viewport_height=1280
 window/size/initial_position_type=2
 window/stretch/mode="canvas_items"
 
+[gui]
+
+theme/default_font_subpixel_positioning=2
+theme/default_font_generate_mipmaps=true
+theme/custom_font="uid://bjabx2uloeigs"
+
 [input]
 
 hop={
@@ -40,11 +46,16 @@ pause={
 
 [physics]
 
-2d/run_on_separate_thread=true
 3d/physics_engine="Jolt Physics"
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
+textures/canvas_textures/default_texture_repeat=1
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
 textures/vram_compression/import_etc2_astc=true
+textures/lossless_compression/force_png=true
+textures/default_filters/use_nearest_mipmap_filter=true
+viewport/hdr_2d=true
+viewport/transparent_background=true

@@ -220,66 +220,75 @@ main {
 
 .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
     padding: 0 1rem 2rem;
     max-width: 900px;
     margin: 0 auto;
+}
+
+@keyframes cardFadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .game-card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: 1.25rem;
-    text-decoration: none;
-    color: inherit;
-    transition: all 0.15s ease;
+    overflow: hidden;
     cursor: pointer;
-    display: block;
+    opacity: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.game-card.in-view {
+    animation: cardFadeUp 0.45s ease forwards;
 }
 
 .game-card:hover {
     background: var(--color-surface-elevated);
     border-color: var(--color-accent);
-    transform: translateY(-2px);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
 }
 
-.game-card .emoji-icon {
-    font-size: 2.5rem;
-    display: block;
-    margin-bottom: 0.75rem;
+.game-card a {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
 }
 
 .game-card .game-thumbnail {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     object-position: center;
-    border-radius: var(--radius-sm);
-    margin-bottom: 0.75rem;
 }
 
 .game-card h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
-    margin-bottom: 0.25rem;
+    padding: 0.75rem 1rem 0.5rem;
 }
 
 .game-card p {
     font-size: 0.85rem;
     color: var(--color-text-muted);
-    margin-bottom: 0.75rem;
+    padding: 0 1rem 0.75rem;
 }
 
 .game-card .play-badge {
-    display: inline-block;
-    padding: 0.4rem 0.8rem;
+    display: block;
+    margin: 0 1rem 1rem;
+    padding: 0.5rem 1rem;
     background: var(--color-accent);
     color: var(--color-bg);
     border-radius: 999px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 700;
+    text-align: center;
 }
 
 .game-card.coming-soon {
@@ -375,12 +384,9 @@ footer a:hover {
     }
     
     .games-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
         padding: 0 0.75rem 1.5rem;
-    }
-    
-    .game-card {
-        padding: 1rem;
     }
 }
 

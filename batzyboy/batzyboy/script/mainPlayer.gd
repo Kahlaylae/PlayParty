@@ -138,6 +138,7 @@ func take_damage(amount: int) -> void:
 	if is_dying or _invincible:
 		return
 	hp -= amount
+	SaveManager.player_hp = hp
 	emit_signal("hp_changed", hp)
 	if hp <= 0:
 		_start_dying()

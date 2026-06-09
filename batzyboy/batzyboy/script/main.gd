@@ -24,6 +24,14 @@ const DEBUG: bool = true
 const MONSTER_INTERVAL_MAX: float = 1.5   # seconds between spawns at level 1
 const MONSTER_INTERVAL_MIN: float = 0.5   # floor — never faster than this
 
+# ─── Fruit motion ranges — tweak here ────────────────────────────────────────
+const FRUIT_DRIFT_MIN:    float = 25.0   # px/s downward drop — slowest
+const FRUIT_DRIFT_MAX:    float = 80.0   # px/s downward drop — fastest
+const FRUIT_SINE_FREQ_MIN: float = 0.4   # Y wobble cycles/s — laziest
+const FRUIT_SINE_FREQ_MAX: float = 1.8   # Y wobble cycles/s — bounciest
+const FRUIT_SINE_AMP_MIN:  float = 12.0  # Y wobble height px — tightest
+const FRUIT_SINE_AMP_MAX:  float = 45.0  # Y wobble height px — widest
+
 # ─── Scene preloads ───────────────────────────────────────────────────────────
 # Drag enemies.tscn / fruits.tscn into these slots in the Inspector on the main node.
 @export var enemy_list_scene: PackedScene
@@ -33,10 +41,9 @@ var _monster_pool: Array = []
 var _fruit_pool: Array = []
 
 # ─── Game State ───────────────────────────────────────────────────────────────
-enum State { SPLASH, PLAYING, LEVEL_UP, DEAD, PAUSED }
+enum State { SPLASH, PLAYING, LEVEL_UP, DEAD }
 var state: State = State.SPLASH
 
-var score: int         = 0
 var dist_px: float     = 0.0
 var current_level: int = 1
 var scroll_speed: float = SPEED_MIN   # updated every frame in _update_level()
@@ -47,15 +54,12 @@ var _retry_enabled: bool   = false
 
 # ─── Node refs ────────────────────────────────────────────────────────────────
 @onready var _bat: CharacterBody2D   = $batMainSpawn
-@onready var _parallax: Node2D         = $CanvasLayer/parallaxBackground
+@onready var _parallax: Node2D         = $CanvasLayer2/parallaxBackground
 @onready var _cam: Camera2D            = $Camera2D
 @onready var _killerzone: Area2D       = $killerzone
 @onready var _hearts_node: Node2D      = $CanvasLayer/hearts
 @onready var _monster_spawner: Area2D  = $monsterspawner
 @onready var _fruit_spawner: Area2D    = $fruitspawner
-@onready var _floor_slide: StaticBody2D = $"Floor Slide"
-@onready var _menu_btn: Button         = $CanvasLayer/MenuButton
-@onready var _settings_btn: Button     = $CanvasLayer/How2Button
 @onready var _pts_rtl: RichTextLabel   = $CanvasLayer/Points
 @onready var _dist_rtl: RichTextLabel  = $CanvasLayer/DistanceTravelled
 
@@ -65,8 +69,6 @@ var _death_layer: CanvasLayer
 var _death_panel: Control
 var _level_up_layer: CanvasLayer
 var _level_up_panel: Control
-var _pause_layer: CanvasLayer
-var _pause_panel: Control
 var _level_title_label: Label
 var _countdown_label: Label
 var _tap_hint: Label    # pulsing "tap to fly" / "tap to retry" label
@@ -81,10 +83,15 @@ func _ready() -> void:
 
 	# Resume from save if requested by menu
 	if SaveManager.resume_requested:
-		current_level = maxi(SaveManager.resume_level, 1)
-		dist_px       = SaveManager.resume_dist
-		score         = SaveManager.resume_score
+		current_level         = maxi(SaveManager.resume_level, 1)
+		dist_px               = SaveManager.resume_dist
+		SaveManager.score     = SaveManager.resume_score
 		SaveManager.resume_requested = false
+	else:
+		SaveManager.score = 0
+
+	add_to_group("game_session")
+	SaveManager.fruit_unlocked.connect(_show_fruit_unlocked_toast)
 
 	# Wire up bat signals
 	_build_monster_pool()
@@ -96,49 +103,25 @@ func _ready() -> void:
 	# Wire up zone collisions
 	_killerzone.body_entered.connect(_on_killerzone_entered)
 
-	_build_hud()
+	_pts_rtl.bbcode_enabled = true
+	_pts_rtl.text = "0 pts"
+	_dist_rtl.bbcode_enabled = true
+	_dist_rtl.text = "Lv 1\n0 m"
 	_update_hud_hp(6)
 	_build_gradient_bg()
 	_build_splash()
 	_build_death_screen()
 	_build_level_up_screen()
-	_build_pause_screen()
 
 
 # ─── Input / Process ──────────────────────────────────────────────────────────
-func _input(event: InputEvent) -> void:
-	# Spacebar toggles pause — check keycode directly (is_action_just_pressed removed from InputEvent in 4.6)
-	if event is InputEventKey and event.pressed and not event.echo \
-			and (event.keycode == KEY_SPACE or event.physical_keycode == KEY_SPACE):
-		match state:
-			State.PLAYING:
-				_pause_game()
-			State.PAUSED:
-				_resume_game()
-		return
-
+func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton and event.pressed):
 		return
-
-	# Menu / Settings buttons — clickable during splash and gameplay
-	var click_pos := (event as InputEventMouseButton).position
-	if state in [State.SPLASH, State.PLAYING]:
-		if click_pos.distance_to(_menu_btn.position) < 36.0 \
-				or click_pos.distance_to(_settings_btn.position) < 36.0:
-			_pause_game()
-			return
 
 	match state:
 		State.SPLASH:
 			_start_game()
-		State.PAUSED:
-			# Top half → resume; bottom half → main menu
-			if (event as InputEventMouseButton).position.y < get_viewport().size.y / 2.0:
-				_resume_game()
-			else:
-				SaveManager.save_progress(current_level, score, dist_px)
-				Engine.time_scale = 1.0
-				get_tree().change_scene_to_file("res://scenes/menu.tscn")
 		State.DEAD:
 			if _retry_enabled:
 				get_tree().change_scene_to_file("res://scenes/menu.tscn")
@@ -163,10 +146,7 @@ func _process(delta: float) -> void:
 				_fruit_timer = maxf(0.8, randf_range(1.8, 2.5) / pow(float(current_level), 0.6))
 			_update_hud()
 		State.LEVEL_UP:
-			# World keeps scrolling during the countdown, spawning is paused
 			_parallax.base_speed = scroll_speed
-		State.PAUSED:
-			pass   # Engine.time_scale = 0 freezes delta; nothing to do here
 		State.DEAD:
 			_parallax.base_speed = SPEED_UI
 
@@ -178,16 +158,14 @@ func _start_game() -> void:
 	# First tap IS the first hop — Flappy Bird feel
 	_bat.velocity.y = _bat.hop_strength
 	_splash_layer.hide()
-	_get_hud().show()
 	_monster_timer = 2.5
 	_fruit_timer   = 1.5
-
 
 func _on_bat_died() -> void:
 	state = State.DEAD
 	# Update high score + checkpoint
-	if score > SaveManager.high_score:
-		SaveManager.high_score = score
+	if SaveManager.score > SaveManager.high_score:
+		SaveManager.high_score = SaveManager.score
 		_new_best_label.show()
 	SaveManager.save()
 	# Wait briefly then show death screen
@@ -195,7 +173,7 @@ func _on_bat_died() -> void:
 	_death_layer.show()
 	var score_lbl := _death_panel.get_node_or_null("ScoreSummary") as Label
 	if score_lbl:
-		score_lbl.text = "%d pts  ·  Best: %d pts" % [score, SaveManager.high_score]
+		score_lbl.text = "%d pts  ·  Best: %d pts" % [SaveManager.score, SaveManager.high_score]
 	var panel_tween := create_tween()
 	panel_tween.tween_property(_death_panel, "modulate:a", 1.0, 0.4).from(0.0)
 	# Enable retry tap after an additional delay
@@ -243,48 +221,40 @@ func _spawn_fruit() -> void:
 	if eligible.is_empty():
 		return
 	# Cluster size grows with level: 1 at L1, 2 at L3, 3 at L5, capped at 4
-	var count: int = mini(1 + int(current_level) / 2, 4)
-	var spawn_y: float = _fruit_spawner.get_spawn_y()
+	var count: int = mini(1 + floori(current_level / 2.0), 4)
+	var y_range: Vector2 = _fruit_spawner.get_spawn_y_range()
 
-	# Build a list of unique X positions — minimum 60 px apart
-	var xs: Array[float] = []
-	var attempts := 0
-	while xs.size() < count and attempts < 40:
-		attempts += 1
-		var x: float = _fruit_spawner.get_spawn_x()
-		if xs.all(func(ex: float) -> bool: return abs(ex - x) >= 60.0):
-			xs.append(x)
-
-	# Accumulated stagger so each fruit fires at a different moment
+	# Accumulated stagger so each fruit enters at a different moment
 	var delay := 0.0
-	for i in xs.size():
+	for i in count:
 		delay += randf_range(0.09, 0.4)
-		var entry: Dictionary = eligible[randi() % eligible.size()]
-		var fs  := randf_range(40.0, 160.0)
-		var sine_freq := randf_range(0.6, 2.2)
-		var sine_amp  := randf_range(15.0, 55.0)
-		var pts:  int   = entry.points
-		var heal: int   = entry.heal
-		var ps:   float = entry.pulse_speed
-		var fid:  String = entry.get("fruit_id", "")
-		var scn  := entry.scene as PackedScene
-		var pos  := Vector2(xs[i], spawn_y)
+		var entry: Dictionary      = eligible[randi() % eligible.size()]
+		var spawn_x: float         = _spawn_x() + randf_range(0.0, 300.0)
+		var spawn_y: float         = randf_range(y_range.x, y_range.y)
+		var drift:   float         = randf_range(FRUIT_DRIFT_MIN,    FRUIT_DRIFT_MAX)
+		var s_freq:  float         = randf_range(FRUIT_SINE_FREQ_MIN, FRUIT_SINE_FREQ_MAX)
+		var s_amp:   float         = randf_range(FRUIT_SINE_AMP_MIN,  FRUIT_SINE_AMP_MAX)
+		var pts:     int           = entry.points
+		var heal:    int           = entry.heal
+		var ps:      float         = entry.pulse_speed
+		var fid:     String        = entry.get("fruit_id", "")
+		var scn:     PackedScene   = entry.scene as PackedScene
+		var spd:     float         = scroll_speed  # capture current speed for the closure
 		get_tree().create_timer(delay).timeout.connect(
 			func() -> void:
 				if not is_inside_tree():
 					return
 				var inst := scn.instantiate() as Area2D
-				inst.fall_speed     = fs
-				inst.sine_freq      = sine_freq
-				inst.sine_amp       = sine_amp
-				inst.fruit_id       = fid
-				inst.max_y          = _floor_slide.global_position.y
-				inst.points         = pts
-				inst.heal           = heal
-				inst.pulse_speed    = ps
-				inst.collision_mask = 1
-				inst.global_position = pos
-				inst.collected.connect(_on_fruit_collected)
+				inst.scroll_speed    = spd
+				inst.drift_speed     = drift
+				inst.sine_freq       = s_freq
+				inst.sine_amp        = s_amp
+				inst.fruit_id        = fid
+				inst.points          = pts
+				inst.heal            = heal
+				inst.pulse_speed     = ps
+				inst.collision_mask  = 1
+				inst.global_position = Vector2(spawn_x, spawn_y)
 				add_child(inst)
 		)
 
@@ -352,29 +322,12 @@ func _obj_speed() -> float:
 	)
 
 
-# ─── Signals from bat / fruit ─────────────────────────────────────────────────
-func _on_fruit_collected(pts: int, heal: int, fruit_id: String) -> void:
-	score += pts
-	if heal > 0:
-		_bat.heal(heal)
-	var is_new := fruit_id != "" and fruit_id not in SaveManager.unlocked_fruits
-	if DEBUG:
-		print("[FruitEaten] id='%s'  is_new=%s  pts=%d" % [fruit_id, str(is_new), pts])
-	SaveManager.unlock_fruit(fruit_id)
-	if is_new:
-		_show_fruit_unlocked_toast(fruit_id)
-		if DEBUG:
-			print("[FruitPool] unlocked so far: %s" % str(SaveManager.unlocked_fruits))
-
-
+# ─── Signals ──────────────────────────────────────────────────────────────────
 func _show_fruit_unlocked_toast(fruit_id: String) -> void:
 	var lbl := Label.new()
 	lbl.text = "✨ %s Unlocked!" % fruit_id.capitalize()
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.add_theme_font_size_override("font_size", 28)
-	lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.3))
-	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
-	lbl.add_theme_constant_override("outline_size", 3)
 	lbl.anchor_left   = 0.5
 	lbl.anchor_right  = 0.5
 	lbl.anchor_top    = 0.5
@@ -383,7 +336,7 @@ func _show_fruit_unlocked_toast(fruit_id: String) -> void:
 	lbl.offset_right  =  300.0
 	lbl.offset_top    = -220.0
 	lbl.offset_bottom = -185.0
-	_get_hud().add_child(lbl)
+	$CanvasLayer.add_child(lbl)
 	var t := create_tween()
 	t.tween_property(lbl, "modulate:a", 1.0, 0.15).from(0.0)
 	t.tween_interval(1.2)
@@ -392,7 +345,6 @@ func _show_fruit_unlocked_toast(fruit_id: String) -> void:
 
 
 func _on_hp_changed(hp: int) -> void:
-	SaveManager.player_hp = hp
 	_update_hud_hp(hp)
 
 
@@ -452,7 +404,7 @@ func _show_level_up(lvl: int) -> void:
 	var fade := create_tween()
 	fade.tween_property(_level_up_panel, "modulate:a", 1.0, 0.3).from(0.0)
 	# Checkpoint save on every level-up
-	SaveManager.save_progress(lvl, score, dist_px)
+	SaveManager.save_progress(lvl, SaveManager.score, dist_px)
 	await get_tree().create_timer(1.0).timeout
 	for i: int in [3, 2, 1]:
 		_countdown_label.text = str(i)
@@ -464,9 +416,9 @@ func _show_level_up(lvl: int) -> void:
 
 func _show_win_screen() -> void:
 	state = State.DEAD   # reuse DEAD to stop spawning; win panel takes over
-	SaveManager.save_progress(current_level, score, dist_px)
-	if score > SaveManager.high_score:
-		SaveManager.high_score = score
+	SaveManager.save_progress(current_level, SaveManager.score, dist_px)
+	if SaveManager.score > SaveManager.high_score:
+		SaveManager.high_score = SaveManager.score
 		SaveManager.save()
 
 	# Build win overlay procedurally
@@ -492,11 +444,10 @@ func _show_win_screen() -> void:
 	title_lbl.text                    = "YOU COLLECTED THEM ALL!"
 	title_lbl.horizontal_alignment    = HORIZONTAL_ALIGNMENT_CENTER
 	title_lbl.add_theme_font_size_override("font_size", 48)
-	title_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
 	panel.add_child(title_lbl)
 
 	var score_lbl := Label.new()
-	score_lbl.text                 = "%d pts  ·  Best: %d pts" % [score, SaveManager.high_score]
+	score_lbl.text                 = "%d pts  ·  Best: %d pts" % [SaveManager.score, SaveManager.high_score]
 	score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	score_lbl.add_theme_font_size_override("font_size", 32)
 	panel.add_child(score_lbl)
@@ -518,62 +469,10 @@ func _show_win_screen() -> void:
 
 
 # ─── Pause ────────────────────────────────────────────────────────────────────
-func _pause_game() -> void:
-	state = State.PAUSED
-	Engine.time_scale = 0.0   # freezes delta → all movement stops
-	_pause_layer.show()
-
-
-func _resume_game() -> void:
-	_pause_layer.hide()
-	Engine.time_scale = 1.0
-	state = State.PLAYING
-
-
-func _build_pause_screen() -> void:
-	_pause_layer = CanvasLayer.new()
-	_pause_layer.name  = "Pause"
-	_pause_layer.layer = 11   # above HUD (1), below death/levelup (10)... actually above all at 11
-	add_child(_pause_layer)
-	_pause_layer.hide()
-
-	_pause_panel = Control.new()
-	_pause_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_pause_layer.add_child(_pause_panel)
-
-	var bg := ColorRect.new()
-	bg.color         = Color(0.0, 0.0, 0.0, 0.72)
-	bg.anchor_right  = 1.0
-	bg.anchor_bottom = 1.0
-	bg.offset_right  = 0.0
-	bg.offset_bottom = 0.0
-	_pause_panel.add_child(bg)
-
-	var title := _make_label_centered(_pause_panel, -280.0, 52, "PAUSED")
-	title.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
-
-	# Top half tap zone → resume
-	_make_label_centered(_pause_panel, -100.0, 32, "Resume")
-
-	# Subtle divider at screen centre
-	var sep := ColorRect.new()
-	sep.color         = Color(1, 1, 1, 0.12)
-	sep.anchor_left   = 0.5
-	sep.anchor_right  = 0.5
-	sep.anchor_top    = 0.5
-	sep.anchor_bottom = 0.5
-	sep.offset_left   = -200.0
-	sep.offset_right  = 200.0
-	sep.offset_top    = -1.0
-	sep.offset_bottom = 1.0
-	_pause_panel.add_child(sep)
-
-	# Bottom half tap zone → main menu
-	var menu_lbl := _make_label_centered(_pause_panel, 60.0, 32, "Main Menu")
-	menu_lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75))
-
-	var hint := _make_label_centered(_pause_panel, 230.0, 16, "spacebar to resume")
-	hint.add_theme_color_override("font_color", Color(0.38, 0.38, 0.38))
+func save_before_exit() -> void:
+	# Called by MenuButton (via "game_session" group) before returning to menu.
+	if state == State.PLAYING or state == State.SPLASH:
+		SaveManager.save_progress(current_level, SaveManager.score, dist_px)
 
 
 # ─── Background gradient overlay ─────────────────────────────────────────────
@@ -601,27 +500,8 @@ func _build_gradient_bg() -> void:
 	layer.add_child(tex_rect)
 
 
-# ─── HUD ──────────────────────────────────────────────────────────────────────
-func _get_hud() -> CanvasLayer:
-	return get_node("HUD")
-
-
-func _build_hud() -> void:
-	var hud := CanvasLayer.new()
-	hud.name  = "HUD"
-	hud.layer = 1
-	add_child(hud)
-
-	_pts_rtl.bbcode_enabled = true
-	_pts_rtl.text = "0 pts"
-	_dist_rtl.bbcode_enabled = true
-	_dist_rtl.text = "Lv 1\n0 m"
-
-	hud.hide()  # shown when game starts
-
-
 func _update_hud() -> void:
-	_pts_rtl.text  = "%d pts" % score
+	_pts_rtl.text  = "%d pts" % SaveManager.score
 	_dist_rtl.text = "Lv %d\n%d m" % [current_level, int(dist_px / 100.0)]
 
 
@@ -666,11 +546,9 @@ func _build_death_screen() -> void:
 	bg.offset_bottom = 0.0
 	_death_panel.add_child(bg)
 
-	var died_lbl := _make_label_centered(_death_panel, -200.0, 52, "YOU DIED")
-	died_lbl.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2))
+	_make_label_centered(_death_panel, -200.0, 52, "YOU DIED")
 
 	_new_best_label = _make_label_centered(_death_panel, -135.0, 26, "NEW BEST!")
-	_new_best_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
 	_new_best_label.hide()
 
 	var score_lbl := _make_label_centered(_death_panel, -90.0, 22, "")
@@ -703,7 +581,6 @@ func _build_level_up_screen() -> void:
 	_level_up_panel.add_child(bg)
 
 	_level_title_label = _make_label_centered(_level_up_panel, -160.0, 52, "LEVEL 2!")
-	_level_title_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
 
 	_countdown_label = _make_label_centered(_level_up_panel, -60.0, 33, "")
 
@@ -714,9 +591,6 @@ func _make_label(parent: Node, pos: Vector2, font_size: int, text: String) -> La
 	lbl.text                                          = text
 	lbl.position                                      = pos
 	lbl.add_theme_font_size_override("font_size",      font_size)
-	lbl.add_theme_color_override("font_color",         Color.WHITE)
-	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
-	lbl.add_theme_constant_override("outline_size",    2)
 	parent.add_child(lbl)
 	return lbl
 
@@ -731,9 +605,6 @@ func _make_label_right(parent: Node, offset: Vector2, font_size: int, text: Stri
 	lbl.offset_top                                    = offset.y
 	lbl.horizontal_alignment                          = HORIZONTAL_ALIGNMENT_RIGHT
 	lbl.add_theme_font_size_override("font_size",      font_size)
-	lbl.add_theme_color_override("font_color",         Color.WHITE)
-	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
-	lbl.add_theme_constant_override("outline_size",    2)
 	parent.add_child(lbl)
 	return lbl
 
@@ -751,9 +622,6 @@ func _make_label_centered(parent: Node, y_offset: float, font_size: int, text: S
 	lbl.offset_bottom                                 = y_offset + font_size + 8.0
 	lbl.horizontal_alignment                          = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.add_theme_font_size_override("font_size",      font_size)
-	lbl.add_theme_color_override("font_color",         Color.WHITE)
-	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
-	lbl.add_theme_constant_override("outline_size",    3)
 	parent.add_child(lbl)
 	return lbl
 

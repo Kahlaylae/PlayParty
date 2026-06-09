@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://curpygfh3rbi4"]
+
+[ext_resource type="Script" uid="uid://bjx1mrvc8b0he" path="res://script/fruitbaby.gd" id="1_hfbyt"]
+[ext_resource type="Texture2D" uid="uid://cuilqitq0qo1j" path="res://assets/appleguys/pearbabyrun.png" id="2_68i7k"]
+[ext_resource type="Texture2D" uid="uid://bg1yish5jkmil" path="res://assets/appleguys/pearbabystill.png" id="3_ngboo"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qlxha"]
+atlas = ExtResource("2_68i7k")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sbatk"]
+atlas = ExtResource("2_68i7k")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kek77"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qlxha")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sbatk")
+}],
+"loop": true,
+"name": &"run",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_ngboo")
+}],
+"loop": true,
+"name": &"still",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4c57u"]
+
+[node name="pearbaby" type="CharacterBody2D" unique_id=1363756705]
+texture_filter = 1
+script = ExtResource("1_hfbyt")
+
+[node name="animation" type="AnimatedSprite2D" parent="." unique_id=1500564393]
+sprite_frames = SubResource("SpriteFrames_kek77")
+animation = &"run"
+autoplay = "run"
+frame_progress = 0.8084231
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1193419356]
+position = Vector2(0, 1)
+shape = SubResource("CircleShape2D_4c57u")
