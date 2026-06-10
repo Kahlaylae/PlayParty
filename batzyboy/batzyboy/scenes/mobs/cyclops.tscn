@@ -7,8 +7,8 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ol"]
 shader = ExtResource("shader_ol")
-shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 0.50000002375
+shader_parameter/line_color = Color(0, 0, 0, 1)
+shader_parameter/line_thickness = 0.250000011875
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_a1eep"]
 atlas = ExtResource("2_ay7eu")

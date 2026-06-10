@@ -31,7 +31,16 @@ func _ready() -> void:
 		if child is Area2D:
 			child.queue_free()
 
-	var count: int = fruit_list.fruit_nodes.size()
+	var sorted: Array = fruit_list.fruit_nodes.duplicate()
+	sorted.sort_custom(func(a: Node, b: Node) -> bool:
+		var la: int = a.get("level") if "level" in a else 1
+		var lb: int = b.get("level") if "level" in b else 1
+		if la != lb:
+			return la < lb
+		return str(a.name).to_lower() < str(b.name).to_lower()
+	)
+
+	var count: int = sorted.size()
 	var cols: int = maxi(guide.columns, 1)
 	var rows: int = ceili(float(count) / float(cols))
 	var cell_w: float = guide.size.x / float(cols)
@@ -39,7 +48,7 @@ func _ready() -> void:
 	var origin: Vector2 = guide.position + Vector2(cell_w, cell_h) * 0.5
 
 	for i in range(count):
-		var node: Node = fruit_list.fruit_nodes[i]
+		var node: Node = sorted[i]
 		if not is_instance_valid(node) or node.scene_file_path.is_empty():
 			continue
 		var scene := load(node.scene_file_path) as PackedScene

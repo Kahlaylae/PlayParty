@@ -42,29 +42,8 @@ func _ready() -> void:
 
 	# Hurtbox — overlap is polled each physics frame (more reliable with Jolt)
 	# body_entered signal is intentionally not used here
+	# Outline material — assign on AnimatedSprite2D in the inspector instead.
 
-	# White outline shader — 4-neighbour sample, draws white where pixel is transparent but neighbor has alpha
-	var outline_shader := Shader.new()
-	outline_shader.code = """
-shader_type canvas_item;
-uniform float size : hint_range(0.0, 8.0) = 1.0;
-uniform float flash_amount : hint_range(0.0, 1.0) = 0.0;
-void fragment() {
-    vec4 col = texture(TEXTURE, UV);
-    vec2 p = TEXTURE_PIXEL_SIZE * size;
-    float n = 0.0;
-    n += texture(TEXTURE, UV + vec2( p.x, 0.0)).a;
-    n += texture(TEXTURE, UV + vec2(-p.x, 0.0)).a;
-    n += texture(TEXTURE, UV + vec2(0.0,  p.y)).a;
-    n += texture(TEXTURE, UV + vec2(0.0, -p.y)).a;
-    float outline = min(n, 1.0) * (1.0 - col.a);
-    vec4 outlined = mix(col, vec4(1.0, 1.0, 1.0, 1.0), outline);
-    COLOR = mix(outlined, vec4(1.0, 1.0, 1.0, outlined.a), flash_amount);
-}
-"""
-	var outline_mat := ShaderMaterial.new()
-	outline_mat.shader = outline_shader
-	_anim.material = outline_mat
 
 
 func _physics_process(delta: float) -> void:

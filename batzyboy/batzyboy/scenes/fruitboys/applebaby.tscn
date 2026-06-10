@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://c0j15y5y8omle" path="res://assetsRaw/appleguys/applebabyrun.png" id="1_qnq7e"]
 [ext_resource type="Texture2D" uid="uid://dxl73qccg10bo" path="res://assetsRaw/appleguys/applebabystill.png" id="2_6hsvf"]
+[ext_resource type="Texture2D" uid="uid://hg05a6j85so3" path="res://assetsRaw/appleguys/applebabystill2.png" id="3_fvbu7"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3xmoo"]
 atlas = ExtResource("1_qnq7e")
@@ -27,10 +28,13 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("2_6hsvf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_fvbu7")
 }],
 "loop": true,
 "name": &"still",
-"speed": 5.0
+"speed": 3.0
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_3sf8f"]
@@ -41,9 +45,9 @@ animations = [{
 texture_filter = 1
 position = Vector2(0, 4)
 sprite_frames = SubResource("SpriteFrames_kde5q")
-animation = &"running"
+animation = &"still"
 autoplay = "running"
-frame_progress = 0.40674898
+frame_progress = 0.31261528
 
 [node name="shape" type="CollisionShape2D" parent="." unique_id=1242696327]
 position = Vector2(0, 4)

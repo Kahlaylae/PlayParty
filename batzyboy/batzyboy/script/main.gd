@@ -325,7 +325,7 @@ func _obj_speed() -> float:
 # ─── Signals ──────────────────────────────────────────────────────────────────
 func _show_fruit_unlocked_toast(fruit_id: String) -> void:
 	var lbl := Label.new()
-	lbl.text = "✨ %s Unlocked!" % fruit_id.capitalize()
+	lbl.text = "%s Unlocked!!!" % fruit_id.capitalize()
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.add_theme_font_size_override("font_size", 28)
 	lbl.anchor_left   = 0.5

@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://b8ofiad3wvqcq"]
 
 [ext_resource type="Script" uid="uid://bjx1mrvc8b0he" path="res://script/fruitbaby.gd" id="1_nbrws"]
-[ext_resource type="Texture2D" uid="uid://dhk2y1m6x78a2" path="res://assets/appleguys/watermelonbabyrun.png" id="2_nbrws"]
-[ext_resource type="Texture2D" uid="uid://drqaobcrddh4w" path="res://assets/appleguys/watermelonbabystill.png" id="3_ckugd"]
+[ext_resource type="Texture2D" uid="uid://dhk2y1m6x78a2" path="res://assetsRaw/appleguys/watermelonbabyrun.png" id="2_nbrws"]
+[ext_resource type="Texture2D" uid="uid://drqaobcrddh4w" path="res://assetsRaw/appleguys/watermelonbabystill.png" id="3_ckugd"]
+[ext_resource type="Texture2D" uid="uid://b6um476xdpajk" path="res://assetsRaw/appleguys/watermelonbabystill2.png" id="4_2vdxi"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vgg3a"]
 atlas = ExtResource("2_nbrws")
@@ -28,6 +29,9 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("3_ckugd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_2vdxi")
 }],
 "loop": true,
 "name": &"still",
@@ -44,6 +48,7 @@ script = ExtResource("1_nbrws")
 sprite_frames = SubResource("SpriteFrames_kek77")
 animation = &"still"
 autoplay = "run"
+frame_progress = 0.5547675
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1417007529]
 position = Vector2(0, 1)

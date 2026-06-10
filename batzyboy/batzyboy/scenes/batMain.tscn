@@ -12,8 +12,8 @@ radius = 8.065607
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ja06y"]
 shader = ExtResource("2_qmftm")
-shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 0.350000016625
+shader_parameter/line_color = Color(0, 0, 0, 1)
+shader_parameter/line_thickness = 0.400000019
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_h1twc"]
 atlas = ExtResource("3_epk6u")
@@ -69,23 +69,51 @@ region = Rect2(128, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_etwie"]
 atlas = ExtResource("4_msxfr")
-region = Rect2(256, 0, 64, 64)
+region = Rect2(192, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rcq13"]
 atlas = ExtResource("4_msxfr")
-region = Rect2(320, 0, 64, 64)
+region = Rect2(256, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_851c6"]
 atlas = ExtResource("4_msxfr")
-region = Rect2(512, 0, 64, 64)
+region = Rect2(320, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_twqp5"]
 atlas = ExtResource("4_msxfr")
-region = Rect2(576, 0, 64, 64)
+region = Rect2(384, 0, 64, 64)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_safaf"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_akm5y"]
+atlas = ExtResource("4_msxfr")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_awcl2"]
+atlas = ExtResource("4_msxfr")
+region = Rect2(512, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5plqe"]
 atlas = ExtResource("5_w0wjg")
 region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1t62e"]
+atlas = ExtResource("5_w0wjg")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r0b6d"]
+atlas = ExtResource("5_w0wjg")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rdmmj"]
+atlas = ExtResource("5_w0wjg")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a7kov"]
+atlas = ExtResource("5_w0wjg")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4cx0x"]
+atlas = ExtResource("5_w0wjg")
+region = Rect2(448, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hmdnr"]
 atlas = ExtResource("5_w0wjg")
@@ -94,6 +122,10 @@ region = Rect2(0, 0, 64, 64)
 [sub_resource type="AtlasTexture" id="AtlasTexture_blgtp"]
 atlas = ExtResource("5_w0wjg")
 region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_safaf"]
+atlas = ExtResource("5_w0wjg")
+region = Rect2(128, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xrjyi"]
 atlas = ExtResource("5_w0wjg")
@@ -183,7 +215,28 @@ animations = [{
 "texture": SubResource("AtlasTexture_twqp5")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_safaf")
+"texture": SubResource("AtlasTexture_akm5y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_awcl2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5plqe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1t62e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r0b6d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rdmmj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a7kov")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4cx0x")
 }],
 "loop": false,
 "name": &"eat",
@@ -284,6 +337,7 @@ texture_repeat = 2
 material = SubResource("ShaderMaterial_ja06y")
 scale = Vector2(5.5, 5.5)
 sprite_frames = SubResource("SpriteFrames_epk6u")
-animation = &"fly"
+animation = &"eat"
 autoplay = "fly"
-frame_progress = 0.20824409
+frame = 8
+frame_progress = 1.0
