@@ -22,8 +22,10 @@ SaveManager="*res://script/saveManager.gd"
 
 window/size/viewport_width=720
 window/size/viewport_height=1280
+window/size/mode=2
 window/size/initial_position_type=2
-window/stretch/mode="canvas_items"
+window/stretch/mode="viewport"
+window/stretch/aspect="ignore"
 
 [gui]
 

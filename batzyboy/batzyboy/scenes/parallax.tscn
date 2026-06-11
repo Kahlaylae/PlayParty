@@ -9,6 +9,14 @@
 [ext_resource type="Texture2D" uid="uid://07cv1hag4wfy" path="res://assetsRaw/map/8.png" id="8_cyp6n"]
 [ext_resource type="Texture2D" uid="uid://0qta1lwxs6hj" path="res://assetsRaw/map/6.png" id="8_plx"]
 [ext_resource type="Shader" uid="uid://ddm4s3cr8ncle" path="res://script/shaders/water.gdshader" id="10_m2jpk"]
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="12_w6ouw"]
+[ext_resource type="Texture2D" uid="uid://c6b82xb8d4j2m" path="res://assetsRaw/map/moon/Moon_Phase_1.png" id="12_x17sq"]
+[ext_resource type="Texture2D" uid="uid://dn4jc41see57l" path="res://assetsRaw/map/moon/Moon_Phase_2.png" id="14_jrwxi"]
+[ext_resource type="Texture2D" uid="uid://llovlvwc72dv" path="res://assetsRaw/map/moon/Moon_Phase_3.png" id="15_f8lyx"]
+[ext_resource type="Texture2D" uid="uid://t71wxx781opl" path="res://assetsRaw/map/moon/Moon_Phase_4.png" id="16_q107m"]
+[ext_resource type="Texture2D" uid="uid://b05ogso6t1dem" path="res://assetsRaw/map/moon/Moon_Phase_6.png" id="17_owsjb"]
+[ext_resource type="Texture2D" uid="uid://certme8k44lsm" path="res://assetsRaw/map/moon/Moon_Phase_7.png" id="18_n53kq"]
+[ext_resource type="Texture2D" uid="uid://jwlr3s1rq1ub" path="res://assetsRaw/map/moon/Moon_Phase_8.png" id="19_3yt2v"]
 [ext_resource type="Script" uid="uid://6xlvdff8mhos" path="res://script/fog.gd" id="fog_script"]
 [ext_resource type="Shader" uid="uid://bm3rboayi5xrx" path="res://script/shaders/fog.gdshader" id="fog_shader"]
 
@@ -61,6 +69,40 @@ shader_parameter/waveSpeed = 0.85600004066
 shader_parameter/opacity = 0.706000033535
 shader_parameter/horizon = 0.7670000364325
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3orxj"]
+shader = ExtResource("12_w6ouw")
+shader_parameter/line_color = Color(0.4575854, 0.72234535, 0.5163609, 0.34509805)
+shader_parameter/line_thickness = 0.3
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8vcgh"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_x17sq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_jrwxi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_f8lyx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_q107m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_owsjb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_n53kq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_3yt2v")
+}],
+"loop": true,
+"name": &"default",
+"speed": 11.0
+}]
+
 [sub_resource type="Sky" id="Sky_cyp6n"]
 
 [sub_resource type="Environment" id="Environment_0fvxf"]
@@ -75,7 +117,6 @@ adjustment_saturation = 1.64
 
 [node name="parallaxBackground" type="Parallax2D" unique_id=2021570811 node_paths=PackedStringArray("layer_nodes")]
 z_index = -3
-scroll_offset = Vector2(-1, -1)
 script = ExtResource("1_plx")
 base_speed = 150.0
 layer_nodes = [NodePath("background4"), NodePath("background3"), NodePath("background2"), NodePath("background1"), NodePath("foreground"), NodePath("ground"), NodePath("reflection"), NodePath("fog"), NodePath("reflection/water2"), NodePath("foreground2")]
@@ -89,7 +130,7 @@ position = Vector2(362.89566, 448.01434)
 scale = Vector2(6, 6)
 texture = ExtResource("2_plx")
 region_enabled = true
-region_rect = Rect2(14889.08, 0, 384, 216)
+region_rect = Rect2(467771.25, 0, 384, 216)
 
 [node name="background3" type="Sprite2D" parent="." unique_id=1521471453]
 z_index = -4
@@ -99,7 +140,7 @@ position = Vector2(337.00003, 513)
 scale = Vector2(6, 6)
 texture = ExtResource("3_plx")
 region_enabled = true
-region_rect = Rect2(45349.188, 0, 384, 216)
+region_rect = Rect2(1630458.9, 0, 384, 216)
 
 [node name="background2" type="Sprite2D" parent="." unique_id=1268798545]
 z_index = -3
@@ -109,7 +150,7 @@ position = Vector2(377, 585)
 scale = Vector2(6, 6)
 texture = ExtResource("4_plx")
 region_enabled = true
-region_rect = Rect2(30071.697, 0, 384, 216)
+region_rect = Rect2(935836, 0, 384, 216)
 
 [node name="foreground2" type="Sprite2D" parent="." unique_id=2146669569]
 z_index = -4
@@ -120,7 +161,7 @@ scale = Vector2(6.0492334, 6.0492334)
 texture = ExtResource("6_plx")
 flip_h = true
 region_enabled = true
-region_rect = Rect2(-18640.066, 0, 384, 216)
+region_rect = Rect2(-924404.4, 0, 384, 216)
 
 [node name="background1" type="Sprite2D" parent="." unique_id=2124780172]
 z_index = -2
@@ -130,7 +171,7 @@ position = Vector2(345, 449.00003)
 scale = Vector2(6, 6)
 texture = ExtResource("5_plx")
 region_enabled = true
-region_rect = Rect2(56235.3, 0, 384, 216)
+region_rect = Rect2(509117.5, 0, 384, 216)
 
 [node name="fog" type="Sprite2D" parent="." unique_id=111222333]
 texture_filter = 1
@@ -140,7 +181,7 @@ position = Vector2(401.00003, 481)
 scale = Vector2(3.1247392, 0.77842855)
 texture = SubResource("CanvasTexture_8vcgh")
 region_enabled = true
-region_rect = Rect2(104223.23, 0, 800, 1900)
+region_rect = Rect2(3274256.7, 0, 800, 1900)
 script = ExtResource("fog_script")
 breath_speed = 0.5
 min_alpha = 4.4
@@ -153,7 +194,7 @@ position = Vector2(105, 537)
 scale = Vector2(5.220097, 4.9623146)
 texture = ExtResource("6_plx")
 region_enabled = true
-region_rect = Rect2(35138.34, 0, 384, 216)
+region_rect = Rect2(940902.6, 0, 384, 216)
 
 [node name="ground" type="Sprite2D" parent="." unique_id=1576932842]
 z_index = 1
@@ -163,7 +204,7 @@ position = Vector2(377, 1121)
 scale = Vector2(9.298192, 5.585889)
 texture = ExtResource("8_plx")
 region_enabled = true
-region_rect = Rect2(44667.13, 0, 248, 216)
+region_rect = Rect2(1403005.7, 0, 248, 216)
 
 [node name="reflection" type="Sprite2D" parent="." unique_id=539058533]
 modulate = Color(1, 1, 1, 0.15686275)
@@ -176,7 +217,7 @@ position = Vector2(393, 1372.2802)
 scale = Vector2(7.8866663, 5.041211)
 texture = ExtResource("8_cyp6n")
 region_enabled = true
-region_rect = Rect2(47595.17, 88, 300, 132)
+region_rect = Rect2(1405933.7, 88, 300, 132)
 
 [node name="water2" type="Sprite2D" parent="reflection" unique_id=1568036497]
 modulate = Color(0, 0, 0, 1)
@@ -188,7 +229,20 @@ position = Vector2(-3.0431123, -3.824519)
 scale = Vector2(1.4402602, 0.9858138)
 texture = ExtResource("8_cyp6n")
 region_enabled = true
-region_rect = Rect2(104223.23, 88, 209, 132)
+region_rect = Rect2(3274442.8, 88, 209, 132)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1875748657]
+modulate = Color(0.8901961, 0.98039216, 1, 0.7372549)
+z_index = -5
+texture_filter = 1
+material = SubResource("ShaderMaterial_3orxj")
+position = Vector2(392, 160)
+rotation = 3.1415927
+scale = Vector2(21.595654, 5.4566493)
+sprite_frames = SubResource("SpriteFrames_8vcgh")
+autoplay = "default"
+frame_progress = 0.8886697
+flip_h = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1686642164]
 process_mode = 3

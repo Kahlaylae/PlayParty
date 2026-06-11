@@ -33,11 +33,11 @@ html, body {
     height: 100%;
     width: 100%;
     overflow: hidden;
+    background: var(--color-bg);
 }
 
 body {
     font-family: var(--font-family);
-    background: var(--color-bg);
     color: var(--color-text);
     line-height: 1.5;
 }
@@ -142,6 +142,7 @@ main {
     justify-content: flex-start;
     overflow: hidden;
     padding: 1rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* Game window - fixed 600px on desktop, fills on mobile */

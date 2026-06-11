@@ -7,7 +7,7 @@
 scroll_scale = Vector2(0, 0)
 script = ExtResource("1_ni3vu")
 layer_nodes = [NodePath("Background")]
-layer_mults = Array[float]([0.045])
+layer_mults = Array[float]([0.035])
 
 [node name="Background" type="Sprite2D" parent="." unique_id=1948084174]
 z_index = -4
@@ -17,5 +17,5 @@ position = Vector2(360.00003, 631.99994)
 scale = Vector2(5.880208, 6.911352)
 texture = ExtResource("2_ni3vu")
 region_enabled = true
-region_rect = Rect2(0, 1340.3938, 192, 223.52)
+region_rect = Rect2(0, 2537.0723, 192, 223.52)
 region_filter_clip_enabled = true
