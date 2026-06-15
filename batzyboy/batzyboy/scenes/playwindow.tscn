@@ -7,7 +7,7 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_circle"]
 shader = ExtResource("5_mask_shader")
-shader_parameter/outline_color = Color(0.0657901, 0.26453337, 0.2189664, 1)
+shader_parameter/outline_color = Color(0.10980392, 0.2627451, 0.047058824, 0.42352942)
 shader_parameter/outline_width = 0.05000000074506
 
 [node name="Playwindow" type="Node2D" unique_id=2062320398]

@@ -1,98 +1,102 @@
 @tool
 extends CanvasLayer
 
-@export var fruit_list_scene: PackedScene
-@export var pulse_speed: float = 2.0
-@export var outline_thickness: float = 2.0
-@export var fruit_scale := Vector2(3, 3)
+@export var fruit_list_scene: PackedScene    # fruits.tscn  —  data list
+@export var fruitpanel_scene: PackedScene    # fruitpanel.tscn  —  reusable slot
 
-var _silhouette_shader: Shader
+const FRUIT_SCALE  := Vector2(0.26, 0.26)
+const SCROLL_STEP  := 120.0
+const DEFAULT_OUTLINE := 0.5
+const SILHOUETTE_SHADER := preload("res://script/shaders/silhouette.gdshader")
 
 
 func _ready() -> void:
-	_silhouette_shader = load("res://script/shaders/silhouette.gdshader") as Shader
-	if fruit_list_scene == null:
+	if fruit_list_scene == null or fruitpanel_scene == null:
 		return
 
+	# ── Find the grid shell ───────────────────────────────────────────────
+	var grid_container := _find_grid_container()
+	if grid_container == null:
+		return
+
+	# ── Read fruit data ───────────────────────────────────────────────────
 	var fruit_list := fruit_list_scene.instantiate()
-	var window := get_node_or_null("collections window") as Control
-	if window == null:
-		fruit_list.free()
-		return
-
-	# Read the GridContainer's position & size as a layout guide.
-	var guide := _find_grid(window)
-	if guide == null:
-		fruit_list.free()
-		return
-
-	# Always clean previous fruit children to avoid duplicates.
-	for child in window.get_children():
-		if child is Area2D:
-			child.queue_free()
-
-	var sorted: Array = fruit_list.fruit_nodes.duplicate()
-	sorted.sort_custom(func(a: Node, b: Node) -> bool:
-		var la: int = a.get("level") if "level" in a else 1
-		var lb: int = b.get("level") if "level" in b else 1
-		if la != lb:
-			return la < lb
-		return str(a.name).to_lower() < str(b.name).to_lower()
-	)
-
-	var count: int = sorted.size()
-	var cols: int = maxi(guide.columns, 1)
-	var rows: int = ceili(float(count) / float(cols))
-	var cell_w: float = guide.size.x / float(cols)
-	var cell_h: float = guide.size.y / float(rows)
-	var origin: Vector2 = guide.position + Vector2(cell_w, cell_h) * 0.5
-
-	for i in range(count):
-		var node: Node = sorted[i]
-		if not is_instance_valid(node) or node.scene_file_path.is_empty():
-			continue
-		var scene := load(node.scene_file_path) as PackedScene
-		if scene == null:
-			continue
-
-		var fruit = scene.instantiate()
-		fruit.frozen = true
-		fruit.scale = fruit_scale
-		fruit.pulse_speed = pulse_speed
-
-		var col := i % cols
-		var row := i / cols
-		fruit.position = origin + Vector2(col * cell_w, row * cell_h)
-
-		if node.name.to_lower() not in SaveManager.unlocked_fruits:
-			_apply_silhouette(fruit)
-
-		window.add_child(fruit)
-		if Engine.is_editor_hint():
-			fruit.owner = null
-
+	var entries: Array = []
+	for node: Node in fruit_list.fruit_nodes:
+		if is_instance_valid(node) and not node.scene_file_path.is_empty():
+			entries.append({
+				path  = node.scene_file_path,
+				name  = node.name.to_lower(),
+				level = node.get("level") if "level" in node else 1,
+			})
 	fruit_list.free()
 
+	# Sort: lower level first, then alphabetically
+	entries.sort_custom(func(a, b):
+		if a.level != b.level:
+			return a.level < b.level
+		return a.name < b.name
+	)
 
-func _find_grid(parent: Control) -> GridContainer:
-	for child in parent.get_children():
-		if child is GridContainer:
-			return child
-	return null
+	# ── Populate grid ─────────────────────────────────────────────────────
+	var panel_scene := fruitpanel_scene
+	for entry: Dictionary in entries:
+		# Stamp a panel
+		var panel := panel_scene.instantiate() as Control
+		grid_container.add_child(panel)
+
+		# Instance fruit inside the panel
+		var fruit_scene := load(entry.path) as PackedScene
+		if fruit_scene == null:
+			continue
+		var fruit := fruit_scene.instantiate() as Node2D
+		fruit.set("frozen", true)
+		fruit.scale = FRUIT_SCALE
+		fruit.position = Vector2(10, 10)
+		panel.add_child(fruit)
+
+		# Locked → silhouette
+		if entry.name not in SaveManager.unlocked_fruits:
+			var thickness := DEFAULT_OUTLINE
+			var sprite := fruit.get_node_or_null("Sprite2D") as Sprite2D
+			if sprite:
+				# Read outline thickness from fruit's own material if present
+				if sprite.material is ShaderMaterial:
+					var sm: ShaderMaterial = sprite.material
+					var t: Variant = sm.get_shader_parameter("line_thickness")
+					if t != null:
+						thickness = t
+				var mat := ShaderMaterial.new()
+				mat.shader = SILHOUETTE_SHADER
+				mat.set_shader_parameter("outline_thickness", thickness)
+				sprite.material = mat
+
+	# ── Wire scroll buttons ───────────────────────────────────────────────
+	var scroll := get_node_or_null("grid/ScrollContainer") as ScrollContainer
+	if scroll:
+		scroll.gui_input.connect(_block_scroll_input)
+
+		var btn_left := get_node_or_null("grid/left") as Button
+		var btn_right := get_node_or_null("grid/right") as Button
+		if btn_left:
+			btn_left.pressed.connect(func(): _scroll(scroll, -SCROLL_STEP))
+		if btn_right:
+			btn_right.pressed.connect(func(): _scroll(scroll, +SCROLL_STEP))
 
 
-func _apply_silhouette(node: Node) -> void:
-	for sprite in _all_sprites(node):
-		var mat := ShaderMaterial.new()
-		mat.shader = _silhouette_shader
-		mat.set_shader_parameter("outline_thickness", outline_thickness)
-		sprite.material = mat
+func _find_grid_container() -> GridContainer:
+	return get_node_or_null("grid/ScrollContainer/MarginContainer/GridContainer") as GridContainer
 
 
-func _all_sprites(node: Node) -> Array[Sprite2D]:
-	var out: Array[Sprite2D] = []
-	if node is Sprite2D:
-		out.append(node)
-	for child in node.get_children():
-		out.append_array(_all_sprites(child))
-	return out
+func _scroll(sc: ScrollContainer, step: float) -> void:
+	var t := create_tween()
+	var target := sc.scroll_vertical + int(step)
+	t.tween_property(sc, "scroll_vertical", target, 0.25).set_ease(Tween.EASE_OUT)
+
+
+func _block_scroll_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			get_viewport().set_input_as_handled()
+	if event is InputEventPanGesture or event is InputEventMagnifyGesture:
+		get_viewport().set_input_as_handled()

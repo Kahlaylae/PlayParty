@@ -9,12 +9,13 @@ radius = 24.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jlcbh"]
 shader = ExtResource("2_1bs3t")
-shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 0.750000035625
+shader_parameter/line_color = Color(0.87058824, 0.23137255, 0.21960784, 1)
+shader_parameter/line_thickness = 0.50000002375
 
 [node name="watermelon" type="Area2D" unique_id=1022520154]
 script = ExtResource("1_hplsj")
 points = 10
+heal = -2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=113844476]
 shape = SubResource("CircleShape2D_7o87m")
@@ -22,5 +23,6 @@ shape = SubResource("CircleShape2D_7o87m")
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1101992768]
 texture_filter = 1
 material = SubResource("ShaderMaterial_jlcbh")
-scale = Vector2(4, 4)
+position = Vector2(1.9999999, -1.9999999)
+scale = Vector2(3.5, 3.5)
 texture = ExtResource("3_vlmfl")

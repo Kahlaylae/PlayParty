@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://di1e4ryu1kxtd" path="res://script/hitpoints.gd" id="1_14ev0"]
 [ext_resource type="Texture2D" uid="uid://cs4fdsfn0fqvx" path="res://assetsRaw/UI/HealthUI.png" id="1_ruow3"]
+[ext_resource type="Texture2D" uid="uid://gkcbadtdrp1i" path="res://assetsRaw/UI/uiElements/backpanel.png" id="2_hugpe"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ruow3"]
 atlas = ExtResource("1_ruow3")
@@ -34,6 +35,18 @@ animations = [{
 
 [node name="Hearts" type="Node2D" unique_id=1811215120]
 script = ExtResource("1_14ev0")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=885374113]
+offset_left = -32.0
+offset_top = -13.0
+offset_right = 35.368423
+offset_bottom = 13.315792
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("2_hugpe")
+patch_margin_left = 10
+patch_margin_top = 10
+patch_margin_right = 15
+patch_margin_bottom = 10
 
 [node name="heart1" type="AnimatedSprite2D" parent="." unique_id=1169918901]
 texture_filter = 1

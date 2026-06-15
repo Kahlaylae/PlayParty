@@ -10,7 +10,7 @@ radius = 24.0
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jlcbh"]
 shader = ExtResource("2_qvpph")
 shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 0.750000035625
+shader_parameter/line_thickness = 0.50000002375
 
 [node name="plum" type="Area2D" unique_id=1019236651]
 script = ExtResource("1_qtvhf")
@@ -22,4 +22,6 @@ shape = SubResource("CircleShape2D_7o87m")
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=639857445]
 texture_filter = 1
 material = SubResource("ShaderMaterial_jlcbh")
+position = Vector2(-1.9999999, 0.99999994)
+scale = Vector2(3.75, 3.75)
 texture = ExtResource("3_y2q5u")

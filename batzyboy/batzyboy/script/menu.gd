@@ -8,10 +8,10 @@ var _state: MenuState = MenuState.MAIN
 # ── Scene node refs ───────────────────────────────────────────────────────────
 @onready var _title:    RichTextLabel = $title
 @onready var _points:   RichTextLabel = $points
-@onready var _btn_new:  Button        = $"New Game"
-@onready var _btn_cont: Button        = $Continue
-@onready var _btn_set:  Button        = $Settings
-@onready var _btn_coll: Button        = $Collections
+@onready var _btn_new:  Button        = $newgamepatch/"New Game"
+@onready var _btn_cont: Button        = $continuepatch/Continue
+@onready var _btn_set:  Button        = $settingspatch/Settings
+@onready var _btn_coll: Button        = $collectionspatch/Collections
 
 # Overlays built in code
 var _settings_layer: CanvasLayer
@@ -60,6 +60,10 @@ func _on_new_game() -> void:
 
 func _on_collections() -> void:
 	get_tree().change_scene_to_file("res://scenes/collections.tscn")
+
+
+func _on_highscores() -> void:
+	get_tree().change_scene_to_file("res://scenes/highscores.tscn")
 
 
 func _on_continue() -> void:

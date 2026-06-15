@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://p2lp4hiumfo1"]
+
+[ext_resource type="Texture2D" uid="uid://dwr06j3us1xwi" path="res://assetsRaw/UI/uiElements/placeholder.png" id="1_3ix7y"]
+
+[node name="fruitpanel" type="NinePatchRect" unique_id=1499618829]
+texture_filter = 1
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("1_3ix7y")
+patch_margin_left = 10
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10

@@ -12,6 +12,7 @@ signal fruit_unlocked(fruit_id: String)
 
 var score:            int  = 0
 var high_score:       int  = 0
+var high_dist:        float = 0.0      # distance when high_score was set
 var resume_level:     int  = 1
 var resume_score:     int  = 0         # restored when continuing a session
 var resume_dist:      float = 0.0      # restored when continuing a session
@@ -53,6 +54,7 @@ func save() -> void:
 		return
 	var data := {
 		"high_score":      high_score,
+		"high_dist":       high_dist,
 		"resume_level":    resume_level,
 		"resume_score":    resume_score,
 		"resume_dist":     resume_dist,
@@ -77,6 +79,7 @@ func load_data() -> void:
 		return
 	var d := parsed as Dictionary
 	high_score   = int(d.get("high_score",   0))
+	high_dist    = float(d.get("high_dist",  0.0))
 	resume_level = int(d.get("resume_level", 1))
 	resume_score = int(d.get("resume_score", 0))
 	resume_dist  = float(d.get("resume_dist", 0.0))
@@ -94,6 +97,7 @@ func save_progress(level: int, pts: int, dist: float = 0.0) -> void:
 	resume_dist  = dist
 	if pts > high_score:
 		high_score = pts
+		high_dist  = dist
 	save()
 
 
@@ -108,6 +112,23 @@ func unlock_fruit(id: String) -> void:
 		unlocked_fruits.append(key)
 		save()
 		fruit_unlocked.emit(key)
+
+
+# ── Online leaderboard ──────────────────────────────────────────────────
+const HISCORES_URL := "https://firestore.googleapis.com/v1/projects/batzyboy-5c624/databases/%28default%29/documents/hiscores?key=AIzaSyDGEwstQlAkvf9yNudaNa7gT4Rb06LeBy0"
+
+func submit_online_score(player_name: String) -> void:
+	var http := HTTPRequest.new()
+	add_child(http)
+	var m := int(high_dist / 100.0)
+	var body := JSON.stringify({fields = {
+		name  = {stringValue  = player_name},
+		score = {integerValue = high_score},
+		dist  = {integerValue = m},
+		level = {integerValue = resume_level},
+	}})
+	http.request_completed.connect(func(_r, _c, _h, _b): http.queue_free())
+	http.request(HISCORES_URL, [], HTTPClient.METHOD_POST, body)
 
 
 # Returns true when every fruit whose min_level == level has been caught at least once.

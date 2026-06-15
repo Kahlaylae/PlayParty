@@ -1,0 +1,265 @@
+[gd_scene format=3 uid="uid://hl6aawjmfrbq"]
+
+[ext_resource type="PackedScene" uid="uid://lln3kc1yk262" path="res://scenes/menuparallax.tscn" id="1_j3tq7"]
+[ext_resource type="Texture2D" uid="uid://gkcbadtdrp1i" path="res://assetsRaw/UI/uiElements/backpanel.png" id="2_54w3a"]
+[ext_resource type="Shader" uid="uid://d28whffvtp7is" path="res://script/shaders/icon.gdshader" id="3_vhji3"]
+[ext_resource type="Texture2D" uid="uid://c2exp81joc5hr" path="res://assetsRaw/UI/uiElements/play.png" id="4_5swaj"]
+[ext_resource type="Script" uid="uid://1h8cyhlf32sv" path="res://script/menubutton.gd" id="5_f16vu"]
+[ext_resource type="Texture2D" uid="uid://c6v83uf57wvwf" path="res://assetsRaw/UI/uiElements/help.png" id="6_onehq"]
+[ext_resource type="Script" uid="uid://nddelbsjxla6" path="res://script/helpbutton.gd" id="7_ldpgt"]
+[ext_resource type="Texture2D" uid="uid://us0jichfhwtg" path="res://assetsRaw/UI/uiElements/collectionswindow.png" id="8_qlmfq"]
+[ext_resource type="PackedScene" uid="uid://cpwvl0ijo7nes" path="res://scenes/fruitboys/applebaby.tscn" id="9_kh288"]
+[ext_resource type="PackedScene" uid="uid://kt4xj4dsxp67" path="res://scenes/fruitboys/lemonbaby.tscn" id="10_xaygv"]
+[ext_resource type="PackedScene" uid="uid://bjf3njh3euayn" path="res://scenes/fruitboys/orangebaby.tscn" id="11_p6u0q"]
+[ext_resource type="PackedScene" uid="uid://b8ofiad3wvqcq" path="res://scenes/fruitboys/watermelonbaby.tscn" id="12_5n7pm"]
+[ext_resource type="PackedScene" uid="uid://ofyr18j50uov" path="res://scenes/fruitboys/strawberrybaby.tscn" id="13_us4cv"]
+[ext_resource type="Script" uid="uid://cea571rskdihp" path="res://script/highscores.gd" id="14_54w3a"]
+[ext_resource type="Theme" uid="uid://c5wy5yiygftou" path="res://scenes/themes/highscoretheme.tres" id="14_vhji3"]
+[ext_resource type="Script" uid="uid://c2abec7d7pfjb" path="res://script/offlinescore.gd" id="15_onehq"]
+[ext_resource type="Script" uid="uid://toh0of0p81n7" path="res://scenes/highscorebutton.gd" id="16_5swaj"]
+[ext_resource type="Texture2D" uid="uid://bwytqak58cp2h" path="res://assetsRaw/UI/uiElements/highscorebutton.png" id="16_f16vu"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qj2wq"]
+shader = ExtResource("3_vhji3")
+shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
+shader_parameter/outline_color = Color(0.18356577, 0.022312064, 0.025110528, 0.23529412)
+shader_parameter/outline_thickness = 3.0000001425
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_g6n21"]
+shader = ExtResource("3_vhji3")
+shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
+shader_parameter/outline_color = Color(0.18431373, 0.023529412, 0.023529412, 0.23529412)
+shader_parameter/outline_thickness = 5.0000002375
+
+[node name="hiscores" type="Control" unique_id=1197996462]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 600.0
+offset_bottom = 1000.0
+
+[node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=1305047474]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1277800878]
+layer = -3
+
+[node name="Title" type="RichTextLabel" parent="CanvasLayer" unique_id=100634116]
+z_index = 3
+texture_filter = 2
+texture_repeat = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -240.0
+offset_top = -387.0
+offset_right = 252.0
+offset_bottom = -211.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_stretch_ratio = 0.0
+theme_override_constants/line_separation = -30
+theme_override_constants/outline_size = 17
+theme_override_constants/table_v_separation = 3
+theme_override_font_sizes/normal_font_size = 117
+bbcode_enabled = true
+text = "Hi-Scores"
+fit_content = true
+scroll_active = false
+autowrap_mode = 2
+tab_size = 2
+context_menu_enabled = true
+horizontal_alignment = 1
+justification_flags = 1
+visible_characters_behavior = 2
+
+[node name="menuparallax" parent="CanvasLayer" unique_id=577794802 instance=ExtResource("1_j3tq7")]
+z_index = -4
+scroll_offset = Vector2(10, -22)
+
+[node name="menupatch" type="NinePatchRect" parent="CanvasLayer" unique_id=533785760]
+offset_left = 636.0
+offset_top = 16.0
+offset_right = 694.08374
+offset_bottom = 90.679214
+scale = Vector2(0.9641237, 0.9641237)
+texture = ExtResource("2_54w3a")
+patch_margin_left = 19
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="MenuButton" type="Button" parent="CanvasLayer/menupatch" unique_id=1310190865]
+texture_filter = 1
+texture_repeat = 3
+material = SubResource("ShaderMaterial_qj2wq")
+layout_mode = 0
+offset_left = 4.14882
+offset_top = -5.186057
+offset_right = 117.78517
+offset_bottom = 98.50883
+scale = Vector2(0.704, 0.839)
+icon = ExtResource("4_5swaj")
+flat = true
+script = ExtResource("5_f16vu")
+
+[node name="helppatch" type="NinePatchRect" parent="CanvasLayer" unique_id=949310908]
+offset_left = 576.0
+offset_top = 16.0
+offset_right = 634.08374
+offset_bottom = 90.679214
+scale = Vector2(0.9641237, 0.9641237)
+texture = ExtResource("2_54w3a")
+patch_margin_left = 19
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="How2Button" type="Button" parent="CanvasLayer/helppatch" unique_id=1182534035]
+texture_filter = 3
+texture_repeat = 2
+material = SubResource("ShaderMaterial_g6n21")
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -31.116278
+offset_top = 8.297689
+offset_right = 40.88372
+offset_bottom = 80.29769
+grow_horizontal = 2
+scale = Vector2(0.8385135, 0.8385135)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.0
+icon = ExtResource("6_onehq")
+flat = true
+text_overrun_behavior = 1
+script = ExtResource("7_ldpgt")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="CanvasLayer" unique_id=261102797]
+z_index = 2
+z_as_relative = false
+offset_left = 111.0
+offset_top = 340.0
+offset_right = 278.0
+offset_bottom = 557.3334
+scale = Vector2(3, 3)
+texture = ExtResource("8_qlmfq")
+patch_margin_left = 50
+patch_margin_top = 50
+patch_margin_right = 50
+patch_margin_bottom = 50
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[node name="applebaby" parent="CanvasLayer" unique_id=775343366 instance=ExtResource("9_kh288")]
+z_index = 2
+position = Vector2(200, 217.00002)
+scale = Vector2(3.5, 3.5)
+
+[node name="lemonbaby" parent="CanvasLayer" unique_id=1604801010 instance=ExtResource("10_xaygv")]
+z_index = 2
+position = Vector2(569.00006, 948.00006)
+scale = Vector2(3.5, 3.5)
+
+[node name="orangebaby" parent="CanvasLayer" unique_id=1200206360 instance=ExtResource("11_p6u0q")]
+z_index = 2
+position = Vector2(145, 947)
+scale = Vector2(3.5, 3.5)
+
+[node name="watermelonbaby" parent="CanvasLayer" unique_id=712754995 instance=ExtResource("12_5n7pm")]
+z_index = 2
+position = Vector2(577, 300)
+scale = Vector2(3.5, 3.5)
+
+[node name="strawberrybaby" parent="CanvasLayer" unique_id=420971279 instance=ExtResource("13_us4cv")]
+z_index = 2
+position = Vector2(150, 311)
+scale = Vector2(3.5, 3.5)
+
+[node name="offlinescore" type="RichTextLabel" parent="CanvasLayer" unique_id=1950669509]
+z_index = 3
+texture_filter = 1
+offset_left = 184.0
+offset_top = 937.0
+offset_right = 484.0
+offset_bottom = 1017.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("14_vhji3")
+theme_override_font_sizes/normal_font_size = 50
+bbcode_enabled = true
+text = "Your Score:"
+fit_content = true
+autowrap_mode = 2
+tab_size = 5
+script = ExtResource("15_onehq")
+metadata/_edit_use_anchors_ = true
+
+[node name="highscorebutton" type="NinePatchRect" parent="CanvasLayer" unique_id=479452914]
+offset_left = 70.0
+offset_top = 16.0
+offset_right = 128.08374
+offset_bottom = 90.679214
+scale = Vector2(0.9641237, 0.9641237)
+texture = ExtResource("2_54w3a")
+patch_margin_left = 19
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="highscorebutton" type="Button" parent="CanvasLayer/highscorebutton" unique_id=894488290]
+texture_filter = 3
+texture_repeat = 2
+material = SubResource("ShaderMaterial_g6n21")
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -33.19072
+offset_top = 10.372112
+offset_right = -11.19072
+offset_bottom = 30.372112
+grow_horizontal = 2
+scale = Vector2(3, 3)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.0
+icon = ExtResource("16_f16vu")
+flat = true
+text_overrun_behavior = 1
+script = ExtResource("16_5swaj")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1544981689]
+layout_mode = 0
+offset_left = 164.0
+offset_top = 396.0
+offset_right = 573.0
+offset_bottom = 896.0
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
+
+[node name="highscoretabel" type="MarginContainer" parent="ScrollContainer" unique_id=502461921]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="highscoretabeltext" type="RichTextLabel" parent="ScrollContainer/highscoretabel" unique_id=2082842659]
+texture_filter = 1
+layout_mode = 2
+theme = ExtResource("14_vhji3")
+theme_override_font_sizes/normal_font_size = 25
+text = " Name |    Points   | Distance
+jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerxjohn jacob jingleheumerx"
+fit_content = true
+scroll_following = true
+autowrap_mode = 2
+tab_size = 8
+script = ExtResource("14_54w3a")
+metadata/_edit_use_anchors_ = true
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=2041284577]
+anchor_mode = 0

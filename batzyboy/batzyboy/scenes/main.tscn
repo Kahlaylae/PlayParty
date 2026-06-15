@@ -5,27 +5,29 @@
 [ext_resource type="PackedScene" uid="uid://c7kvud3y3tsus" path="res://scenes/enemies.tscn" id="2_tefeu"]
 [ext_resource type="PackedScene" uid="uid://bsqkcf1vc018v" path="res://scenes/fruits.tscn" id="3_o6xl0"]
 [ext_resource type="FontFile" uid="uid://bjabx2uloeigs" path="res://assetsRaw/fonts/Ithaca.ttf" id="5_jkv2x"]
+[ext_resource type="Texture2D" uid="uid://gkcbadtdrp1i" path="res://assetsRaw/UI/uiElements/backpanel.png" id="6_jkv2x"]
 [ext_resource type="Shader" uid="uid://d28whffvtp7is" path="res://script/shaders/icon.gdshader" id="7_a8y0u"]
 [ext_resource type="Script" uid="uid://dvwp4pw5nqeqe" path="res://script/monsterSpawner.gd" id="7_o6xl0"]
 [ext_resource type="Script" uid="uid://cavia1c0gf7lo" path="res://script/fruitspawner.gd" id="8_choun"]
 [ext_resource type="Texture2D" uid="uid://c6v83uf57wvwf" path="res://assetsRaw/UI/uiElements/help.png" id="8_jkv2x"]
-[ext_resource type="Texture2D" uid="uid://dicsa872vbd3b" path="res://assetsRaw/UI/uiElements/pause.png" id="9_jkv2x"]
+[ext_resource type="Texture2D" uid="uid://c2exp81joc5hr" path="res://assetsRaw/UI/uiElements/play.png" id="10_a8y0u"]
 [ext_resource type="PackedScene" uid="uid://b8ln7otjmug6m" path="res://scenes/hearts.tscn" id="11_ya4ey"]
+[ext_resource type="Script" uid="uid://cnc6w7fwx0vnl" path="res://script/killerzone.gd" id="14_jbj1t"]
 [ext_resource type="Script" uid="uid://nddelbsjxla6" path="res://script/helpbutton.gd" id="script_helpbtn"]
 [ext_resource type="Script" uid="uid://pyejpjptpvq4" path="res://script/main.gd" id="script_main"]
 [ext_resource type="Script" uid="uid://1h8cyhlf32sv" path="res://script/menubutton.gd" id="script_menubtn"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_eb6dy"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jbj1t"]
 shader = ExtResource("7_a8y0u")
-shader_parameter/tint = Color(0.101960786, 0.73333335, 0.7607843, 1)
-shader_parameter/outline_color = Color(1, 1, 1, 1)
-shader_parameter/outline_thickness = 1.0000000475
+shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
+shader_parameter/outline_color = Color(0.18356577, 0.022312064, 0.025110528, 0.23529412)
+shader_parameter/outline_thickness = 3.0000001425
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_trceg"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_muem4"]
 shader = ExtResource("7_a8y0u")
-shader_parameter/tint = Color(0.101960786, 0.73333335, 0.7607843, 1)
-shader_parameter/outline_color = Color(1, 1, 1, 1)
-shader_parameter/outline_thickness = 1.5
+shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
+shader_parameter/outline_color = Color(0.18431373, 0.023529412, 0.023529412, 0.23529412)
+shader_parameter/outline_thickness = 3.0000001425
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_trceg"]
 
@@ -61,8 +63,68 @@ follow_viewport_enabled = true
 [node name="hearts" parent="CanvasLayer" unique_id=267642753 instance=ExtResource("11_ya4ey")]
 z_index = 5
 texture_filter = 1
-position = Vector2(136, 64)
-scale = Vector2(5, 5)
+position = Vector2(120, 56)
+scale = Vector2(2.6488657, 2.6488657)
+
+[node name="menupatch" type="NinePatchRect" parent="CanvasLayer" unique_id=1568245437]
+offset_left = 656.0
+offset_top = 24.0
+offset_right = 714.08374
+offset_bottom = 98.679214
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("6_jkv2x")
+patch_margin_left = 10
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="MenuButton" type="Button" parent="CanvasLayer/menupatch" unique_id=1270297736]
+texture_filter = 1
+texture_repeat = 3
+material = SubResource("ShaderMaterial_jbj1t")
+layout_mode = 0
+offset_left = 4.14882
+offset_top = -5.186057
+offset_right = 117.78517
+offset_bottom = 98.50883
+scale = Vector2(0.704, 0.839)
+icon = ExtResource("10_a8y0u")
+flat = true
+script = ExtResource("script_menubtn")
+
+[node name="helppatch" type="NinePatchRect" parent="CanvasLayer" unique_id=545215540]
+offset_left = 576.0
+offset_top = 25.0
+offset_right = 634.08374
+offset_bottom = 99.679214
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("6_jkv2x")
+patch_margin_left = 10
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="How2Button" type="Button" parent="CanvasLayer/helppatch" unique_id=1480559662]
+texture_filter = 3
+texture_repeat = 2
+material = SubResource("ShaderMaterial_muem4")
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -31.116278
+offset_top = 8.297689
+offset_right = 40.88372
+offset_bottom = 80.29769
+grow_horizontal = 2
+scale = Vector2(0.8385135, 0.8385135)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.0
+icon = ExtResource("8_jkv2x")
+flat = true
+text_overrun_behavior = 1
+script = ExtResource("script_helpbtn")
 
 [node name="Points" type="RichTextLabel" parent="CanvasLayer" unique_id=19796658]
 z_index = 5
@@ -98,44 +160,11 @@ scroll_active = false
 autowrap_mode = 0
 horizontal_alignment = 1
 
-[node name="How2Button" type="Button" parent="CanvasLayer" unique_id=1590330913]
-texture_filter = 1
-texture_repeat = 2
-material = SubResource("ShaderMaterial_eb6dy")
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = 208.0
-offset_top = 32.0
-offset_right = 280.0
-offset_bottom = 104.0
-grow_horizontal = 2
-scale = Vector2(0.8385135, 0.8385135)
-size_flags_horizontal = 4
-size_flags_vertical = 4
-size_flags_stretch_ratio = 0.0
-icon = ExtResource("8_jkv2x")
-flat = true
-text_overrun_behavior = 1
-script = ExtResource("script_helpbtn")
-
-[node name="MenuButton" type="Button" parent="CanvasLayer" unique_id=1906885141]
-texture_filter = 1
-texture_repeat = 3
-material = SubResource("ShaderMaterial_trceg")
-offset_left = 616.00006
-offset_top = 32.0
-offset_right = 688.00006
-offset_bottom = 104.0
-scale = Vector2(0.704, 0.839)
-icon = ExtResource("9_jkv2x")
-flat = true
-script = ExtResource("script_menubtn")
-
 [node name="roof" type="StaticBody2D" parent="CanvasLayer" unique_id=767058240]
 position = Vector2(344, 120)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CanvasLayer/roof" unique_id=2118354701]
+position = Vector2(0, 40)
 rotation = 3.1415927
 scale = Vector2(1, 4)
 shape = SubResource("WorldBoundaryShape2D_trceg")
@@ -159,6 +188,7 @@ limit_bottom = 1280
 [node name="killerzone" type="Area2D" parent="." unique_id=2035655063]
 z_index = 2
 position = Vector2(467, 1004)
+script = ExtResource("14_jbj1t")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="killerzone" unique_id=1911690869]
 position = Vector2(-88, -32)

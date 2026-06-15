@@ -10,7 +10,7 @@ radius = 24.0
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jlcbh"]
 shader = ExtResource("2_t1aqi")
 shader_parameter/line_color = Color(1, 1, 1, 1)
-shader_parameter/line_thickness = 0.750000035625
+shader_parameter/line_thickness = 0.50000002375
 
 [node name="durian" type="Area2D" unique_id=1660278325]
 script = ExtResource("1_fqqvy")
@@ -22,4 +22,6 @@ shape = SubResource("CircleShape2D_7o87m")
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1950424166]
 texture_filter = 1
 material = SubResource("ShaderMaterial_jlcbh")
+position = Vector2(4.7683716e-07, 0)
+scale = Vector2(2.75, 2.75)
 texture = ExtResource("3_cdj6n")

@@ -2,38 +2,48 @@
 
 [ext_resource type="Script" uid="uid://c6c1u4orlwjd0" path="res://script/collections.gd" id="1_kxtot"]
 [ext_resource type="PackedScene" uid="uid://lln3kc1yk262" path="res://scenes/menuparallax.tscn" id="2_q1ne7"]
-[ext_resource type="Texture2D" uid="uid://us0jichfhwtg" path="res://assetsRaw/UI/uiElements/collectionswindow.png" id="3_03hsv"]
+[ext_resource type="Texture2D" uid="uid://gkcbadtdrp1i" path="res://assetsRaw/UI/uiElements/backpanel.png" id="3_gmcut"]
 [ext_resource type="PackedScene" uid="uid://bsqkcf1vc018v" path="res://scenes/fruits.tscn" id="4_fruits"]
 [ext_resource type="Texture2D" uid="uid://c6v83uf57wvwf" path="res://assetsRaw/UI/uiElements/help.png" id="6_help"]
 [ext_resource type="Shader" uid="uid://d28whffvtp7is" path="res://script/shaders/icon.gdshader" id="6_icon_shader"]
 [ext_resource type="Texture2D" uid="uid://c2exp81joc5hr" path="res://assetsRaw/UI/uiElements/play.png" id="7_play"]
+[ext_resource type="PackedScene" uid="uid://brrkvbvfn56lo" path="res://scenes/grid.tscn" id="8_8y54x"]
 [ext_resource type="PackedScene" uid="uid://cpwvl0ijo7nes" path="res://scenes/fruitboys/applebaby.tscn" id="8_applebaby"]
 [ext_resource type="PackedScene" uid="uid://kt4xj4dsxp67" path="res://scenes/fruitboys/lemonbaby.tscn" id="9_lemonbaby"]
+[ext_resource type="Texture2D" uid="uid://bwytqak58cp2h" path="res://assetsRaw/UI/uiElements/highscorebutton.png" id="10_mx6ix"]
 [ext_resource type="PackedScene" uid="uid://bjf3njh3euayn" path="res://scenes/fruitboys/orangebaby.tscn" id="10_orangebaby"]
 [ext_resource type="PackedScene" uid="uid://curpygfh3rbi4" path="res://scenes/fruitboys/pearbaby.tscn" id="11_pearbaby"]
+[ext_resource type="Script" uid="uid://toh0of0p81n7" path="res://scenes/highscorebutton.gd" id="11_wc8c8"]
 [ext_resource type="PackedScene" uid="uid://ofyr18j50uov" path="res://scenes/fruitboys/strawberrybaby.tscn" id="12_strawberrybaby"]
+[ext_resource type="PackedScene" uid="uid://p2lp4hiumfo1" path="res://scenes/fruitpanel.tscn" id="fruitpanel_scene"]
 [ext_resource type="Script" uid="uid://nddelbsjxla6" path="res://script/helpbutton.gd" id="script_helpbtn"]
 [ext_resource type="Script" uid="uid://1h8cyhlf32sv" path="res://script/menubutton.gd" id="script_menubtn"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_icon1"]
-resource_local_to_scene = true
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gmcut"]
 shader = ExtResource("6_icon_shader")
-shader_parameter/tint = Color(0.4117647, 0.8627451, 0.89411765, 1)
-shader_parameter/outline_color = Color(1, 1, 1, 1)
-shader_parameter/outline_thickness = 1.0000000475
+shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
+shader_parameter/outline_color = Color(0.18356577, 0.022312064, 0.025110528, 0.23529412)
+shader_parameter/outline_thickness = 3.0000001425
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_icon2"]
-resource_local_to_scene = true
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8y54x"]
 shader = ExtResource("6_icon_shader")
-shader_parameter/tint = Color(0.4117647, 0.8627451, 0.89411765, 1)
-shader_parameter/outline_color = Color(1, 1, 1, 1)
-shader_parameter/outline_thickness = 1.5
+shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
+shader_parameter/outline_color = Color(0.18431373, 0.023529412, 0.023529412, 0.23529412)
+shader_parameter/outline_thickness = 3.0000001425
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_x6p3a"]
+shader = ExtResource("6_icon_shader")
+shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
+shader_parameter/outline_color = Color(0.18431373, 0.023529412, 0.023529412, 0.23529412)
+shader_parameter/outline_thickness = 5.0000002375
 
 [node name="collections" type="CanvasLayer" unique_id=711208428]
 script = ExtResource("1_kxtot")
 fruit_list_scene = ExtResource("4_fruits")
+fruitpanel_scene = ExtResource("fruitpanel_scene")
 
 [node name="Title" type="RichTextLabel" parent="." unique_id=375607090]
+z_index = 1
 texture_filter = 2
 texture_repeat = 1
 anchors_preset = 8
@@ -42,9 +52,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -248.0
-offset_top = -528.0
+offset_top = -536.0
 offset_right = 244.0
-offset_bottom = -352.0
+offset_bottom = -360.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 6
@@ -65,17 +75,56 @@ horizontal_alignment = 1
 justification_flags = 1
 visible_characters_behavior = 2
 
-[node name="How2Button" type="Button" parent="." unique_id=936553580]
+[node name="menupatch" type="NinePatchRect" parent="." unique_id=1975428735]
+offset_left = 636.0
+offset_top = 16.0
+offset_right = 694.08374
+offset_bottom = 90.679214
+scale = Vector2(0.9641237, 0.9641237)
+texture = ExtResource("3_gmcut")
+patch_margin_left = 19
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="MenuButton" type="Button" parent="menupatch" unique_id=1607222935]
+texture_filter = 1
+texture_repeat = 3
+material = SubResource("ShaderMaterial_gmcut")
+layout_mode = 0
+offset_left = 4.14882
+offset_top = -5.186057
+offset_right = 117.78517
+offset_bottom = 98.50883
+scale = Vector2(0.704, 0.839)
+icon = ExtResource("7_play")
+flat = true
+script = ExtResource("script_menubtn")
+
+[node name="helppatch" type="NinePatchRect" parent="." unique_id=1491216595]
+offset_left = 576.0
+offset_top = 16.0
+offset_right = 634.08374
+offset_bottom = 90.679214
+scale = Vector2(0.9641237, 0.9641237)
+texture = ExtResource("3_gmcut")
+patch_margin_left = 19
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="How2Button" type="Button" parent="helppatch" unique_id=184540314]
 texture_filter = 3
 texture_repeat = 2
-material = SubResource("ShaderMaterial_icon1")
+material = SubResource("ShaderMaterial_8y54x")
+layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = 216.0
-offset_top = 32.0
-offset_right = 288.0
-offset_bottom = 104.0
+offset_left = -31.116278
+offset_top = 8.297689
+offset_right = 40.88372
+offset_bottom = 80.29769
 grow_horizontal = 2
 scale = Vector2(0.8385135, 0.8385135)
 size_flags_horizontal = 4
@@ -86,74 +135,76 @@ flat = true
 text_overrun_behavior = 1
 script = ExtResource("script_helpbtn")
 
-[node name="MenuButton" type="Button" parent="." unique_id=1563108123]
-texture_filter = 1
-texture_repeat = 3
-material = SubResource("ShaderMaterial_icon2")
-offset_left = 640.00006
-offset_top = 32.0
-offset_right = 712.00006
-offset_bottom = 104.0
-scale = Vector2(0.704, 0.839)
-icon = ExtResource("7_play")
-flat = true
-script = ExtResource("script_menubtn")
+[node name="highscorebutton" type="NinePatchRect" parent="." unique_id=533276230]
+offset_left = 40.0
+offset_top = 24.0
+offset_right = 98.08374
+offset_bottom = 98.679214
+scale = Vector2(0.9641237, 0.9641237)
+texture = ExtResource("3_gmcut")
+patch_margin_left = 19
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
 
-[node name="collections window" type="NinePatchRect" parent="." unique_id=1642370233]
-texture_filter = 1
-offset_left = 32.0
-offset_top = 272.0
-offset_right = 1761.1051
-offset_bottom = 1772.0
-scale = Vector2(0.37013367, 0.5970936)
-texture = ExtResource("3_03hsv")
-draw_center = false
-patch_margin_left = 750
-patch_margin_top = 750
-patch_margin_right = 750
-patch_margin_bottom = 900
-axis_stretch_vertical = 1
-metadata/_edit_use_anchors_ = true
-
-[node name="GridContainer" type="GridContainer" parent="collections window" unique_id=333326546]
-custom_minimum_size = Vector2(200, 0)
+[node name="highscorebutton" type="Button" parent="highscorebutton" unique_id=1544641917]
+texture_filter = 3
+texture_repeat = 2
+material = SubResource("ShaderMaterial_x6p3a")
 layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.037
-anchor_top = 0.024
-anchor_right = 0.037
-anchor_bottom = 0.024
-offset_left = 87.3198
-offset_top = 40.789406
-offset_right = 1487.3197
-offset_bottom = 1440.7894
-columns = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -33.19072
+offset_top = 10.372112
+offset_right = -11.19072
+offset_bottom = 30.372112
+grow_horizontal = 2
+scale = Vector2(3, 3)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.0
+icon = ExtResource("10_mx6ix")
+flat = true
+text_overrun_behavior = 1
+script = ExtResource("11_wc8c8")
+
+[node name="grid" parent="." unique_id=298611686 instance=ExtResource("8_8y54x")]
+offset_left = 63.999996
+offset_top = 256.0
+offset_right = 164.0
+offset_bottom = 456.0
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=753899521]
+position = Vector2(0, -8)
 anchor_mode = 0
-limit_left = -3
+limit_left = 0
 limit_top = 2
-limit_right = 717
+limit_right = 720
 limit_bottom = 1282
 
 [node name="menuparallax" parent="." unique_id=684406184 instance=ExtResource("2_q1ne7")]
-scroll_offset = Vector2(128, -16)
+scroll_offset = Vector2(-8, 24)
 
 [node name="applebaby" parent="." unique_id=775343366 instance=ExtResource("8_applebaby")]
-position = Vector2(600, 1192)
+position = Vector2(576, 1120)
 scale = Vector2(4, 4)
 
 [node name="lemonbaby" parent="." unique_id=1604801010 instance=ExtResource("9_lemonbaby")]
-position = Vector2(568, 232)
+z_index = 2
+texture_filter = 1
+position = Vector2(512, 176)
 scale = Vector2(4, 4)
 script = null
 
 [node name="orangebaby" parent="." unique_id=1200206360 instance=ExtResource("10_orangebaby")]
-position = Vector2(496, 192)
+z_index = 1
+position = Vector2(416, 96)
 scale = Vector2(4, 4)
 script = null
 
 [node name="pearbaby" parent="." unique_id=1363756705 instance=ExtResource("11_pearbaby")]
+z_index = 1
 position = Vector2(280, 104)
 scale = Vector2(4, 4)
 script = null

@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://brrkvbvfn56lo"]
+
+[ext_resource type="Shader" uid="uid://b2qsrs14kyu7o" path="res://script/shaders/outline.gdshader" id="1_w88cy"]
+[ext_resource type="Texture2D" uid="uid://us0jichfhwtg" path="res://assetsRaw/UI/uiElements/collectionswindow.png" id="2_2s7k2"]
+[ext_resource type="Texture2D" uid="uid://btu1a5r431ty1" path="res://assetsRaw/UI/uiElements/ArrowLeft.png" id="4_gnlqp"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gnlqp"]
+shader = ExtResource("1_w88cy")
+shader_parameter/line_color = Color(0.10980392, 0.2627451, 0.047058824, 0.83137256)
+shader_parameter/line_thickness = 1.250000059375
+
+[node name="grid" type="NinePatchRect" unique_id=298611686]
+material = SubResource("ShaderMaterial_gnlqp")
+offset_top = 3.0517578e-05
+offset_right = 100.00001
+offset_bottom = 200.00003
+scale = Vector2(5.7876487, 4.7235794)
+texture = ExtResource("2_2s7k2")
+patch_margin_left = 50
+patch_margin_top = 100
+patch_margin_right = 50
+patch_margin_bottom = 100
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+metadata/_edit_horizontal_guides_ = [889.0, -392.0, 788.0]
+
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1118448908]
+layout_direction = 2
+layout_mode = 0
+offset_left = 10.88525
+offset_top = 15.666079
+offset_right = 90.885254
+offset_bottom = 165.66608
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer" unique_id=1784055420]
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.0
+
+[node name="GridContainer" type="GridContainer" parent="ScrollContainer/MarginContainer" unique_id=911236621]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 3
+
+[node name="left" type="Button" parent="." unique_id=645380153]
+layout_mode = 0
+offset_left = 26.608389
+offset_top = 172.96205
+offset_right = 76.60839
+offset_bottom = 236.96205
+scale = Vector2(0.25, 0.25)
+icon = ExtResource("4_gnlqp")
+flat = true
+
+[node name="right" type="Button" parent="." unique_id=1624680516]
+texture_filter = 1
+layout_mode = 0
+offset_left = 71.53164
+offset_top = 189.05154
+offset_right = 121.53164
+offset_bottom = 253.05154
+scale = Vector2(-0.25, -0.25)
+icon = ExtResource("4_gnlqp")
+flat = true

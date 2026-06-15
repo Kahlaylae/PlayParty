@@ -1,0 +1,7 @@
+[gd_resource type="Theme" format=3 uid="uid://c5wy5yiygftou"]
+
+[ext_resource type="FontFile" uid="uid://bjabx2uloeigs" path="res://assetsRaw/fonts/Ithaca.ttf" id="1_fajxj"]
+
+[resource]
+default_font = ExtResource("1_fajxj")
+default_font_size = 50
