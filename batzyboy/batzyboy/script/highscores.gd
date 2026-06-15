@@ -5,7 +5,7 @@ extends RichTextLabel
 
 const PROJECT_ID := "batzyboy-5c624"
 const API_KEY    := "AIzaSyDGEwstQlAkvf9yNudaNa7gT4Rb06LeBy0"
-const BASE_URL   := "https://firestore.googleapis.com/v1/projects/%s/databases/%%28default%%29/documents/hiscores" % PROJECT_ID
+const BASE_URL   := "https://firestore.googleapis.com/v1/projects/batzyboy-5c624/databases/%28default%29/documents/hiscores"
 const AUTH_URL   := "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=%s" % API_KEY
 
 @onready var _http: HTTPRequest = _find_http()
@@ -25,12 +25,13 @@ func _find_http() -> HTTPRequest:
 
 
 func _ready() -> void:
+	bbcode_enabled = true
 	if _http == null:
 		self.text = "[center]HTTPRequest not found[/center]"
 		return
 	self.text = "[center]Connecting …[/center]"
 	_http.request_completed.connect(_on_response)
-	_sign_in()
+	_fetch()
 
 
 func _sign_in() -> void:
@@ -92,9 +93,9 @@ func _on_response(_result: int, _code: int, _headers: PackedStringArray, body: P
 
 func _display() -> void:
 	var txt := "[table=4]"
-	txt += "[cell][b]NAME[/b][/cell][cell][b]PTS[/b][/cell][cell][b]DIST[/b][/cell][cell][b]LVL[/b][/cell]"
+	txt += "[cell][b]  NAME  [/b][/cell][cell][b]PTS[/b][/cell][cell][b] DIST [/b][/cell][cell][b]LVL[/b][/cell]"
 	for s: Dictionary in _scores:
-		txt += "[cell]%s[/cell][cell]%d[/cell][cell]%d m[/cell][cell]%d[/cell]" % [s.name, s.score, s.dist, s.level]
+		txt += "[cell]  %s  [/cell][cell][right]%d[/right][/cell][cell][right]%d m[/right][/cell][cell][right]%d[/right][/cell]" % [s.name, s.score, s.dist, s.level]
 	txt += "[/table]"
 	self.text = txt
 
