@@ -39,7 +39,33 @@ func _sign_in() -> void:
 
 
 func _fetch() -> void:
-	_http.request("%s?key=%s" % [BASE_URL, API_KEY])
+	var url := "%s?key=%s" % [BASE_URL, API_KEY]
+	if OS.get_name() == "Web":
+		_fetch_web(url)
+	else:
+		_http.request(url)
+
+
+func _fetch_web(url: String) -> void:
+	# Browser's native fetch handles gzip, CORS — Godot's WASM HTTP client doesn't
+	JavaScriptBridge.eval("""
+		fetch('%s').then(r => r.text()).then(b => {
+			window._hs_body = b; window._hs_ok = true;
+		}).catch(e => {
+			window._hs_body = ''; window._hs_ok = false;
+		});
+	""".replace("'", "\\'") % url, true)
+
+
+func _process(_delta: float) -> void:
+	if OS.get_name() != "Web":
+		return
+	var ok: bool = JavaScriptBridge.eval("window._hs_ok ?? null", true)
+	if ok == null:
+		return
+	JavaScriptBridge.eval("window._hs_ok = null", true)
+	var raw: String = JavaScriptBridge.eval("window._hs_body || ''", true)
+	_handle_response(200 if ok else 0, raw.to_utf8_buffer())
 
 
 func submit_score(player_name: String) -> void:
@@ -60,9 +86,19 @@ func _int_field(f: Dictionary, key: String) -> int:
 
 
 func _on_response(_result: int, _code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	_handle_response(_code, body)
+
+
+func _handle_response(code: int, body: PackedByteArray) -> void:
 	var raw: String = body.get_string_from_utf8()
-	print("[highscores] HTTP %d — %s" % [_code, raw.substr(0, 250)])
+	print("[highscores] HTTP %d — %s" % [code, raw.substr(0, 250)])
 	var json: Variant = JSON.parse_string(raw)
+
+	if json and json.has("error"):
+		var err: Dictionary = json.error
+		print("[highscores] FIREBASE ERROR: %s (status: %s)" % [err.get("message", "?"), err.get("status", "?")])
+		_display_error(code)
+		return
 
 	if json and json.has("localId"):
 		_token = json.localId
@@ -88,7 +124,7 @@ func _on_response(_result: int, _code: int, _headers: PackedStringArray, body: P
 		_fetch()
 		return
 
-	_display_error(_code)
+	_display_error(code)
 
 
 func _display() -> void:

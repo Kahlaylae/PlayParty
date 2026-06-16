@@ -97,7 +97,11 @@ self.addEventListener(
 		const url = event.request.url || '';
 		// Bypass service worker for Firebase / Firestore API calls
 		if (url.includes('firestore.googleapis.com') || url.includes('identitytoolkit.googleapis.com')) {
-			event.respondWith(fetch(event.request));
+			// Strip gzip encoding — Godot web client can't decompress
+			const headers = new Headers(event.request.headers);
+			headers.set('Accept-Encoding', 'identity');
+			const req = new Request(event.request, {headers: headers});
+			event.respondWith(fetch(req));
 			return;
 		}
 		const isNavigate = event.request.mode === 'navigate';
