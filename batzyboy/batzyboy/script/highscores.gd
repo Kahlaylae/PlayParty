@@ -12,6 +12,7 @@ const AUTH_URL   := "https://identitytoolkit.googleapis.com/v1/accounts:signUp?k
 
 var _token: String = ""
 var _scores: Array = []
+var _web_pending: bool = false
 
 
 func _find_http() -> HTTPRequest:
@@ -47,19 +48,25 @@ func _fetch() -> void:
 
 
 func _fetch_web(url: String) -> void:
-	var cb := JavaScriptBridge.create_callback(_on_web_result)
+	_web_pending = true
 	JavaScriptBridge.eval("""
-		window._hs_cb = function(body) { %s(body); };
 		fetch('%s').then(r => r.text()).then(b => {
-			window._hs_cb(b);
+			window._hs_body = b; window._hs_ready = 1;
 		}).catch(e => {
-			window._hs_cb('ERROR:' + String(e));
+			window._hs_body = 'ERROR:'+String(e); window._hs_ready = 1;
 		});
-	""" % [str(cb), url], true)
+	""".replace("'", "\\'") % url, true)
 
 
-func _on_web_result(args: Array) -> void:
-	var raw: String = args[0] if args.size() > 0 else ""
+func _process(_delta: float) -> void:
+	if not _web_pending:
+		return
+	var ready: int = JavaScriptBridge.eval("window._hs_ready || 0", true)
+	if ready != 1:
+		return
+	_web_pending = false
+	JavaScriptBridge.eval("window._hs_ready = 0", true)
+	var raw: String = JavaScriptBridge.eval("window._hs_body || ''", true)
 	print("[highscores-web] raw=%s" % raw.substr(0, 300))
 	_handle_response(200, raw.to_utf8_buffer())
 
