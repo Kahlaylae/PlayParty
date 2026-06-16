@@ -5,7 +5,12 @@ uniform float rock_amount : hint_range(0.0, 0.5) = 0.12;
 uniform sampler2D normal_map : hint_default_black;
 uniform float normal_strength : hint_range(0.0, 2.0) = 1.0;
 
+// ── firefly pulse ──
+uniform float pulse_speed : hint_range(0.0, 3.0) = 0.4;
+uniform float pulse_depth : hint_range(0.0, 1.0) = 0.85;
+
 void fragment() {
+	// ── rocking rotation ──
 	float angle = sin(TIME * rock_speed) * rock_amount;
 	vec2 centered = UV - vec2(0.5);
 	float c = cos(angle);
@@ -15,6 +20,11 @@ void fragment() {
 		centered.x * s + centered.y * c
 	) + vec2(0.5);
 	COLOR = texture(TEXTURE, ruv);
+
+	// ── firefly pulse: quick dip to dark, swift reappear ──
+	float raw = sin(TIME * pulse_speed + UV.y * 3.14159);
+	float dip = 1.0 - smoothstep(-1.0, -0.35, raw);
+	COLOR.a *= 1.0 - pulse_depth * (1.0 - dip);
 }
 
 void light() {

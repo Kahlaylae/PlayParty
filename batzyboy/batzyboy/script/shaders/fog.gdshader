@@ -1,10 +1,11 @@
 shader_type canvas_item;
 
-uniform vec4 fog_color : source_color = vec4(0.62, 0.70, 0.85, 1.0);
+uniform vec4 fog_color : source_color = vec4(0.08, 0.10, 0.18, 1.0);
 uniform float scroll_speed : hint_range(0.0, 1.0, 0.01) = 0.06;
 uniform float fog_scale : hint_range(0.1, 5.0, 0.05) = 1.8;
 uniform float warp_strength : hint_range(0.0, 1.0, 0.01) = 0.35;
 uniform float max_alpha : hint_range(0.0, 1.0, 0.01) = 0.55;
+uniform float density_boost : hint_range(0.5, 5.0, 0.1) = 1.0;
 uniform float falloff : hint_range(0.0, 0.5, 0.01) = 0.2;
 uniform int foggy : hint_range(1, 10) = 1;
 
@@ -142,5 +143,5 @@ void fragment() {
 
 	float vert = smoothstep(0.0, falloff, UV.y) * smoothstep(1.0, 1.0 - falloff, UV.y);
 
-	COLOR = vec4(fog_color.rgb, fog_color.a * density * vert * max_alpha);
+	COLOR = vec4(fog_color.rgb, fog_color.a * density * vert * max_alpha * density_boost);
 }

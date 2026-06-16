@@ -1,49 +1,54 @@
-extends CharacterBody2D
-## Gentle sine-wave floating for ambient critters (fireflies, fairies, etc.)
-## Place anywhere in the world — origin is captured at _ready().
-## Random parameters are picked from pools so every critter moves uniquely.
+extends Node2D
+## Ambient critter — steering-based flight.
+## Per-instance RNG so batch-duplicated critters never sync.
+## Set z-index in inspector per critter.
 
-# ── Parameter pools (picked randomly per-critter at _ready()) ──
+@export var speed_min: float = 15.0
+@export var speed_max: float = 50.0
+@export var turn_interval_min: float = 0.3
+@export var turn_interval_max: float = 3.0
+@export var wiggle_strength: float = 8.0
+@export var roam_radius: float = 400.0
 
-const SPD_X := [0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5]
-const SPD_Y := [0.2, 0.4, 0.6, 0.8, 1.0, 1.2]
-const AMP_X := [4.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0]
-const AMP_Y := [2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0]
-const PHS  := [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
-const Z_POOL := [-2, 0, 2]
-
-# ── Instance state ──
-
-var _origin: Vector2
-var _sprite: Node2D
-var _spx: float
-var _spy: float
-var _ax: float
-var _ay: float
-var _px: float
-var _py: float
-var _t: float = 0.0
-
-# ──────────────────────────────────────────────────────────────
+var _rng: RandomNumberGenerator
+var _speed: float
+var _velocity: Vector2
+var _home: Vector2
+var _turn_timer: float
+var _wiggle_time: float
+var _personality_turn_amount: float
 
 func _ready() -> void:
-	_spx = SPD_X[randi() % SPD_X.size()]
-	_spy = SPD_Y[randi() % SPD_Y.size()]
-	_ax  = AMP_X[randi() % AMP_X.size()]
-	_ay  = AMP_Y[randi() % AMP_Y.size()]
-	_px  = PHS[randi() % PHS.size()]
-	_py  = PHS[randi() % PHS.size()]
-	# Find the visual sprite child — sine wave moves this, not the body
-	_sprite = get_node_or_null("AnimatedSprite2D") as Node2D
-	if not _sprite:
-		_sprite = get_node_or_null("Sprite2D") as Node2D
-	if _sprite:
-		_origin = _sprite.position
-		_sprite.z_index = Z_POOL[randi() % Z_POOL.size()]
+	_rng = RandomNumberGenerator.new()
+	_rng.seed = hash(get_instance_id())
+
+	_home = global_position
+	_speed = _rng.randf_range(speed_min, speed_max)
+	_personality_turn_amount = _rng.randf_range(20.0, 140.0)
+	_velocity = Vector2.RIGHT.rotated(_rng.randf_range(0.0, TAU))
+	_turn_timer = _rng.randf_range(turn_interval_min, turn_interval_max)
+	_wiggle_time = _rng.randf() * 100.0
+
+
+func _pick_new_direction() -> void:
+	var angle := deg_to_rad(_rng.randf_range(-_personality_turn_amount, _personality_turn_amount))
+	_velocity = _velocity.rotated(angle).normalized()
+	_turn_timer = _rng.randf_range(turn_interval_min, turn_interval_max)
 
 
 func _process(delta: float) -> void:
-	_t += delta
-	if _sprite:
-		_sprite.position.x = _origin.x + sin(_t * _spx + _px) * _ax
-		_sprite.position.y = _origin.y + sin(_t * _spy + _py) * _ay
+	_turn_timer -= delta
+	if _turn_timer <= 0.0:
+		_pick_new_direction()
+
+	if global_position.distance_to(_home) > roam_radius:
+		var return_force := (_home - global_position).normalized() * 0.02
+		_velocity = (_velocity + return_force).normalized()
+
+	_wiggle_time += delta
+	var wiggle := Vector2(
+		sin(_wiggle_time * 1.7),
+		cos(_wiggle_time * 2.3)
+	) * wiggle_strength
+
+	global_position += (_velocity * _speed * delta) + (wiggle * delta)

@@ -11,7 +11,7 @@ var _bat: CharacterBody2D
 func _ready() -> void:
 	var vp := get_node_or_null("CircleWindow/GameViewport") as SubViewport
 	if vp:
-		_parallax = vp.get_node_or_null("parallaxBackground") as Node2D
+		_parallax = vp.get_node_or_null("parallaxBackground/parallaxBackground") as Node2D
 		_bat = vp.get_node_or_null("batMain") as CharacterBody2D
 
 	# Freeze bat — visual only, no gameplay.

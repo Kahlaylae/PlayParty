@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://c2exp81joc5hr" path="res://assetsRaw/UI/uiElements/play.png" id="10_a8y0u"]
 [ext_resource type="PackedScene" uid="uid://b8ln7otjmug6m" path="res://scenes/hearts.tscn" id="11_ya4ey"]
 [ext_resource type="Script" uid="uid://cnc6w7fwx0vnl" path="res://script/killerzone.gd" id="14_jbj1t"]
+[ext_resource type="PackedScene" uid="uid://c2hgs48pkmjv" path="res://deathscene.tscn" id="death_scene"]
 [ext_resource type="Script" uid="uid://nddelbsjxla6" path="res://script/helpbutton.gd" id="script_helpbtn"]
 [ext_resource type="Script" uid="uid://pyejpjptpvq4" path="res://script/main.gd" id="script_main"]
 [ext_resource type="Script" uid="uid://1h8cyhlf32sv" path="res://script/menubutton.gd" id="script_menubtn"]
@@ -38,7 +39,7 @@ distance = -4.0
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_eb6dy"]
 a = Vector2(-3.125, -51)
-b = Vector2(-3.125, 631)
+b = Vector2(1.5626221, 584)
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_ya4ey"]
 a = Vector2(3, 2)
@@ -54,7 +55,6 @@ layer = -1
 
 [node name="parallaxBackground" parent="CanvasLayer2" unique_id=278532048 instance=ExtResource("2_plxscene")]
 texture_filter = 1
-scroll_offset = Vector2(-120, -8)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=974696404]
 layer = 5
@@ -187,7 +187,7 @@ limit_bottom = 1280
 
 [node name="killerzone" type="Area2D" parent="." unique_id=2035655063]
 z_index = 2
-position = Vector2(467, 1004)
+position = Vector2(472, 952)
 script = ExtResource("14_jbj1t")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="killerzone" unique_id=1911690869]
@@ -198,7 +198,7 @@ debug_color = Color(0.86453587, 0, 0.2754476, 1)
 
 [node name="Floor Slide" type="StaticBody2D" parent="." unique_id=899723696]
 z_index = 7
-position = Vector2(360, 1016)
+position = Vector2(360, 960)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor Slide" unique_id=55745031]
 scale = Vector2(20, 20)
@@ -225,3 +225,6 @@ script = ExtResource("8_choun")
 position = Vector2(-1.5258789e-05, 6.6698285e-13)
 shape = SubResource("SegmentShape2D_ya4ey")
 debug_color = Color(0.76862746, 0.35686275, 0.69411767, 0.9764706)
+
+[node name="deathscene" parent="." unique_id=1909645866 instance=ExtResource("death_scene")]
+visible = false

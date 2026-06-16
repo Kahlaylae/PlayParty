@@ -1,0 +1,94 @@
+[gd_scene format=3 uid="uid://c2hgs48pkmjv"]
+
+[ext_resource type="Script" uid="uid://giympolgod0r" path="res://script/deathscene.gd" id="1_xwja3"]
+
+[node name="deathscene" type="CanvasLayer" unique_id=1641452332]
+script = ExtResource("1_xwja3")
+
+[node name="background" type="ColorRect" parent="." unique_id=1384762298]
+offset_left = -200.0
+offset_top = -365.71436
+offset_right = 1296.0
+offset_bottom = 2369.8286
+color = Color(0, 0, 0, 0.6745098)
+
+[node name="points" type="RichTextLabel" parent="." unique_id=522136478]
+offset_left = 208.0
+offset_top = 456.0
+offset_right = 592.0
+offset_bottom = 616.0
+theme_override_font_sizes/normal_font_size = 50
+text = "Displays Points Sections
+New Best if necessary"
+
+[node name="Title" type="RichTextLabel" parent="." unique_id=2046215771]
+offset_left = 184.0
+offset_top = 336.0
+offset_right = 560.0
+offset_bottom = 441.0
+theme_override_font_sizes/normal_font_size = 120
+text = "You Died!"
+fit_content = true
+
+[node name="addhighscore" type="Button" parent="." unique_id=1001894038]
+texture_filter = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -208.0
+offset_right = 208.0
+offset_bottom = 64.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 46
+text = "Add Highscore"
+
+[node name="new game" type="Button" parent="." unique_id=1319198798]
+texture_filter = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -208.0
+offset_top = 136.0
+offset_right = 208.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 46
+text = "NEW GAME"
+
+[node name="menu" type="Button" parent="." unique_id=716890108]
+texture_filter = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -208.0
+offset_top = 296.0
+offset_right = 208.0
+offset_bottom = 360.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 46
+text = "MENU"
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=32011571]
+anchor_mode = 0
+limit_left = 0
+limit_top = 0
+limit_right = 720
+limit_bottom = 1280
+
+[node name="LineEdit" type="LineEdit" parent="." unique_id=433211948]
+visible = false
+offset_left = 192.0
+offset_top = 616.0
+offset_right = 544.0
+offset_bottom = 638.0
+text = "Add Highscore!"
+placeholder_text = "Add Your High Score Input field"

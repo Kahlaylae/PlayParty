@@ -54,7 +54,7 @@ var _retry_enabled: bool   = false
 
 # ─── Node refs ────────────────────────────────────────────────────────────────
 @onready var _bat: CharacterBody2D   = $batMainSpawn
-@onready var _parallax: Node2D         = $CanvasLayer2/parallaxBackground
+@onready var _parallax: Node2D         = $CanvasLayer2/parallaxBackground/parallaxBackground
 @onready var _cam: Camera2D            = $Camera2D
 @onready var _killerzone: Area2D       = $killerzone
 @onready var _hearts_node: Node2D      = $CanvasLayer/hearts
@@ -65,14 +65,12 @@ var _retry_enabled: bool   = false
 
 # Overlay nodes
 var _splash_layer: CanvasLayer
-var _death_layer: CanvasLayer
-var _death_panel: Control
+var _death_scene: CanvasLayer
 var _level_up_layer: CanvasLayer
 var _level_up_panel: Control
 var _level_title_label: Label
 var _countdown_label: Label
 var _tap_hint: Label    # pulsing "tap to fly" / "tap to retry" label
-var _new_best_label: Label
 
 # ─── Ready ────────────────────────────────────────────────────────────────────
 func _ready() -> void:
@@ -108,9 +106,9 @@ func _ready() -> void:
 	_dist_rtl.bbcode_enabled = true
 	_dist_rtl.text = "Lv 1\n0 m"
 	_update_hud_hp(6)
+	_death_scene = $deathscene
 	_build_gradient_bg()
 	_build_splash()
-	_build_death_screen()
 	_build_level_up_screen()
 
 
@@ -165,20 +163,13 @@ func _on_bat_died() -> void:
 	if state == State.DEAD:
 		return
 	state = State.DEAD
-	if SaveManager.score > SaveManager.high_score:
+	var is_new := SaveManager.score > SaveManager.high_score
+	if is_new:
 		SaveManager.high_score = SaveManager.score
 		SaveManager.high_dist  = dist_px
-		_new_best_label.show()
 	SaveManager.save()
 	await get_tree().create_timer(0.6).timeout
-	_death_layer.show()
-	# Wire buttons
-	_wire_death_buttons()
-	var score_lbl := _death_panel.get_node_or_null("ScoreSummary") as Label
-	if score_lbl:
-		score_lbl.text = "%d pts  ·  Best: %d pts" % [SaveManager.score, SaveManager.high_score]
-	var panel_tween := create_tween()
-	panel_tween.tween_property(_death_panel, "modulate:a", 1.0, 0.4).from(0.0)
+	_death_scene.show_death(SaveManager.score, SaveManager.high_score, is_new)
 
 
 func _on_killerzone_entered(body: Node2D) -> void:
@@ -187,37 +178,6 @@ func _on_killerzone_entered(body: Node2D) -> void:
 		# Trigger death screen directly — don't wait for sink animation
 		await get_tree().create_timer(0.8).timeout
 		_on_bat_died()
-
-
-func _wire_death_buttons() -> void:
-	var name_input := _death_panel.get_node_or_null("NameInput") as LineEdit
-	var btn_hs := _death_panel.get_node_or_null("BtnHiscore") as Button
-	var btn_re := _death_panel.get_node_or_null("BtnRestart") as Button
-	var btn_mn := _death_panel.get_node_or_null("BtnMenu") as Button
-
-	if btn_hs and name_input:
-		btn_hs.pressed.connect(func():
-			if not name_input.visible:
-				name_input.visible = true
-				name_input.grab_focus()
-			else:
-				var n := name_input.text.strip_edges()
-				if n.length() > 0:
-					SaveManager.submit_online_score(n)
-					btn_hs.text = "Submitted!"
-					btn_hs.disabled = true
-					name_input.editable = false
-		)
-	if btn_re:
-		btn_re.pressed.connect(func():
-			SaveManager.clear()
-			SaveManager.resume_requested = false
-			get_tree().change_scene_to_file("res://scenes/main.tscn")
-		)
-	if btn_mn:
-		btn_mn.pressed.connect(func():
-			get_tree().change_scene_to_file("res://scenes/menu.tscn")
-		)
 
 
 # ─── Spawning ─────────────────────────────────────────────────────────────────
@@ -555,101 +515,6 @@ func _build_splash() -> void:
 	# Minimal hint — no title panel, menu handles the full splash experience
 	_tap_hint = _make_label_centered(_splash_layer, 200.0, 24, "tap to start")
 	_pulse_label(_tap_hint)
-
-
-# ─── Death screen ─────────────────────────────────────────────────────────────
-func _build_death_screen() -> void:
-	_death_layer = CanvasLayer.new()
-	_death_layer.name  = "DeathScreen"
-	_death_layer.layer = 10
-	add_child(_death_layer)
-	_death_layer.hide()
-
-	# Control node is the fadeable container (CanvasLayer has no modulate)
-	_death_panel = Control.new()
-	_death_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_death_panel.modulate = Color(1, 1, 1, 0)
-	_death_layer.add_child(_death_panel)
-
-	var bg := ColorRect.new()
-	bg.color         = Color(0.0, 0.0, 0.0, 0.65)
-	bg.anchor_right  = 1.0
-	bg.anchor_bottom = 1.0
-	bg.offset_right  = 0.0
-	bg.offset_bottom = 0.0
-	_death_panel.add_child(bg)
-
-	_make_label_centered(_death_panel, -200.0, 52, "YOU DIED")
-
-	_new_best_label = _make_label_centered(_death_panel, -135.0, 26, "NEW BEST!")
-	_new_best_label.hide()
-
-	var score_lbl := _make_label_centered(_death_panel, -90.0, 22, "")
-	score_lbl.name = "ScoreSummary"
-
-	# Name input (hidden until "Add Hiscore" clicked)
-	var name_input := LineEdit.new()
-	name_input.name = "NameInput"
-	name_input.placeholder_text = "enter name"
-	name_input.custom_minimum_size = Vector2(260, 44)
-	name_input.add_theme_font_size_override("font_size", 20)
-	name_input.anchor_left = 0.5
-	name_input.anchor_right = 0.5
-	name_input.offset_left = -130.0
-	name_input.offset_top = 10.0
-	name_input.offset_right = 130.0
-	name_input.offset_bottom = 54.0
-	name_input.visible = false
-	_death_panel.add_child(name_input)
-
-	# Button 1 — Add Hiscore
-	var btn_hs := Button.new()
-	btn_hs.name = "BtnHiscore"
-	btn_hs.text = "Add Hiscore"
-	btn_hs.custom_minimum_size = Vector2(200, 44)
-	btn_hs.add_theme_font_size_override("font_size", 20)
-	btn_hs.anchor_left = 0.5
-	btn_hs.anchor_right = 0.5
-	btn_hs.offset_left = -100.0
-	btn_hs.offset_top = 70.0
-	btn_hs.offset_right = 100.0
-	btn_hs.offset_bottom = 114.0
-	_death_panel.add_child(btn_hs)
-
-	# Button 2 — Restart
-	var btn_re := Button.new()
-	btn_re.name = "BtnRestart"
-	btn_re.text = "Restart"
-	btn_re.custom_minimum_size = Vector2(200, 44)
-	btn_re.add_theme_font_size_override("font_size", 20)
-	btn_re.anchor_left = 0.5
-	btn_re.anchor_right = 0.5
-	btn_re.offset_left = -100.0
-	btn_re.offset_top = 130.0
-	btn_re.offset_right = 100.0
-	btn_re.offset_bottom = 174.0
-	_death_panel.add_child(btn_re)
-
-	# Button 3 — Menu
-	var btn_mn := Button.new()
-	btn_mn.name = "BtnMenu"
-	btn_mn.text = "Menu"
-	btn_mn.custom_minimum_size = Vector2(200, 44)
-	btn_mn.add_theme_font_size_override("font_size", 20)
-	btn_mn.anchor_left = 0.5
-	btn_mn.anchor_right = 0.5
-	btn_mn.offset_left = -100.0
-	btn_mn.offset_top = 190.0
-	btn_mn.offset_right = 100.0
-	btn_mn.offset_bottom = 234.0
-	_death_panel.add_child(btn_mn)
-
-	# Wire buttons — cannot do here (need _ready context), done in _on_bat_died
-
-
-	# _tap_hint is the back-to-menu label — hidden until retry enabled
-	_tap_hint = _make_label_centered(_death_panel, -30.0, 24, "tap to return to menu")
-	_tap_hint.modulate = Color(1, 1, 1, 0)
 
 
 # ─── Level-up screen ──────────────────────────────────────────────────────────
