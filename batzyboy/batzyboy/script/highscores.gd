@@ -12,7 +12,6 @@ const AUTH_URL   := "https://identitytoolkit.googleapis.com/v1/accounts:signUp?k
 
 var _token: String = ""
 var _scores: Array = []
-var _web_pending: bool = false
 
 
 func _find_http() -> HTTPRequest:
@@ -30,6 +29,8 @@ func _ready() -> void:
 	if _http == null:
 		self.text = "[center]HTTPRequest not found[/center]"
 		return
+	# CRITICAL: browser already decompresses gzip; Godot must not try again
+	_http.accept_gzip = false
 	self.text = "[center]Connecting …[/center]"
 	_http.request_completed.connect(_on_response)
 	_fetch()
@@ -40,35 +41,7 @@ func _sign_in() -> void:
 
 
 func _fetch() -> void:
-	var url := "%s?key=%s" % [BASE_URL, API_KEY]
-	if OS.get_name() == "Web":
-		_fetch_web(url)
-	else:
-		_http.request(url)
-
-
-func _fetch_web(url: String) -> void:
-	_web_pending = true
-	JavaScriptBridge.eval("""
-		fetch('%s').then(r => r.text()).then(b => {
-			window._hs_body = b; window._hs_ready = 1;
-		}).catch(e => {
-			window._hs_body = 'ERROR:'+String(e); window._hs_ready = 1;
-		});
-	""".replace("'", "\\'") % url, true)
-
-
-func _process(_delta: float) -> void:
-	if not _web_pending:
-		return
-	var ready: int = JavaScriptBridge.eval("window._hs_ready || 0", true)
-	if ready != 1:
-		return
-	_web_pending = false
-	JavaScriptBridge.eval("window._hs_ready = 0", true)
-	var raw: String = JavaScriptBridge.eval("window._hs_body || ''", true)
-	print("[highscores-web] raw=%s" % raw.substr(0, 300))
-	_handle_response(200, raw.to_utf8_buffer())
+	_http.request("%s?key=%s" % [BASE_URL, API_KEY])
 
 
 func submit_score(player_name: String) -> void:
