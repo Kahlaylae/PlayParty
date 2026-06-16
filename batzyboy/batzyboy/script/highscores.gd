@@ -47,29 +47,21 @@ func _fetch() -> void:
 
 
 func _fetch_web(url: String) -> void:
+	var cb := JavaScriptBridge.create_callback(_on_web_result)
 	JavaScriptBridge.eval("""
-		fetch('%s').then(r => {
-			window._hs_status = r.status;
-			return r.text();
-		}).then(b => {
-			window._hs_body = b; window._hs_ok = true;
+		window._hs_cb = function(body) { %s(body); };
+		fetch('%s').then(r => r.text()).then(b => {
+			window._hs_cb(b);
 		}).catch(e => {
-			window._hs_body = String(e); window._hs_ok = false;
+			window._hs_cb('ERROR:' + String(e));
 		});
-	""".replace("'", "\\'") % url, true)
+	""" % [str(cb), url], true)
 
 
-func _process(_delta: float) -> void:
-	if OS.get_name() != "Web":
-		return
-	var ok: bool = JavaScriptBridge.eval("window._hs_ok ?? null", true)
-	if ok == null:
-		return
-	JavaScriptBridge.eval("window._hs_ok = null", true)
-	var status: int = JavaScriptBridge.eval("window._hs_status || 0", true)
-	var raw: String = JavaScriptBridge.eval("window._hs_body || ''", true)
-	print("[highscores-web] status=%d raw=%s" % [status, raw.substr(0, 200)])
-	_handle_response(status, raw.to_utf8_buffer())
+func _on_web_result(args: Array) -> void:
+	var raw: String = args[0] if args.size() > 0 else ""
+	print("[highscores-web] raw=%s" % raw.substr(0, 300))
+	_handle_response(200, raw.to_utf8_buffer())
 
 
 func submit_score(player_name: String) -> void:
