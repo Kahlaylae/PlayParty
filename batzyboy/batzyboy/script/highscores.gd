@@ -47,12 +47,14 @@ func _fetch() -> void:
 
 
 func _fetch_web(url: String) -> void:
-	# Browser's native fetch handles gzip, CORS — Godot's WASM HTTP client doesn't
 	JavaScriptBridge.eval("""
-		fetch('%s').then(r => r.text()).then(b => {
+		fetch('%s').then(r => {
+			window._hs_status = r.status;
+			return r.text();
+		}).then(b => {
 			window._hs_body = b; window._hs_ok = true;
 		}).catch(e => {
-			window._hs_body = ''; window._hs_ok = false;
+			window._hs_body = String(e); window._hs_ok = false;
 		});
 	""".replace("'", "\\'") % url, true)
 
@@ -64,8 +66,10 @@ func _process(_delta: float) -> void:
 	if ok == null:
 		return
 	JavaScriptBridge.eval("window._hs_ok = null", true)
+	var status: int = JavaScriptBridge.eval("window._hs_status || 0", true)
 	var raw: String = JavaScriptBridge.eval("window._hs_body || ''", true)
-	_handle_response(200 if ok else 0, raw.to_utf8_buffer())
+	print("[highscores-web] status=%d raw=%s" % [status, raw.substr(0, 200)])
+	_handle_response(status, raw.to_utf8_buffer())
 
 
 func submit_score(player_name: String) -> void:
@@ -91,7 +95,18 @@ func _on_response(_result: int, _code: int, _headers: PackedStringArray, body: P
 
 func _handle_response(code: int, body: PackedByteArray) -> void:
 	var raw: String = body.get_string_from_utf8()
-	print("[highscores] HTTP %d — %s" % [code, raw.substr(0, 250)])
+	print("[highscores] HTTP %d — %s" % [code, raw.substr(0, 500)])
+
+	if raw.strip_edges().is_empty():
+		print("[highscores] EMPTY RESPONSE")
+		_display_error(code)
+		return
+
+	if not raw.begins_with("{") and not raw.begins_with("["):
+		print("[highscores] NOT JSON: %s" % raw.substr(0, 300))
+		_display_error(code)
+		return
+
 	var json: Variant = JSON.parse_string(raw)
 
 	if json and json.has("error"):
