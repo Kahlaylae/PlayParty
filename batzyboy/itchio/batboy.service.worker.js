@@ -94,8 +94,13 @@ self.addEventListener(
 	 * @param {FetchEvent} event
 	 */
 	(event) => {
-		const isNavigate = event.request.mode === 'navigate';
 		const url = event.request.url || '';
+		// Bypass service worker for Firebase / Firestore API calls
+		if (url.includes('firestore.googleapis.com') || url.includes('identitytoolkit.googleapis.com')) {
+			event.respondWith(fetch(event.request));
+			return;
+		}
+		const isNavigate = event.request.mode === 'navigate';
 		const referrer = event.request.referrer || '';
 		const base = referrer.slice(0, referrer.lastIndexOf('/') + 1);
 		const local = url.startsWith(base) ? url.replace(base, '') : '';
