@@ -336,6 +336,8 @@ func _show_fruit_unlocked_toast(fruit_id: String) -> void:
 
 func _on_hp_changed(hp: int) -> void:
 	_update_hud_hp(hp)
+	if hp <= 0 and state == State.PLAYING:
+		_on_bat_died()
 
 
 # ─── Level ────────────────────────────────────────────────────────────────────
@@ -466,7 +468,7 @@ func _show_win_screen() -> void:
 # 🎉 Congratulations toast when all 26 fruits are unlocked (completing L9).
 func _show_all_fruits_congrats() -> void:
 	var lbl := Label.new()
-	lbl.text = "🎉 ALL FRUITS UNLOCKED! 🎉"
+	lbl.text = "ALL FRUITS UNLOCKED!"
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.add_theme_font_size_override("font_size", 36)
 	lbl.add_theme_color_override("font_color", Color.GOLD)

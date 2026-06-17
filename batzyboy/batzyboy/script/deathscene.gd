@@ -11,7 +11,6 @@ func _ready() -> void:
 	hide()
 	_btn_hiscore.pressed.connect(_on_hiscore_pressed)
 	_name_input.text_submitted.connect(_on_name_submitted)
-	_name_input.focus_exited.connect(_on_name_focus_exited)
 	_btn_restart.pressed.connect(func():
 		SaveManager.clear()
 		SaveManager.resume_requested = false
@@ -50,10 +49,6 @@ func _on_name_submitted(_text: String) -> void:
 	_submit_score()
 
 
-func _on_name_focus_exited() -> void:
-	_hide_mobile_keyboard()
-
-
 func _submit_score() -> void:
 	var n := _name_input.text.strip_edges()
 	if n.length() > 0:
@@ -61,14 +56,12 @@ func _submit_score() -> void:
 		_btn_hiscore.text = "Submitted!"
 		_btn_hiscore.disabled = true
 		_name_input.editable = false
-	_hide_mobile_keyboard()
+	_name_input.release_focus()
+	if OS.get_name() in ["Android", "iOS", "Web"]:
+		DisplayServer.virtual_keyboard_hide()
 
 
 func _show_mobile_keyboard() -> void:
-	if OS.get_name() in ["Android", "iOS"]:
-		DisplayServer.virtual_keyboard_show(_name_input.get_text(), _name_input.get_global_rect())
-
-
-func _hide_mobile_keyboard() -> void:
-	if OS.get_name() in ["Android", "iOS"]:
-		DisplayServer.virtual_keyboard_hide()
+	if OS.get_name() in ["Android", "iOS", "Web"]:
+		# No Rect2 — let the engine position the keyboard based on the focused LineEdit.
+		DisplayServer.virtual_keyboard_show(_name_input.text)

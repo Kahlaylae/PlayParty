@@ -118,7 +118,8 @@ func _display() -> void:
 	var txt := "[table=4]"
 	txt += "[cell][b]  NAME  [/b][/cell][cell][b]PTS[/b][/cell][cell][b] DIST [/b][/cell][cell][b]LVL[/b][/cell]"
 	for s: Dictionary in _scores:
-		txt += "[cell]  %s  [/cell][cell][right]%d[/right][/cell][cell][right]%d m[/right][/cell][cell][right]%d[/right][/cell]" % [s.name, s.score, s.dist, s.level]
+		var n: String = s.name as String
+		txt += "[cell]  %s  [/cell][cell][right]%d[/right][/cell][cell][right]%d m[/right][/cell][cell][right]%d[/right][/cell]" % [n.substr(0, 7), s.score, s.dist, s.level]
 	txt += "[/table]"
 	self.text = txt
 

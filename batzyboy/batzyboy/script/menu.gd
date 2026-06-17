@@ -26,7 +26,7 @@ func _ready() -> void:
 
 	# Continue button — only available if save exists AND player has >1 heart to sacrifice
 	if SaveManager.has_save() and SaveManager.player_hp > 1:
-		_btn_cont.text    = "Continue  (-1 ♥)"
+		_btn_cont.text    = "Continue (-1)"
 		_btn_cont.disabled = false
 		_btn_cont.modulate = Color(1, 1, 1)
 	elif SaveManager.has_save() and SaveManager.player_hp <= 1:
