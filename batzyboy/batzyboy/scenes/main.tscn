@@ -284,7 +284,6 @@ shape = SubResource("SegmentShape2D_ya4ey")
 debug_color = Color(0.76862746, 0.35686275, 0.69411767, 0.9764706)
 
 [node name="deathscene" parent="." unique_id=1909645866 instance=ExtResource("death_scene")]
-visible = false
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1385072596]
 environment = SubResource("Environment_0ld40")

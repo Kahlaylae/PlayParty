@@ -50,18 +50,45 @@ func _on_name_submitted(_text: String) -> void:
 
 
 func _submit_score() -> void:
-	var n := _name_input.text.strip_edges()
+	var n: String
+	if OS.has_feature("web"):
+		# Read from the real HTML input, then hide it
+		var raw: String = JavaScriptBridge.eval("window._bkb ? window._bkb.value : ''") as String
+		n = raw.strip_edges()
+		JavaScriptBridge.eval("if(window._bkb){window._bkb.style.display='none';window._bkb.blur();}")
+	else:
+		n = _name_input.text.strip_edges()
+		_name_input.release_focus()
+		if OS.get_name() in ["Android", "iOS"]:
+			DisplayServer.virtual_keyboard_hide()
+
 	if n.length() > 0:
 		SaveManager.submit_online_score(n)
 		_btn_hiscore.text = "Submitted!"
 		_btn_hiscore.disabled = true
 		_name_input.editable = false
-	_name_input.release_focus()
-	if OS.get_name() in ["Android", "iOS", "Web"]:
-		DisplayServer.virtual_keyboard_hide()
 
 
 func _show_mobile_keyboard() -> void:
-	if OS.get_name() in ["Android", "iOS", "Web"]:
-		# No Rect2 — let the engine position the keyboard based on the focused LineEdit.
+	if OS.has_feature("web"):
+		# Godot 4 web can't trigger a native keyboard from the canvas.
+		# Create a real HTML <input> element so mobile browsers show their keyboard.
+		JavaScriptBridge.eval("""
+			if (!window._bkb) {
+				var i = document.createElement('input');
+				i.type = 'text';
+				i.id = '_batzyboy_kb';
+				i.setAttribute('autocomplete','off');
+				i.setAttribute('autocorrect','off');
+				i.setAttribute('autocapitalize','off');
+				i.setAttribute('spellcheck','false');
+				i.style.cssText = 'position:fixed;left:50%;top:35%;transform:translate(-50%,-50%);z-index:99999;font-size:22px;padding:14px 20px;border:2px solid gold;background:#111;color:#fff;text-align:center;width:240px;border-radius:8px;font-family:sans-serif;';
+				document.body.appendChild(i);
+				window._bkb = i;
+			}
+			window._bkb.value = '';
+			window._bkb.style.display = 'block';
+			window._bkb.focus();
+		""")
+	elif OS.get_name() in ["Android", "iOS"]:
 		DisplayServer.virtual_keyboard_show(_name_input.text)

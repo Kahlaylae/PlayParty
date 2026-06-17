@@ -85,10 +85,11 @@ limit_right = 720
 limit_bottom = 1280
 
 [node name="LineEdit" type="LineEdit" parent="." unique_id=433211948]
-visible = false
-offset_left = 192.0
-offset_top = 616.0
-offset_right = 544.0
-offset_bottom = 638.0
+offset_left = 193.0
+offset_top = 606.0
+offset_right = 545.0
+offset_bottom = 643.0
 text = "Add Highscore!"
 placeholder_text = "Add Your High Score Input field"
+keep_editing_on_text_submit = true
+expand_to_text_length = true
