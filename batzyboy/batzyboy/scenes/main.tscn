@@ -6,31 +6,39 @@
 [ext_resource type="PackedScene" uid="uid://bsqkcf1vc018v" path="res://scenes/fruits.tscn" id="3_o6xl0"]
 [ext_resource type="FontFile" uid="uid://bjabx2uloeigs" path="res://assetsRaw/fonts/Ithaca.ttf" id="5_jkv2x"]
 [ext_resource type="Texture2D" uid="uid://gkcbadtdrp1i" path="res://assetsRaw/UI/uiElements/backpanel.png" id="6_jkv2x"]
+[ext_resource type="Texture2D" uid="uid://bwytqak58cp2h" path="res://assetsRaw/UI/uiElements/highscorebutton.png" id="7_0ld40"]
 [ext_resource type="Shader" uid="uid://d28whffvtp7is" path="res://script/shaders/icon.gdshader" id="7_a8y0u"]
 [ext_resource type="Script" uid="uid://dvwp4pw5nqeqe" path="res://script/monsterSpawner.gd" id="7_o6xl0"]
 [ext_resource type="Script" uid="uid://cavia1c0gf7lo" path="res://script/fruitspawner.gd" id="8_choun"]
+[ext_resource type="Script" uid="uid://toh0of0p81n7" path="res://scenes/highscorebutton.gd" id="8_gqmmt"]
 [ext_resource type="Texture2D" uid="uid://c6v83uf57wvwf" path="res://assetsRaw/UI/uiElements/help.png" id="8_jkv2x"]
 [ext_resource type="Texture2D" uid="uid://c2exp81joc5hr" path="res://assetsRaw/UI/uiElements/play.png" id="10_a8y0u"]
 [ext_resource type="PackedScene" uid="uid://b8ln7otjmug6m" path="res://scenes/hearts.tscn" id="11_ya4ey"]
 [ext_resource type="Script" uid="uid://cnc6w7fwx0vnl" path="res://script/killerzone.gd" id="14_jbj1t"]
-[ext_resource type="PackedScene" uid="uid://c2hgs48pkmjv" path="res://deathscene.tscn" id="death_scene"]
+[ext_resource type="PackedScene" uid="uid://c2hgs48pkmjv" path="res://scenes/deathscene.tscn" id="death_scene"]
 [ext_resource type="Script" uid="uid://nddelbsjxla6" path="res://script/helpbutton.gd" id="script_helpbtn"]
 [ext_resource type="Script" uid="uid://pyejpjptpvq4" path="res://script/main.gd" id="script_main"]
 [ext_resource type="Script" uid="uid://1h8cyhlf32sv" path="res://script/menubutton.gd" id="script_menubtn"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_jbj1t"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yc10j"]
 shader = ExtResource("7_a8y0u")
-shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
-shader_parameter/outline_color = Color(0.18356577, 0.022312064, 0.025110528, 0.23529412)
-shader_parameter/outline_thickness = 3.0000001425
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4394079, 0.25766903, 0.2385109, 1)
+shader_parameter/outline_thickness = 1.0000000475
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_muem4"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pm3ni"]
 shader = ExtResource("7_a8y0u")
-shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
-shader_parameter/outline_color = Color(0.18431373, 0.023529412, 0.023529412, 0.23529412)
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4392157, 0.25882354, 0.23921569, 1)
 shader_parameter/outline_thickness = 3.0000001425
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_trceg"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0ld40"]
+shader = ExtResource("7_a8y0u")
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4392157, 0.25882354, 0.23921569, 1)
+shader_parameter/outline_thickness = 1.0000000475
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_eb6dy"]
 distance = -4.0
@@ -45,10 +53,19 @@ b = Vector2(1.5626221, 584)
 a = Vector2(3, 2)
 b = Vector2(355, 2)
 
+[sub_resource type="Environment" id="Environment_0ld40"]
+background_mode = 3
+background_energy_multiplier = 0.0
+ambient_light_energy = 0.55
+adjustment_enabled = true
+adjustment_contrast = 1.25
+adjustment_saturation = 1.45
+
 [node name="main" type="Node2D" unique_id=228319826]
 script = ExtResource("script_main")
 enemy_list_scene = ExtResource("2_tefeu")
 fruit_list_scene = ExtResource("3_o6xl0")
+metadata/_edit_horizontal_guides_ = [97.0]
 
 [node name="CanvasLayer2" type="CanvasLayer" parent="." unique_id=929590190]
 layer = -1
@@ -60,43 +77,51 @@ texture_filter = 1
 layer = 5
 follow_viewport_enabled = true
 
+[node name="highscorebutton" type="NinePatchRect" parent="CanvasLayer" unique_id=609916737]
+offset_left = 45.0
+offset_top = 25.0
+offset_right = 112.41865
+offset_bottom = 99.679214
+scale = Vector2(0.9641237, 0.9641237)
+texture = ExtResource("6_jkv2x")
+patch_margin_left = 19
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="highscorebutton" type="Button" parent="CanvasLayer/highscorebutton" unique_id=27837961]
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_yc10j")
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -32.672108
+offset_top = 4.1488447
+offset_right = 33.92328
+offset_bottom = 70.744225
+grow_horizontal = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.0
+icon = ExtResource("7_0ld40")
+flat = true
+text_overrun_behavior = 1
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("8_gqmmt")
+
 [node name="hearts" parent="CanvasLayer" unique_id=267642753 instance=ExtResource("11_ya4ey")]
 z_index = 5
 texture_filter = 1
-position = Vector2(120, 56)
-scale = Vector2(2.6488657, 2.6488657)
+position = Vector2(199, 62)
 
-[node name="menupatch" type="NinePatchRect" parent="CanvasLayer" unique_id=1568245437]
-offset_left = 656.0
-offset_top = 24.0
-offset_right = 714.08374
-offset_bottom = 98.679214
-scale = Vector2(0.95, 0.95)
-texture = ExtResource("6_jkv2x")
-patch_margin_left = 10
-patch_margin_top = 10
-patch_margin_right = 10
-patch_margin_bottom = 10
-
-[node name="MenuButton" type="Button" parent="CanvasLayer/menupatch" unique_id=1270297736]
-texture_filter = 1
-texture_repeat = 3
-material = SubResource("ShaderMaterial_jbj1t")
-layout_mode = 0
-offset_left = 4.14882
-offset_top = -5.186057
-offset_right = 117.78517
-offset_bottom = 98.50883
-scale = Vector2(0.704, 0.839)
-icon = ExtResource("10_a8y0u")
-flat = true
-script = ExtResource("script_menubtn")
-
-[node name="helppatch" type="NinePatchRect" parent="CanvasLayer" unique_id=545215540]
-offset_left = 576.0
+[node name="helppatch" type="NinePatchRect" parent="CanvasLayer" unique_id=1617033434]
+offset_left = 582.0
 offset_top = 25.0
-offset_right = 634.08374
-offset_bottom = 99.679214
+offset_right = 646.2105
+offset_bottom = 100.73184
 scale = Vector2(0.95, 0.95)
 texture = ExtResource("6_jkv2x")
 patch_margin_left = 10
@@ -104,10 +129,10 @@ patch_margin_top = 10
 patch_margin_right = 10
 patch_margin_bottom = 10
 
-[node name="How2Button" type="Button" parent="CanvasLayer/helppatch" unique_id=1480559662]
+[node name="How2Button" type="Button" parent="CanvasLayer/helppatch" unique_id=1312711738]
 texture_filter = 3
 texture_repeat = 2
-material = SubResource("ShaderMaterial_muem4")
+material = SubResource("ShaderMaterial_pm3ni")
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -124,6 +149,8 @@ size_flags_stretch_ratio = 0.0
 icon = ExtResource("8_jkv2x")
 flat = true
 text_overrun_behavior = 1
+icon_alignment = 1
+expand_icon = true
 script = ExtResource("script_helpbtn")
 
 [node name="Points" type="RichTextLabel" parent="CanvasLayer" unique_id=19796658]
@@ -132,10 +159,10 @@ texture_filter = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -456.0
-offset_top = 48.0
-offset_right = -306.0
-offset_bottom = 98.0
+offset_left = -464.0
+offset_top = 57.0
+offset_right = -314.0
+offset_bottom = 107.0
 grow_horizontal = 0
 theme_override_fonts/normal_font = ExtResource("5_jkv2x")
 theme_override_font_sizes/normal_font_size = 50
@@ -150,18 +177,20 @@ horizontal_alignment = 1
 z_index = 5
 texture_filter = 1
 layout_direction = 2
-offset_left = 400.0
-offset_right = 550.0
-offset_bottom = 100.0
+offset_left = 410.0
+offset_top = 13.0
+offset_right = 560.0
+offset_bottom = 113.0
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/normal_font_size = 50
-text = "testing"
+text = "Level
+Distance"
 scroll_active = false
 autowrap_mode = 0
 horizontal_alignment = 1
 
 [node name="roof" type="StaticBody2D" parent="CanvasLayer" unique_id=767058240]
-position = Vector2(344, 120)
+position = Vector2(344, 93)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CanvasLayer/roof" unique_id=2118354701]
 position = Vector2(0, 40)
@@ -169,6 +198,34 @@ rotation = 3.1415927
 scale = Vector2(1, 4)
 shape = SubResource("WorldBoundaryShape2D_trceg")
 debug_color = Color(1, 1, 1, 1)
+
+[node name="menupatch" type="NinePatchRect" parent="CanvasLayer" unique_id=672865472]
+offset_left = 643.0
+offset_top = 25.0
+offset_right = 701.08374
+offset_bottom = 100.73184
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("6_jkv2x")
+patch_margin_left = 10
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="MenuButton" type="Button" parent="CanvasLayer/menupatch" unique_id=1332337865]
+texture_filter = 1
+texture_repeat = 3
+material = SubResource("ShaderMaterial_0ld40")
+layout_mode = 0
+offset_left = 5.2631617
+offset_top = 8.421054
+offset_right = 118.89951
+offset_bottom = 112.11594
+scale = Vector2(0.44067654, 0.5251813)
+icon = ExtResource("10_a8y0u")
+flat = true
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("script_menubtn")
 
 [node name="batMainSpawn" parent="." unique_id=39988283 instance=ExtResource("1_o5qli")]
 position = Vector2(168, 520)
@@ -228,3 +285,6 @@ debug_color = Color(0.76862746, 0.35686275, 0.69411767, 0.9764706)
 
 [node name="deathscene" parent="." unique_id=1909645866 instance=ExtResource("death_scene")]
 visible = false
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1385072596]
+environment = SubResource("Environment_0ld40")

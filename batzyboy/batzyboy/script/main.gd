@@ -6,16 +6,16 @@ extends Node2D
 const SPEED_MIN:  float = 150.0
 const SPEED_MAX:  float = 400.0
 const SPEED_UI:   float = 100.0   # parallax on splash/dead — never level-influenced
-const MAX_LEVEL:  int   = 20      # level at which SPEED_MAX is reached
+const SPEED_CAP_LEVEL: int = 9    # speed stops increasing after this level
+const MAX_LEVEL:       int = 100  # highest level the player can reach
+const ALL_FRUITS_LEVEL:int = 9    # level at which all fruits become available — triggers congratulations
 
-# Object (monster/fruit) speed ramps 300→350 over the same MAX_LEVEL range.
-const OBJ_SPEED_MIN: float = 300.0
-const OBJ_SPEED_MAX: float = 350.0
+# Monster speed = scroll_speed + MONSTER_SPEED_OFFSET (always closes in at consistent screen speed).
+const MONSTER_SPEED_OFFSET: float = 150.0
 
 # Leveling thresholds — distance in pixels (100 px = 1 m).
 # Level advances when: all fruits for this level caught once AND dist_px >= level * DIST_PER_LEVEL.
 const DIST_PER_LEVEL: float = 10000.0  # 100 m × 100 px/m
-const WIN_LEVEL:      int   = 9        # reaching this level's completion triggers win screen
 
 # ─── Debug (set false for release) ───────────────────────────────────────────
 const DEBUG: bool = true
@@ -309,10 +309,7 @@ func _build_fruit_pool() -> void:
 
 # Returns the current object scroll speed, clamped between OBJ_SPEED_MIN and OBJ_SPEED_MAX.
 func _obj_speed() -> float:
-	return minf(
-		OBJ_SPEED_MIN + (OBJ_SPEED_MAX - OBJ_SPEED_MIN) * float(current_level - 1) / float(MAX_LEVEL - 1),
-		OBJ_SPEED_MAX
-	)
+	return scroll_speed + MONSTER_SPEED_OFFSET
 
 
 # ─── Signals ──────────────────────────────────────────────────────────────────
@@ -343,9 +340,10 @@ func _on_hp_changed(hp: int) -> void:
 
 # ─── Level ────────────────────────────────────────────────────────────────────
 func _update_level() -> void:
-	# Always keep scroll_speed in sync.
+	# Speed ramps to SPEED_CAP_LEVEL then holds flat through MAX_LEVEL.
+	var speed_lvl := mini(current_level, SPEED_CAP_LEVEL)
 	scroll_speed = minf(
-		SPEED_MIN + (SPEED_MAX - SPEED_MIN) * float(current_level - 1) / float(MAX_LEVEL - 1),
+		SPEED_MIN + (SPEED_MAX - SPEED_MIN) * float(speed_lvl - 1) / float(SPEED_CAP_LEVEL - 1),
 		SPEED_MAX
 	)
 	# Advance when: all fruits for this level caught at least once AND distance milestone met.
@@ -369,21 +367,26 @@ func _update_level() -> void:
 			print("[LevelUp] Conditions met at L%d  dist=%dm  unlocked=%s" % [
 				current_level, int(dist_px / 100.0), str(SaveManager.unlocked_fruits)
 			])
-		if current_level >= WIN_LEVEL:
+		if current_level >= MAX_LEVEL:
 			_show_win_screen()
 			return
+		# 🎉 All fruits unlocked — show congratulations then keep going!
+		if current_level == ALL_FRUITS_LEVEL:
+			_show_all_fruits_congrats()
 		current_level += 1
-		# Recompute speed at the new level immediately.
+		# Recompute speed at the new level (still capped at SPEED_CAP_LEVEL).
+		speed_lvl = mini(current_level, SPEED_CAP_LEVEL)
 		scroll_speed = minf(
-			SPEED_MIN + (SPEED_MAX - SPEED_MIN) * float(current_level - 1) / float(MAX_LEVEL - 1),
+			SPEED_MIN + (SPEED_MAX - SPEED_MIN) * float(speed_lvl - 1) / float(SPEED_CAP_LEVEL - 1),
 			SPEED_MAX
 		)
 		_show_level_up(current_level)
 
 
 func _current_interval() -> float:
-	# Tighter monster spawning each level; tweakable via MONSTER_INTERVAL_MAX/MIN consts.
-	return maxf(MONSTER_INTERVAL_MIN, MONSTER_INTERVAL_MAX / float(current_level))
+	# Tighter monster spawning each level; power-law decay for a smoother curve.
+	# L1=1.5s  L3≈0.87s  L9≈0.5s floor
+	return maxf(MONSTER_INTERVAL_MIN, MONSTER_INTERVAL_MAX / pow(float(current_level), 0.5))
 
 
 func _show_level_up(lvl: int) -> void:
@@ -408,13 +411,12 @@ func _show_level_up(lvl: int) -> void:
 
 
 func _show_win_screen() -> void:
-	state = State.DEAD   # reuse DEAD to stop spawning; win panel takes over
+	state = State.DEAD   # triggers at MAX_LEVEL; stops spawning
 	SaveManager.save_progress(current_level, SaveManager.score, dist_px)
 	if SaveManager.score > SaveManager.high_score:
 		SaveManager.high_score = SaveManager.score
 		SaveManager.save()
 
-	# Build win overlay procedurally
 	var win_layer := CanvasLayer.new()
 	win_layer.layer = 20
 	add_child(win_layer)
@@ -434,7 +436,7 @@ func _show_win_screen() -> void:
 	win_layer.add_child(panel)
 
 	var title_lbl := Label.new()
-	title_lbl.text                    = "YOU COLLECTED THEM ALL!"
+	title_lbl.text                    = "YOU BEAT LEVEL 100!"
 	title_lbl.horizontal_alignment    = HORIZONTAL_ALIGNMENT_CENTER
 	title_lbl.add_theme_font_size_override("font_size", 48)
 	panel.add_child(title_lbl)
@@ -459,6 +461,29 @@ func _show_win_screen() -> void:
 
 	var tween := create_tween()
 	tween.tween_property(bg, "modulate:a", 1.0, 0.5).from(0.0)
+
+
+# 🎉 Congratulations toast when all 26 fruits are unlocked (completing L9).
+func _show_all_fruits_congrats() -> void:
+	var lbl := Label.new()
+	lbl.text = "🎉 ALL FRUITS UNLOCKED! 🎉"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 36)
+	lbl.add_theme_color_override("font_color", Color.GOLD)
+	lbl.anchor_left   = 0.5
+	lbl.anchor_right  = 0.5
+	lbl.anchor_top    = 0.5
+	lbl.anchor_bottom = 0.5
+	lbl.offset_left   = -350.0
+	lbl.offset_right  =  350.0
+	lbl.offset_top    = -260.0
+	lbl.offset_bottom = -215.0
+	$CanvasLayer.add_child(lbl)
+	var t := create_tween()
+	t.tween_property(lbl, "modulate:a", 1.0, 0.3).from(0.0)
+	t.tween_interval(2.0)
+	t.tween_property(lbl, "modulate:a", 0.0, 0.5)
+	t.tween_callback(lbl.queue_free)
 
 
 # ─── Pause ────────────────────────────────────────────────────────────────────

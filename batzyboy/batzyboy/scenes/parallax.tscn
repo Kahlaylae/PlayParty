@@ -22,7 +22,7 @@
 shader = ExtResource("3_0jpoy")
 shader_parameter/rock_speed = 2.2350001061625
 shader_parameter/rock_amount = 0.082000003895
-shader_parameter/normal_strength = 1.8430000875424999
+shader_parameter/normal_strength = 1.8430000875425
 shader_parameter/pulse_speed = 1.13600005396
 shader_parameter/pulse_depth = 0.6710000318725
 
@@ -101,12 +101,12 @@ animations = [{
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_h5c3f"]
 shader = ExtResource("3_0jpoy")
-shader_parameter/rock_speed = 2.000000095
-shader_parameter/rock_amount = 0.038000001805
+shader_parameter/rock_speed = 0.43600002071
+shader_parameter/rock_amount = 0.030000001425
 shader_parameter/normal_map = ExtResource("5_q4vhb")
-shader_parameter/normal_strength = 1.0
-shader_parameter/pulse_speed = 0.0
-shader_parameter/pulse_depth = 0.0
+shader_parameter/normal_strength = 1.1710000556225
+shader_parameter/pulse_speed = 3.0
+shader_parameter/pulse_depth = 0.14400000684
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_w6ouw"]
 diffuse_texture = ExtResource("4_uyuwf")
@@ -163,18 +163,6 @@ shader_parameter/waveSpeed = 0.85600004066
 shader_parameter/opacity = 0.7490000355775
 shader_parameter/horizon = 0.7690000365275
 
-[sub_resource type="Sky" id="Sky_cyp6n"]
-
-[sub_resource type="Environment" id="Environment_0fvxf"]
-background_mode = 3
-background_energy_multiplier = 1.54
-sky = SubResource("Sky_cyp6n")
-fog_depth_curve = 1.2745606
-adjustment_enabled = true
-adjustment_brightness = 1.03
-adjustment_contrast = 1.25
-adjustment_saturation = 1.64
-
 [node name="newparallaxnode" type="Node2D" unique_id=984393826]
 
 [node name="critterlayer" type="Node2D" parent="." unique_id=1871489743]
@@ -191,6 +179,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.063606314
 script = ExtResource("17_w6ouw")
+speed_min = 400.0
+roam_radius = 200.0
 
 [node name="firefly7" type="AnimatedSprite2D" parent="critterlayer" unique_id=643123325]
 z_index = -3
@@ -203,6 +193,9 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+speed_min = 400.0
+turn_interval_min = 1.0
+roam_radius = 200.0
 
 [node name="firefly8" type="AnimatedSprite2D" parent="critterlayer" unique_id=148234511]
 z_index = -3
@@ -215,6 +208,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+turn_interval_min = 1.0
+roam_radius = 200.0
 
 [node name="firefly9" type="AnimatedSprite2D" parent="critterlayer" unique_id=878785380]
 z_index = -3
@@ -227,6 +222,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+turn_interval_min = 1.0
+roam_radius = 200.0
 
 [node name="firefly10" type="AnimatedSprite2D" parent="critterlayer" unique_id=1569476134]
 z_index = -3
@@ -239,6 +236,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+turn_interval_min = 1.0
+roam_radius = 200.0
 
 [node name="firefly11" type="AnimatedSprite2D" parent="critterlayer" unique_id=991249804]
 z_index = -3
@@ -251,6 +250,7 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+roam_radius = 200.0
 
 [node name="firefly6" type="AnimatedSprite2D" parent="critterlayer" unique_id=1969778571]
 z_index = -3
@@ -264,6 +264,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.585481
 script = ExtResource("17_w6ouw")
+speed_min = 150.0
+roam_radius = 200.0
 
 [node name="firefly18" type="AnimatedSprite2D" parent="critterlayer" unique_id=957319877]
 z_index = -3
@@ -277,6 +279,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+speed_min = 150.0
+roam_radius = 200.0
 
 [node name="firefly19" type="AnimatedSprite2D" parent="critterlayer" unique_id=388506681]
 z_index = -3
@@ -290,6 +294,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+speed_min = 150.0
+roam_radius = 200.0
 
 [node name="firefly20" type="AnimatedSprite2D" parent="critterlayer" unique_id=1222330517]
 z_index = -3
@@ -303,6 +309,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+speed_min = 150.0
+roam_radius = 200.0
 
 [node name="firefly21" type="AnimatedSprite2D" parent="critterlayer" unique_id=1894788468]
 z_index = -3
@@ -316,6 +324,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+speed_min = 150.0
+roam_radius = 200.0
 
 [node name="firefly22" type="AnimatedSprite2D" parent="critterlayer" unique_id=443644254]
 z_index = -3
@@ -329,6 +339,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+speed_min = 150.0
+roam_radius = 200.0
 
 [node name="firefly12" type="AnimatedSprite2D" parent="critterlayer" unique_id=1665184885]
 z_index = -3
@@ -342,6 +354,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+speed_min = 150.0
+roam_radius = 200.0
 
 [node name="firefly13" type="AnimatedSprite2D" parent="critterlayer" unique_id=1835720599]
 z_index = -3
@@ -355,6 +369,9 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+speed_min = 150.0
+turn_interval_min = 1.0
+roam_radius = 200.0
 
 [node name="firefly14" type="AnimatedSprite2D" parent="critterlayer" unique_id=1518905957]
 z_index = -3
@@ -368,6 +385,9 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+speed_min = 400.0
+turn_interval_min = 1.0
+roam_radius = 200.0
 
 [node name="firefly15" type="AnimatedSprite2D" parent="critterlayer" unique_id=1467310950]
 z_index = -3
@@ -381,6 +401,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+turn_interval_min = 1.0
+roam_radius = 200.0
 
 [node name="firefly16" type="AnimatedSprite2D" parent="critterlayer" unique_id=893651308]
 z_index = -3
@@ -394,6 +416,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+speed_min = 400.0
+roam_radius = 200.0
 
 [node name="firefly17" type="AnimatedSprite2D" parent="critterlayer" unique_id=2000615874]
 z_index = -3
@@ -407,6 +431,7 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.1882777
 script = ExtResource("17_w6ouw")
+roam_radius = 200.0
 
 [node name="firefly2" type="AnimatedSprite2D" parent="critterlayer" unique_id=733215295]
 z_index = -3
@@ -420,6 +445,8 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.46160826
 script = ExtResource("17_w6ouw")
+speed_min = 400.0
+roam_radius = 200.0
 
 [node name="firefly3" type="AnimatedSprite2D" parent="critterlayer" unique_id=466526279]
 z_index = -3
@@ -433,6 +460,9 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.46160826
 script = ExtResource("17_w6ouw")
+speed_min = 400.0
+turn_interval_min = 1.0
+roam_radius = 200.0
 
 [node name="firefly4" type="AnimatedSprite2D" parent="critterlayer" unique_id=1392105365]
 z_index = -3
@@ -446,6 +476,9 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.46160826
 script = ExtResource("17_w6ouw")
+speed_min = 400.0
+turn_interval_min = 1.0
+roam_radius = 200.0
 
 [node name="firefly5" type="AnimatedSprite2D" parent="critterlayer" unique_id=1994108096]
 z_index = -3
@@ -459,6 +492,9 @@ animation = &"glow"
 autoplay = "glow"
 frame_progress = 0.746021
 script = ExtResource("17_w6ouw")
+speed_min = 400.0
+turn_interval_min = 1.0
+roam_radius = 200.0
 
 [node name="parallaxBackground" type="Parallax2D" parent="." unique_id=2021570811 node_paths=PackedStringArray("layer_nodes")]
 z_index = -3
@@ -475,10 +511,11 @@ position = Vector2(362.89566, 448.01434)
 scale = Vector2(6, 6)
 texture = ExtResource("2_plx")
 region_enabled = true
-region_rect = Rect2(751166.56, 0, 384, 216)
+region_rect = Rect2(756618.56, 0, 384, 216)
 
 [node name="Moon" type="Sprite2D" parent="parallaxBackground" unique_id=1667056062]
 z_index = -4
+texture_filter = 1
 material = SubResource("ShaderMaterial_h5c3f")
 position = Vector2(672, 216)
 scale = Vector2(10, 10)
@@ -495,7 +532,7 @@ position = Vector2(337.00003, 513)
 scale = Vector2(6, 6)
 texture = ExtResource("3_plx")
 region_enabled = true
-region_rect = Rect2(2214252, 0, 384, 216)
+region_rect = Rect2(2228437.5, 0, 384, 216)
 
 [node name="background2" type="Sprite2D" parent="parallaxBackground" unique_id=1268798545]
 z_index = -3
@@ -505,7 +542,7 @@ position = Vector2(377, 585)
 scale = Vector2(6, 6)
 texture = ExtResource("4_plx")
 region_enabled = true
-region_rect = Rect2(1647904.1, 0, 384, 216)
+region_rect = Rect2(1662361.9, 0, 384, 216)
 
 [node name="foreground2" type="Sprite2D" parent="parallaxBackground" unique_id=2146669569]
 z_index = -4
@@ -516,7 +553,7 @@ scale = Vector2(4.7653575, 4.7653575)
 texture = ExtResource("6_plx")
 flip_h = true
 region_enabled = true
-region_rect = Rect2(-1593781.3, 0, 384, 216)
+region_rect = Rect2(-1608111, 0, 384, 216)
 
 [node name="background1" type="Sprite2D" parent="parallaxBackground" unique_id=2124780172]
 z_index = -2
@@ -526,7 +563,7 @@ position = Vector2(344, 448.00003)
 scale = Vector2(6, 6)
 texture = ExtResource("5_plx")
 region_enabled = true
-region_rect = Rect2(1350547, 0, 384, 216)
+region_rect = Rect2(1365132.1, 0, 384, 216)
 
 [node name="fog" type="Sprite2D" parent="parallaxBackground" unique_id=111222333]
 z_index = 1
@@ -537,7 +574,7 @@ position = Vector2(408.00003, 720)
 scale = Vector2(3.1247392, 0.77842855)
 texture = SubResource("CanvasTexture_8vcgh")
 region_enabled = true
-region_rect = Rect2(5298884, 0, 800, 1900)
+region_rect = Rect2(5342054, 0, 800, 1900)
 script = ExtResource("fog_script")
 breath_speed = 0.5
 min_alpha = 4.4
@@ -551,7 +588,7 @@ position = Vector2(296, 512)
 scale = Vector2(5.220097, 4.9623146)
 texture = ExtResource("6_plx")
 region_enabled = true
-region_rect = Rect2(1791247, 0, 384, 216)
+region_rect = Rect2(1812761.4, 0, 384, 216)
 
 [node name="ground" type="Sprite2D" parent="parallaxBackground" unique_id=1576932842]
 z_index = 1
@@ -561,7 +598,7 @@ position = Vector2(384, 1064)
 scale = Vector2(9.298192, 5.585889)
 texture = ExtResource("8_plx")
 region_enabled = true
-region_rect = Rect2(2245720.3, 0, 248, 216)
+region_rect = Rect2(2260472.2, 0, 248, 216)
 
 [node name="reflection" type="Sprite2D" parent="parallaxBackground" unique_id=539058533]
 modulate = Color(1, 1, 1, 0.15686275)
@@ -574,7 +611,7 @@ position = Vector2(400, 1312)
 scale = Vector2(7.8866663, 5.041211)
 texture = ExtResource("8_cyp6n")
 region_enabled = true
-region_rect = Rect2(2248932.8, 88, 300, 132)
+region_rect = Rect2(2263684.7, 88, 300, 132)
 
 [node name="water2" type="Sprite2D" parent="parallaxBackground/reflection" unique_id=1568036497]
 modulate = Color(0.7750634, 0.7750634, 0.7750634, 1)
@@ -586,8 +623,4 @@ position = Vector2(-3.0431123, -3.824519)
 scale = Vector2(1.4402602, 0.9858138)
 texture = ExtResource("8_cyp6n")
 region_enabled = true
-region_rect = Rect2(5300783, 88, 209, 132)
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="parallaxBackground" unique_id=1686642164]
-process_mode = 3
-environment = SubResource("Environment_0fvxf")
+region_rect = Rect2(5343953, 88, 209, 132)

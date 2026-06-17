@@ -19,23 +19,23 @@
 [ext_resource type="Script" uid="uid://nddelbsjxla6" path="res://script/helpbutton.gd" id="script_helpbtn"]
 [ext_resource type="Script" uid="uid://1h8cyhlf32sv" path="res://script/menubutton.gd" id="script_menubtn"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_gmcut"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wc8c8"]
 shader = ExtResource("6_icon_shader")
-shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
-shader_parameter/outline_color = Color(0.18356577, 0.022312064, 0.025110528, 0.23529412)
-shader_parameter/outline_thickness = 3.0000001425
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_8y54x"]
-shader = ExtResource("6_icon_shader")
-shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
-shader_parameter/outline_color = Color(0.18431373, 0.023529412, 0.023529412, 0.23529412)
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4392157, 0.25882354, 0.23921569, 1)
 shader_parameter/outline_thickness = 3.0000001425
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_x6p3a"]
 shader = ExtResource("6_icon_shader")
-shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
-shader_parameter/outline_color = Color(0.18431373, 0.023529412, 0.023529412, 0.23529412)
-shader_parameter/outline_thickness = 5.0000002375
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4394079, 0.25766903, 0.2385109, 1)
+shader_parameter/outline_thickness = 1.0000000475
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mx6ix"]
+shader = ExtResource("6_icon_shader")
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4392157, 0.25882354, 0.23921569, 1)
+shader_parameter/outline_thickness = 1.0000000475
 
 [node name="collections" type="CanvasLayer" unique_id=711208428]
 script = ExtResource("1_kxtot")
@@ -75,48 +75,28 @@ horizontal_alignment = 1
 justification_flags = 1
 visible_characters_behavior = 2
 
-[node name="menupatch" type="NinePatchRect" parent="." unique_id=1975428735]
-offset_left = 636.0
-offset_top = 16.0
-offset_right = 694.08374
-offset_bottom = 90.679214
-scale = Vector2(0.9641237, 0.9641237)
+[node name="grid" parent="." unique_id=298611686 instance=ExtResource("8_8y54x")]
+offset_left = 63.999996
+offset_top = 256.0
+offset_right = 164.0
+offset_bottom = 456.0
+
+[node name="helppatch" type="NinePatchRect" parent="." unique_id=362351600]
+offset_left = 582.0
+offset_top = 25.0
+offset_right = 646.2105
+offset_bottom = 100.73184
+scale = Vector2(0.95, 0.95)
 texture = ExtResource("3_gmcut")
-patch_margin_left = 19
+patch_margin_left = 10
 patch_margin_top = 10
 patch_margin_right = 10
 patch_margin_bottom = 10
 
-[node name="MenuButton" type="Button" parent="menupatch" unique_id=1607222935]
-texture_filter = 1
-texture_repeat = 3
-material = SubResource("ShaderMaterial_gmcut")
-layout_mode = 0
-offset_left = 4.14882
-offset_top = -5.186057
-offset_right = 117.78517
-offset_bottom = 98.50883
-scale = Vector2(0.704, 0.839)
-icon = ExtResource("7_play")
-flat = true
-script = ExtResource("script_menubtn")
-
-[node name="helppatch" type="NinePatchRect" parent="." unique_id=1491216595]
-offset_left = 576.0
-offset_top = 16.0
-offset_right = 634.08374
-offset_bottom = 90.679214
-scale = Vector2(0.9641237, 0.9641237)
-texture = ExtResource("3_gmcut")
-patch_margin_left = 19
-patch_margin_top = 10
-patch_margin_right = 10
-patch_margin_bottom = 10
-
-[node name="How2Button" type="Button" parent="helppatch" unique_id=184540314]
+[node name="How2Button" type="Button" parent="helppatch" unique_id=39176672]
 texture_filter = 3
 texture_repeat = 2
-material = SubResource("ShaderMaterial_8y54x")
+material = SubResource("ShaderMaterial_wc8c8")
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -133,13 +113,15 @@ size_flags_stretch_ratio = 0.0
 icon = ExtResource("6_help")
 flat = true
 text_overrun_behavior = 1
+icon_alignment = 1
+expand_icon = true
 script = ExtResource("script_helpbtn")
 
-[node name="highscorebutton" type="NinePatchRect" parent="." unique_id=533276230]
-offset_left = 40.0
-offset_top = 24.0
-offset_right = 98.08374
-offset_bottom = 98.679214
+[node name="highscorebutton" type="NinePatchRect" parent="." unique_id=1079496752]
+offset_left = 34.999992
+offset_top = 25.0
+offset_right = 102.41863
+offset_bottom = 99.679214
 scale = Vector2(0.9641237, 0.9641237)
 texture = ExtResource("3_gmcut")
 patch_margin_left = 19
@@ -147,33 +129,28 @@ patch_margin_top = 10
 patch_margin_right = 10
 patch_margin_bottom = 10
 
-[node name="highscorebutton" type="Button" parent="highscorebutton" unique_id=1544641917]
-texture_filter = 3
+[node name="highscorebutton" type="Button" parent="highscorebutton" unique_id=489626172]
+texture_filter = 1
 texture_repeat = 2
 material = SubResource("ShaderMaterial_x6p3a")
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -33.19072
-offset_top = 10.372112
-offset_right = -11.19072
-offset_bottom = 30.372112
+offset_left = -32.672108
+offset_top = 4.1488447
+offset_right = 33.92328
+offset_bottom = 70.744225
 grow_horizontal = 2
-scale = Vector2(3, 3)
 size_flags_horizontal = 4
 size_flags_vertical = 4
 size_flags_stretch_ratio = 0.0
 icon = ExtResource("10_mx6ix")
 flat = true
 text_overrun_behavior = 1
+icon_alignment = 1
+expand_icon = true
 script = ExtResource("11_wc8c8")
-
-[node name="grid" parent="." unique_id=298611686 instance=ExtResource("8_8y54x")]
-offset_left = 63.999996
-offset_top = 256.0
-offset_right = 164.0
-offset_bottom = 456.0
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=753899521]
 position = Vector2(0, -8)
@@ -213,3 +190,31 @@ script = null
 position = Vector2(120, 224)
 scale = Vector2(4, 4)
 script = null
+
+[node name="menupatch" type="NinePatchRect" parent="." unique_id=969057837]
+offset_left = 643.0
+offset_top = 25.0
+offset_right = 701.08374
+offset_bottom = 100.73184
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("3_gmcut")
+patch_margin_left = 10
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="MenuButton" type="Button" parent="menupatch" unique_id=1328210658]
+texture_filter = 1
+texture_repeat = 3
+material = SubResource("ShaderMaterial_mx6ix")
+layout_mode = 0
+offset_left = 5.2631617
+offset_top = 8.421054
+offset_right = 118.89951
+offset_bottom = 112.11594
+scale = Vector2(0.44067654, 0.5251813)
+icon = ExtResource("7_play")
+flat = true
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("script_menubtn")

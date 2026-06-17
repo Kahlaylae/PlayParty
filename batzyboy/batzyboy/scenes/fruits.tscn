@@ -130,38 +130,49 @@ level = 5
 [node name="papaya" parent="." unique_id=677381443 instance=ExtResource("19_c6sni")]
 position = Vector2(-157.89117, 63.08396)
 scale = Vector2(0.99999994, 0.99999994)
+level = 6
 
 [node name="durian" parent="." unique_id=1660278325 instance=ExtResource("9_8tfhk")]
 position = Vector2(-95.35102, 60.908638)
 scale = Vector2(0.9999998, 0.9999998)
+level = 6
 
 [node name="kiwi" parent="." unique_id=1492634455 instance=ExtResource("13_boq36")]
 position = Vector2(-32.267082, 61.271206)
 scale = Vector2(0.99999994, 0.99999994)
+level = 6
 
 [node name="elderberry" parent="." unique_id=2085339095 instance=ExtResource("10_mt14n")]
 position = Vector2(27.73519, 60.364826)
+level = 7
 
 [node name="pomegranate" parent="." unique_id=608386025 instance=ExtResource("24_uduev")]
 position = Vector2(88.10002, 60.546097)
 scale = Vector2(0.99999994, 0.99999994)
+level = 7
 
 [node name="pear" parent="." unique_id=60090814 instance=ExtResource("21_h1txc")]
 position = Vector2(-157.52864, 125.08028)
+level = 7
 
 [node name="pineapple" parent="." unique_id=1672463173 instance=ExtResource("22_d4l6x")]
 position = Vector2(-95.89488, 125.805374)
+level = 8
 
 [node name="plum" parent="." unique_id=1019236651 instance=ExtResource("23_oxmro")]
 position = Vector2(-33.173477, 122.542404)
+level = 8
 
 [node name="rasberry" parent="." unique_id=2006076044 instance=ExtResource("25_twpm1")]
 position = Vector2(26.46627, 123.992615)
+level = 8
 
 [node name="starfruit" parent="." unique_id=77195411 instance=ExtResource("26_poyf7")]
 position = Vector2(87.55618, 120.18582)
+level = 9
 
 [node name="dragonfruit" parent="." unique_id=1355612217 instance=ExtResource("8_4vd64")]
 position = Vector2(-160.42905, 186.17021)
 scale = Vector2(0.99999994, 0.99999994)
+level = 9
 heal = 2

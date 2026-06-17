@@ -1,24 +1,40 @@
 [gd_scene format=3 uid="uid://dsqhsxyqxj81u"]
 
-[ext_resource type="Script" uid="uid://placeholder_hs" path="res://script/highscores.gd" id="1_hs"]
+[ext_resource type="Script" uid="uid://cea571rskdihp" path="res://script/highscores.gd" id="1_hs"]
 [ext_resource type="PackedScene" uid="uid://lln3kc1yk262" path="res://scenes/menuparallax.tscn" id="2_q1ne7"]
 [ext_resource type="Texture2D" uid="uid://gkcbadtdrp1i" path="res://assetsRaw/UI/uiElements/backpanel.png" id="3_gmcut"]
 [ext_resource type="Shader" uid="uid://d28whffvtp7is" path="res://script/shaders/icon.gdshader" id="6_icon_shader"]
+[ext_resource type="Texture2D" uid="uid://c6v83uf57wvwf" path="res://assetsRaw/UI/uiElements/help.png" id="7_2tvck"]
 [ext_resource type="Texture2D" uid="uid://c2exp81joc5hr" path="res://assetsRaw/UI/uiElements/play.png" id="7_play"]
+[ext_resource type="Script" uid="uid://nddelbsjxla6" path="res://script/helpbutton.gd" id="8_fnhg7"]
+[ext_resource type="Texture2D" uid="uid://bwytqak58cp2h" path="res://assetsRaw/UI/uiElements/highscorebutton.png" id="9_prqnn"]
+[ext_resource type="Script" uid="uid://toh0of0p81n7" path="res://scenes/highscorebutton.gd" id="10_rxtxf"]
 [ext_resource type="Script" uid="uid://1h8cyhlf32sv" path="res://script/menubutton.gd" id="script_menubtn"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_gmcut"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bmnbf"]
 shader = ExtResource("6_icon_shader")
-shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
-shader_parameter/outline_color = Color(0.18356577, 0.022312064, 0.025110528, 0.23529412)
-shader_parameter/outline_thickness = 3.0
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4392157, 0.25882354, 0.23921569, 1)
+shader_parameter/outline_thickness = 3.0000001425
 
-[node name="highscores" type="CanvasLayer"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mf6bk"]
+shader = ExtResource("6_icon_shader")
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4394079, 0.25766903, 0.2385109, 1)
+shader_parameter/outline_thickness = 1.0000000475
 
-[node name="menuparallax" parent="." instance=ExtResource("2_q1ne7")]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2tvck"]
+shader = ExtResource("6_icon_shader")
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4392157, 0.25882354, 0.23921569, 1)
+shader_parameter/outline_thickness = 1.0000000475
+
+[node name="highscores" type="CanvasLayer" unique_id=1931741432]
+
+[node name="menuparallax" parent="." unique_id=107077619 instance=ExtResource("2_q1ne7")]
 z_index = -10
 
-[node name="Title" type="RichTextLabel" parent="."]
+[node name="Title" type="RichTextLabel" parent="." unique_id=1945842472]
 z_index = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -37,8 +53,7 @@ text = "[center]HIGH SCORES[/center]"
 fit_content = true
 horizontal_alignment = 1
 
-[node name="ScoresLabel" type="RichTextLabel" parent="."]
-script = ExtResource("1_hs")
+[node name="ScoresLabel" type="RichTextLabel" parent="." unique_id=720416692]
 z_index = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -56,14 +71,51 @@ bbcode_enabled = true
 text = "[center]Loading scores...[/center]"
 scroll_active = false
 horizontal_alignment = 1
+script = ExtResource("1_hs")
 
-[node name="HTTPRequest" type="HTTPRequest" parent="."]
+[node name="HTTPRequest" type="HTTPRequest" parent="." unique_id=1910485670]
 
-[node name="BackPatch" type="NinePatchRect" parent="."]
-offset_left = 636.0
-offset_top = 16.0
-offset_right = 694.08374
-offset_bottom = 90.679214
+[node name="helppatch" type="NinePatchRect" parent="." unique_id=858669378]
+offset_left = 582.0
+offset_top = 25.0
+offset_right = 646.2105
+offset_bottom = 100.73184
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("3_gmcut")
+patch_margin_left = 10
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="How2Button" type="Button" parent="helppatch" unique_id=624868274]
+texture_filter = 3
+texture_repeat = 2
+material = SubResource("ShaderMaterial_bmnbf")
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -31.116278
+offset_top = 8.297689
+offset_right = 40.88372
+offset_bottom = 80.29769
+grow_horizontal = 2
+scale = Vector2(0.8385135, 0.8385135)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.0
+icon = ExtResource("7_2tvck")
+flat = true
+text_overrun_behavior = 1
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("8_fnhg7")
+
+[node name="highscorebutton" type="NinePatchRect" parent="." unique_id=1043186363]
+offset_left = 34.999992
+offset_top = 25.0
+offset_right = 102.41863
+offset_bottom = 99.679214
 scale = Vector2(0.9641237, 0.9641237)
 texture = ExtResource("3_gmcut")
 patch_margin_left = 19
@@ -71,15 +123,53 @@ patch_margin_top = 10
 patch_margin_right = 10
 patch_margin_bottom = 10
 
-[node name="BackButton" type="Button" parent="BackPatch"]
+[node name="highscorebutton" type="Button" parent="highscorebutton" unique_id=1510000841]
 texture_filter = 1
-material = SubResource("ShaderMaterial_gmcut")
+texture_repeat = 2
+material = SubResource("ShaderMaterial_mf6bk")
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -32.672108
+offset_top = 4.1488447
+offset_right = 33.92328
+offset_bottom = 70.744225
+grow_horizontal = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+size_flags_stretch_ratio = 0.0
+icon = ExtResource("9_prqnn")
+flat = true
+text_overrun_behavior = 1
+icon_alignment = 1
+expand_icon = true
+script = ExtResource("10_rxtxf")
+
+[node name="menupatch" type="NinePatchRect" parent="." unique_id=96005780]
+offset_left = 643.0
+offset_top = 25.0
+offset_right = 701.08374
+offset_bottom = 100.73184
+scale = Vector2(0.95, 0.95)
+texture = ExtResource("3_gmcut")
+patch_margin_left = 10
+patch_margin_top = 10
+patch_margin_right = 10
+patch_margin_bottom = 10
+
+[node name="MenuButton" type="Button" parent="menupatch" unique_id=2075315368]
+texture_filter = 1
+texture_repeat = 3
+material = SubResource("ShaderMaterial_2tvck")
 layout_mode = 0
-offset_left = 4.14882
-offset_top = -5.186057
-offset_right = 117.78517
-offset_bottom = 98.50883
-scale = Vector2(0.704, 0.839)
+offset_left = 5.2631617
+offset_top = 8.421054
+offset_right = 118.89951
+offset_bottom = 112.11594
+scale = Vector2(0.44067654, 0.5251813)
 icon = ExtResource("7_play")
 flat = true
+icon_alignment = 1
+expand_icon = true
 script = ExtResource("script_menubtn")

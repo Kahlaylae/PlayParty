@@ -10,6 +10,8 @@ extends CanvasLayer
 func _ready() -> void:
 	hide()
 	_btn_hiscore.pressed.connect(_on_hiscore_pressed)
+	_name_input.text_submitted.connect(_on_name_submitted)
+	_name_input.focus_exited.connect(_on_name_focus_exited)
 	_btn_restart.pressed.connect(func():
 		SaveManager.clear()
 		SaveManager.resume_requested = false
@@ -39,10 +41,34 @@ func _on_hiscore_pressed() -> void:
 	if not _name_input.visible:
 		_name_input.show()
 		_name_input.grab_focus()
+		_show_mobile_keyboard()
 		return
+	_submit_score()
+
+
+func _on_name_submitted(_text: String) -> void:
+	_submit_score()
+
+
+func _on_name_focus_exited() -> void:
+	_hide_mobile_keyboard()
+
+
+func _submit_score() -> void:
 	var n := _name_input.text.strip_edges()
 	if n.length() > 0:
 		SaveManager.submit_online_score(n)
 		_btn_hiscore.text = "Submitted!"
 		_btn_hiscore.disabled = true
 		_name_input.editable = false
+	_hide_mobile_keyboard()
+
+
+func _show_mobile_keyboard() -> void:
+	if OS.get_name() in ["Android", "iOS"]:
+		DisplayServer.virtual_keyboard_show(_name_input.get_text(), _name_input.get_global_rect())
+
+
+func _hide_mobile_keyboard() -> void:
+	if OS.get_name() in ["Android", "iOS"]:
+		DisplayServer.virtual_keyboard_hide()

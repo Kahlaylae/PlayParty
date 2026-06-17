@@ -16,21 +16,21 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6cdou"]
 shader = ExtResource("4_13sgg")
-shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
-shader_parameter/outline_color = Color(0.18356577, 0.022312064, 0.025110528, 0.23529412)
-shader_parameter/outline_thickness = 3.0000001425
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4392157, 0.25882354, 0.23921569, 1)
+shader_parameter/outline_thickness = 1.0000000475
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_i42df"]
 shader = ExtResource("4_13sgg")
-shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
-shader_parameter/outline_color = Color(0.18431373, 0.023529412, 0.023529412, 0.23529412)
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4392157, 0.25882354, 0.23921569, 1)
 shader_parameter/outline_thickness = 3.0000001425
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7jp70"]
 shader = ExtResource("4_13sgg")
-shader_parameter/tint = Color(0.10980392, 0.2627451, 0.047058824, 1)
-shader_parameter/outline_color = Color(0.18431373, 0.023529412, 0.023529412, 0.23529412)
-shader_parameter/outline_thickness = 5.0000002375
+shader_parameter/tint = Color(1, 1, 1, 1)
+shader_parameter/outline_color = Color(0.4394079, 0.25766903, 0.2385109, 1)
+shader_parameter/outline_thickness = 1.0000000475
 
 [node name="Menu" type="CanvasLayer" unique_id=93736883]
 script = ExtResource("1_menu")
@@ -82,16 +82,11 @@ offset_bottom = 590.0
 color = Color(0.862182, 0.948163, 0, 0.55)
 
 [node name="newgamepatch" type="NinePatchRect" parent="." unique_id=1693612898]
-offset_left = 82.0
-offset_top = 615.0
-offset_right = 610.0
-offset_bottom = 697.0
+offset_left = 96.0
+offset_top = 618.0
+offset_right = 624.0
+offset_bottom = 700.0
 texture = ExtResource("3_mj5lg")
-region_rect = Rect2(0, 0, 90, 27)
-patch_margin_left = 10
-patch_margin_top = 10
-patch_margin_right = 10
-patch_margin_bottom = 10
 
 [node name="New Game" type="Button" parent="newgamepatch" unique_id=797704834]
 z_index = 1
@@ -111,23 +106,23 @@ expand_icon = true
 text_direction = 3
 
 [node name="continuepatch" type="NinePatchRect" parent="." unique_id=1371700239]
-offset_left = 82.0
-offset_top = 760.0
-offset_right = 610.0
-offset_bottom = 842.0
+offset_left = 92.0
+offset_top = 779.0
+offset_right = 620.0
+offset_bottom = 861.0
 texture = ExtResource("3_mj5lg")
-region_rect = Rect2(0, 0, 90, 27)
-patch_margin_left = 10
-patch_margin_top = 10
-patch_margin_right = 10
-patch_margin_bottom = 10
+region_rect = Rect2(0, 0, 96, 35)
+patch_margin_left = 1
+patch_margin_top = 1
+patch_margin_right = 1
+patch_margin_bottom = 1
 
 [node name="Continue" type="Button" parent="continuepatch" unique_id=228510509]
 layout_mode = 0
-offset_left = 73.0
-offset_top = -38.0
-offset_right = 467.4945
-offset_bottom = 113.0
+offset_left = 72.0
+offset_top = -39.0
+offset_right = 466.4945
+offset_bottom = 112.0
 tooltip_text = "Start new game"
 theme_override_font_sizes/font_size = 60
 text = "Continue"
@@ -138,23 +133,19 @@ expand_icon = true
 text_direction = 3
 
 [node name="collectionspatch" type="NinePatchRect" parent="." unique_id=781393328]
-offset_left = 82.0
-offset_top = 905.0
-offset_right = 610.0
-offset_bottom = 987.0
+offset_left = 91.0
+offset_top = 946.0
+offset_right = 619.0
+offset_bottom = 1028.0
 texture = ExtResource("3_mj5lg")
-region_rect = Rect2(0, 0, 90, 27)
-patch_margin_left = 10
-patch_margin_top = 10
-patch_margin_right = 10
-patch_margin_bottom = 10
+region_rect = Rect2(0, 0, 96, 35)
 
 [node name="Collections" type="Button" parent="collectionspatch" unique_id=530726723]
 layout_mode = 0
-offset_left = 80.0
-offset_top = -48.0
-offset_right = 474.4945
-offset_bottom = 103.0
+offset_left = 76.0
+offset_top = -40.0
+offset_right = 470.4945
+offset_bottom = 111.0
 tooltip_text = "Start new game"
 theme_override_font_sizes/font_size = 60
 text = "Collection
@@ -166,23 +157,25 @@ expand_icon = true
 text_direction = 3
 
 [node name="settingspatch" type="NinePatchRect" parent="." unique_id=227325997]
-offset_left = 82.0
-offset_top = 1056.0
-offset_right = 610.0
-offset_bottom = 1138.0
+offset_left = 83.0
+offset_top = 1102.0
+offset_right = 611.0
+offset_bottom = 1184.0
 texture = ExtResource("3_mj5lg")
-region_rect = Rect2(0, 0, 90, 27)
-patch_margin_left = 10
-patch_margin_top = 10
-patch_margin_right = 10
-patch_margin_bottom = 10
+region_rect = Rect2(0, 0, 96, 35)
 
 [node name="Settings" type="Button" parent="settingspatch" unique_id=603684612]
-layout_mode = 0
-offset_left = 78.0
-offset_top = -33.0
-offset_right = 472.4945
-offset_bottom = 118.0
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 7.0
+offset_top = -35.0
+offset_right = 7.0
+offset_bottom = 26.0
+grow_horizontal = 2
+grow_vertical = 2
 tooltip_text = "Start new game"
 theme_override_font_sizes/font_size = 60
 text = "Settings"
@@ -193,10 +186,10 @@ expand_icon = true
 text_direction = 3
 
 [node name="menupatch" type="NinePatchRect" parent="." unique_id=572069132]
-offset_left = 656.0
-offset_top = 24.0
-offset_right = 714.08374
-offset_bottom = 98.679214
+offset_left = 643.0
+offset_top = 25.0
+offset_right = 701.08374
+offset_bottom = 100.73184
 scale = Vector2(0.95, 0.95)
 texture = ExtResource("4_ufwb2")
 patch_margin_left = 10
@@ -209,20 +202,22 @@ texture_filter = 1
 texture_repeat = 3
 material = SubResource("ShaderMaterial_6cdou")
 layout_mode = 0
-offset_left = 4.14882
-offset_top = -5.186057
-offset_right = 117.78517
-offset_bottom = 98.50883
-scale = Vector2(0.704, 0.839)
+offset_left = 5.2631617
+offset_top = 8.421054
+offset_right = 118.89951
+offset_bottom = 112.11594
+scale = Vector2(0.44067654, 0.5251813)
 icon = ExtResource("7_mj5lg")
 flat = true
+icon_alignment = 1
+expand_icon = true
 script = ExtResource("8_ufwb2")
 
 [node name="helppatch" type="NinePatchRect" parent="." unique_id=1985755756]
-offset_left = 576.0
+offset_left = 582.0
 offset_top = 25.0
-offset_right = 634.08374
-offset_bottom = 99.679214
+offset_right = 646.2105
+offset_bottom = 100.73184
 scale = Vector2(0.95, 0.95)
 texture = ExtResource("4_ufwb2")
 patch_margin_left = 10
@@ -250,20 +245,15 @@ size_flags_stretch_ratio = 0.0
 icon = ExtResource("5_70i5f")
 flat = true
 text_overrun_behavior = 1
+icon_alignment = 1
+expand_icon = true
 script = ExtResource("script_helpbtn")
 
-[node name="Playwindow" parent="." unique_id=2062320398 instance=ExtResource("9_i6lef")]
-position = Vector2(-21, 23)
-
-[node name="batMain" parent="." unique_id=39988283 instance=ExtResource("10_70i5f")]
-z_index = 50
-position = Vector2(355, 323)
-
 [node name="highscorebutton" type="NinePatchRect" parent="." unique_id=455536982]
-offset_left = 70.0
-offset_top = 16.0
-offset_right = 128.08374
-offset_bottom = 90.679214
+offset_left = 34.999992
+offset_top = 25.0
+offset_right = 102.41863
+offset_bottom = 99.679214
 scale = Vector2(0.9641237, 0.9641237)
 texture = ExtResource("4_ufwb2")
 patch_margin_left = 19
@@ -272,23 +262,31 @@ patch_margin_right = 10
 patch_margin_bottom = 10
 
 [node name="highscorebutton" type="Button" parent="highscorebutton" unique_id=493641076]
-texture_filter = 3
+texture_filter = 1
 texture_repeat = 2
 material = SubResource("ShaderMaterial_7jp70")
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -33.19072
-offset_top = 10.372112
-offset_right = -11.19072
-offset_bottom = 30.372112
+offset_left = -32.672108
+offset_top = 4.1488447
+offset_right = 33.92328
+offset_bottom = 70.744225
 grow_horizontal = 2
-scale = Vector2(3, 3)
 size_flags_horizontal = 4
 size_flags_vertical = 4
 size_flags_stretch_ratio = 0.0
 icon = ExtResource("12_6cdou")
 flat = true
 text_overrun_behavior = 1
+icon_alignment = 1
+expand_icon = true
 script = ExtResource("13_i42df")
+
+[node name="Playwindow" parent="." unique_id=2062320398 instance=ExtResource("9_i6lef")]
+position = Vector2(-21, 23)
+
+[node name="batMain" parent="." unique_id=39988283 instance=ExtResource("10_70i5f")]
+z_index = 50
+position = Vector2(355, 323)

@@ -37,37 +37,48 @@ animations = [{
 script = ExtResource("1_14ev0")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=885374113]
-offset_left = -32.0
-offset_top = -13.0
-offset_right = 35.368423
-offset_bottom = 13.315792
+offset_left = -75.0
+offset_top = -37.0
+offset_right = 72.36844
+offset_bottom = 38.789474
 scale = Vector2(0.95, 0.95)
 texture = ExtResource("2_hugpe")
 patch_margin_left = 10
 patch_margin_top = 10
-patch_margin_right = 15
+patch_margin_right = 10
 patch_margin_bottom = 10
 
 [node name="heart1" type="AnimatedSprite2D" parent="." unique_id=1169918901]
 texture_filter = 1
-position = Vector2(-20, 0)
+position = Vector2(-46.312496, 3.1571631)
+scale = Vector2(3.9431822, 4.0625)
 sprite_frames = SubResource("SpriteFrames_q6mno")
+frame = 2
 
 [node name="heart2" type="AnimatedSprite2D" parent="." unique_id=8489853]
 texture_filter = 1
-position = Vector2(-10, 0)
+position = Vector2(-23.624994, 15.969664)
+scale = Vector2(2.4886363, 2.397727)
 sprite_frames = SubResource("SpriteFrames_q6mno")
+frame = 2
 
 [node name="heart3" type="AnimatedSprite2D" parent="." unique_id=28425624]
 texture_filter = 1
+position = Vector2(-16, -6.1865864)
+scale = Vector2(2.7045455, 2.7045455)
 sprite_frames = SubResource("SpriteFrames_q6mno")
+frame = 2
 
 [node name="heart4" type="AnimatedSprite2D" parent="." unique_id=120574820]
 texture_filter = 1
-position = Vector2(10, 0)
+position = Vector2(3.9999995, 7.8134136)
+scale = Vector2(3.1079545, 2.8423078)
 sprite_frames = SubResource("SpriteFrames_q6mno")
+frame = 2
 
 [node name="heart5" type="AnimatedSprite2D" parent="." unique_id=752732043]
 texture_filter = 1
-position = Vector2(20, 0)
+position = Vector2(33, -4.5000014)
+scale = Vector2(4.808101, 4.454545)
 sprite_frames = SubResource("SpriteFrames_q6mno")
+frame = 2
