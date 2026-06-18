@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://bpjwhm68sxk0x"]
+
+[ext_resource type="Texture2D" uid="uid://d4ihliojmukcq" path="res://assetsRaw/map/ELR_FireFlies.png" id="1_tp0d7"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_bv1ok"]
+blend_mode = 1
+particles_animation = true
+particles_anim_h_frames = 8
+particles_anim_v_frames = 1
+particles_anim_loop = true
+
+[sub_resource type="Curve" id="Curve_24wnq"]
+_data = [Vector2(0.22666666, 1), 0.0, 0.0, 0, 0, Vector2(0.6755556, 0.1685394), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_22nyi"]
+width = 238
+curve = SubResource("Curve_24wnq")
+
+[sub_resource type="Curve" id="Curve_ils18"]
+_limits = [-428.41, 357.17, -569.88, 1024.0]
+_data = [Vector2(0, -0.84269655), 0.0, 0.0, 0, 0, Vector2(0.9511112, 0.5505618), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_mc5lf"]
+curve = SubResource("Curve_ils18")
+
+[sub_resource type="Curve" id="Curve_t5s7i"]
+_data = [Vector2(0.013333328, 0.19101131), 0.0, 0.0, 0, 0, Vector2(0.7377778, 0.84269667), 0.0, 0.0, 0, 0, Vector2(0.9822223, 0.25842702), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_kag7f"]
+curve = SubResource("Curve_t5s7i")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_6dq5a"]
+lifetime_randomness = 0.35
+emission_shape = 3
+emission_box_extents = Vector3(400, 750, 1)
+gravity = Vector3(10, -10, 10)
+linear_accel_min = 40.299995
+linear_accel_max = 40.299995
+radial_accel_min = -2.2351742e-06
+radial_accel_max = 99.99999
+damping_max = 37.5
+scale_max = 4.5
+scale_curve = SubResource("CurveTexture_kag7f")
+scale_over_velocity_min = 378.63998
+scale_over_velocity_max = 740.38
+color = Color(0.9816714, 0.9730082, 0.90484077, 0.61960787)
+hue_variation_min = -0.48000002
+hue_variation_max = 0.97999996
+hue_variation_curve = SubResource("CurveTexture_mc5lf")
+anim_speed_min = 4.8199997
+anim_speed_max = 6.0
+anim_speed_curve = SubResource("CurveTexture_22nyi")
+turbulence_enabled = true
+turbulence_noise_strength = 0.0
+turbulence_noise_speed = Vector3(10, 0, 0)
+collision_use_scale = true
+
+[node name="fireflyparticles" type="GPUParticles2D" unique_id=1271443195]
+material = SubResource("CanvasItemMaterial_bv1ok")
+amount = 100
+texture = ExtResource("1_tp0d7")
+lifetime = 35.0
+speed_scale = 10.0
+explosiveness = 0.35
+randomness = 1.0
+fixed_fps = 20
+collision_base_size = 0.0
+process_material = SubResource("ParticleProcessMaterial_6dq5a")

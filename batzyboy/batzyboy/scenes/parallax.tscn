@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://0qta1lwxs6hj" path="res://assetsRaw/map/6.png" id="8_plx"]
 [ext_resource type="Shader" uid="uid://ddm4s3cr8ncle" path="res://script/shaders/water.gdshader" id="10_m2jpk"]
 [ext_resource type="Script" uid="uid://bhgunohedn1ji" path="res://script/critters.gd" id="17_w6ouw"]
+[ext_resource type="PackedScene" uid="uid://bpjwhm68sxk0x" path="res://scenes/fireflyparticles.tscn" id="18_h5c3f"]
 [ext_resource type="Texture2D" uid="uid://d4ihliojmukcq" path="res://assetsRaw/map/ELR_FireFlies.png" id="18_jrwxi"]
 [ext_resource type="Script" uid="uid://6xlvdff8mhos" path="res://script/fog.gd" id="fog_script"]
 [ext_resource type="Shader" uid="uid://bm3rboayi5xrx" path="res://script/shaders/fog.gdshader" id="fog_shader"]
@@ -26,47 +27,41 @@ shader_parameter/normal_strength = 1.8430000875425
 shader_parameter/pulse_speed = 1.13600005396
 shader_parameter/pulse_depth = 0.6710000318725
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_q4vhb"]
-atlas = ExtResource("18_jrwxi")
-region = Rect2(0, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_h5c3f"]
-atlas = ExtResource("18_jrwxi")
-region = Rect2(16, 0, 16, 16)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_w6ouw"]
 atlas = ExtResource("18_jrwxi")
-region = Rect2(32, 0, 16, 16)
+region = Rect2(0, 0, 10, 20)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jrwxi"]
 atlas = ExtResource("18_jrwxi")
-region = Rect2(48, 0, 16, 16)
+region = Rect2(10, 0, 10, 20)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_f8lyx"]
 atlas = ExtResource("18_jrwxi")
-region = Rect2(0, 16, 16, 16)
+region = Rect2(20, 0, 10, 20)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_q107m"]
 atlas = ExtResource("18_jrwxi")
-region = Rect2(16, 16, 16, 16)
+region = Rect2(30, 0, 10, 20)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_owsjb"]
 atlas = ExtResource("18_jrwxi")
-region = Rect2(32, 16, 16, 16)
+region = Rect2(40, 0, 10, 20)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n53kq"]
 atlas = ExtResource("18_jrwxi")
-region = Rect2(48, 16, 16, 16)
+region = Rect2(50, 0, 10, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3yt2v"]
+atlas = ExtResource("18_jrwxi")
+region = Rect2(60, 0, 10, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3orxj"]
+atlas = ExtResource("18_jrwxi")
+region = Rect2(70, 0, 10, 20)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_q107m"]
 animations = [{
 "frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_q4vhb")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_h5c3f")
-}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_w6ouw")
 }, {
@@ -86,13 +81,10 @@ animations = [{
 "texture": SubResource("AtlasTexture_n53kq")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_n53kq")
+"texture": SubResource("AtlasTexture_3yt2v")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_n53kq")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_n53kq")
+"texture": SubResource("AtlasTexture_3orxj")
 }],
 "loop": true,
 "name": &"glow",
@@ -166,6 +158,7 @@ shader_parameter/horizon = 0.7690000365275
 [node name="newparallaxnode" type="Node2D" unique_id=984393826]
 
 [node name="critterlayer" type="Node2D" parent="." unique_id=1871489743]
+visible = false
 z_as_relative = false
 
 [node name="firefly" type="AnimatedSprite2D" parent="critterlayer" unique_id=706303501]
@@ -174,10 +167,11 @@ z_as_relative = false
 texture_filter = 1
 material = SubResource("ShaderMaterial_q4vhb")
 position = Vector2(128, 464)
+scale = Vector2(40, 40)
 sprite_frames = SubResource("SpriteFrames_q107m")
 animation = &"glow"
 autoplay = "glow"
-frame_progress = 0.063606314
+frame_progress = 0.8538365
 script = ExtResource("17_w6ouw")
 speed_min = 400.0
 roam_radius = 200.0
@@ -511,7 +505,7 @@ position = Vector2(362.89566, 448.01434)
 scale = Vector2(6, 6)
 texture = ExtResource("2_plx")
 region_enabled = true
-region_rect = Rect2(756618.56, 0, 384, 216)
+region_rect = Rect2(760550.1, 0, 384, 216)
 
 [node name="Moon" type="Sprite2D" parent="parallaxBackground" unique_id=1667056062]
 z_index = -4
@@ -532,7 +526,7 @@ position = Vector2(337.00003, 513)
 scale = Vector2(6, 6)
 texture = ExtResource("3_plx")
 region_enabled = true
-region_rect = Rect2(2228437.5, 0, 384, 216)
+region_rect = Rect2(2238342.7, 0, 384, 216)
 
 [node name="background2" type="Sprite2D" parent="parallaxBackground" unique_id=1268798545]
 z_index = -3
@@ -542,7 +536,7 @@ position = Vector2(377, 585)
 scale = Vector2(6, 6)
 texture = ExtResource("4_plx")
 region_enabled = true
-region_rect = Rect2(1662361.9, 0, 384, 216)
+region_rect = Rect2(1672711.7, 0, 384, 216)
 
 [node name="foreground2" type="Sprite2D" parent="parallaxBackground" unique_id=2146669569]
 z_index = -4
@@ -553,7 +547,7 @@ scale = Vector2(4.7653575, 4.7653575)
 texture = ExtResource("6_plx")
 flip_h = true
 region_enabled = true
-region_rect = Rect2(-1608111, 0, 384, 216)
+region_rect = Rect2(-1618242.2, 0, 384, 216)
 
 [node name="background1" type="Sprite2D" parent="parallaxBackground" unique_id=2124780172]
 z_index = -2
@@ -563,7 +557,7 @@ position = Vector2(344, 448.00003)
 scale = Vector2(6, 6)
 texture = ExtResource("5_plx")
 region_enabled = true
-region_rect = Rect2(1365132.1, 0, 384, 216)
+region_rect = Rect2(1375702.8, 0, 384, 216)
 
 [node name="fog" type="Sprite2D" parent="parallaxBackground" unique_id=111222333]
 z_index = 1
@@ -574,7 +568,7 @@ position = Vector2(408.00003, 720)
 scale = Vector2(3.1247392, 0.77842855)
 texture = SubResource("CanvasTexture_8vcgh")
 region_enabled = true
-region_rect = Rect2(5342054, 0, 800, 1900)
+region_rect = Rect2(5372691, 0, 800, 1900)
 script = ExtResource("fog_script")
 breath_speed = 0.5
 min_alpha = 4.4
@@ -588,7 +582,7 @@ position = Vector2(296, 512)
 scale = Vector2(5.220097, 4.9623146)
 texture = ExtResource("6_plx")
 region_enabled = true
-region_rect = Rect2(1812761.4, 0, 384, 216)
+region_rect = Rect2(1828049.1, 0, 384, 216)
 
 [node name="ground" type="Sprite2D" parent="parallaxBackground" unique_id=1576932842]
 z_index = 1
@@ -598,7 +592,7 @@ position = Vector2(384, 1064)
 scale = Vector2(9.298192, 5.585889)
 texture = ExtResource("8_plx")
 region_enabled = true
-region_rect = Rect2(2260472.2, 0, 248, 216)
+region_rect = Rect2(2271281.8, 0, 248, 216)
 
 [node name="reflection" type="Sprite2D" parent="parallaxBackground" unique_id=539058533]
 modulate = Color(1, 1, 1, 0.15686275)
@@ -611,7 +605,7 @@ position = Vector2(400, 1312)
 scale = Vector2(7.8866663, 5.041211)
 texture = ExtResource("8_cyp6n")
 region_enabled = true
-region_rect = Rect2(2263684.7, 88, 300, 132)
+region_rect = Rect2(2274494.2, 88, 300, 132)
 
 [node name="water2" type="Sprite2D" parent="parallaxBackground/reflection" unique_id=1568036497]
 modulate = Color(0.7750634, 0.7750634, 0.7750634, 1)
@@ -623,4 +617,9 @@ position = Vector2(-3.0431123, -3.824519)
 scale = Vector2(1.4402602, 0.9858138)
 texture = ExtResource("8_cyp6n")
 region_enabled = true
-region_rect = Rect2(5343953, 88, 209, 132)
+region_rect = Rect2(5374590, 88, 209, 132)
+
+[node name="fireflyparticles" parent="." unique_id=1271443195 instance=ExtResource("18_h5c3f")]
+z_index = -3
+z_as_relative = false
+position = Vector2(382, 560)

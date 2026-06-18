@@ -46,6 +46,7 @@ limit_bottom = 1280
 z_index = -10
 
 [node name="title" type="RichTextLabel" parent="." unique_id=855156664]
+visible = false
 z_index = 8
 offset_left = 62.0
 offset_top = 86.0
@@ -288,5 +289,6 @@ script = ExtResource("13_i42df")
 position = Vector2(-21, 23)
 
 [node name="batMain" parent="." unique_id=39988283 instance=ExtResource("10_70i5f")]
+visible = false
 z_index = 50
 position = Vector2(355, 323)
